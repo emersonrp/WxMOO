@@ -1,5 +1,4 @@
 package WxMOO::Window::OutputPane;
-use strict;
 use perl5i::2;
 
 use Wx qw( :richtextctrl :font );

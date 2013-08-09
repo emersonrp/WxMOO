@@ -1,14 +1,12 @@
 #!/usr/bin/perl
+use perl5i::2;
 
-use strict;
 require 5.014;
 
 package WxMOO;
 use parent 'Wx::App';
 
 use WxMOO::Window::Main;
-
-use perl5i::2;
 
 sub OnInit {
     my $frame = WxMOO::Window::Main->new;

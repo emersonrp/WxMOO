@@ -1,5 +1,4 @@
 package WxMOO::Window::InputPane;
-use strict;
 use perl5i::2;
 
 use Wx qw(:misc :textctrl :font);

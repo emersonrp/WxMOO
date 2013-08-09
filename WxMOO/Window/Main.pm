@@ -1,5 +1,4 @@
 package WxMOO::Window::Main;
-use strict;
 use perl5i::2;
 
 use parent 'WxMOO::Window';
