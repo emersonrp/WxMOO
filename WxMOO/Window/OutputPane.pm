@@ -19,4 +19,10 @@ method new($class: $parent) {
     return bless $self, $class;
 }
 
+method AppendText {
+    $self->SUPER::AppendText(@_);
+    # TODO:  "if we want scroll-on-output or are already at the bottom..."
+    $self->ShowPosition($self->GetCaretPosition);
+}
+
 1;

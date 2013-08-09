@@ -6,6 +6,7 @@ use parent 'WxMOO::Window';
 
 use Wx qw(:sizer);
 use Wx::Event qw( EVT_MENU );
+use WxMOO::Connection;  # Might go away later
 use WxMOO::Window::InputPane;
 use WxMOO::Window::OutputPane;
 use WxMOO::Utility qw(id);
@@ -65,8 +66,15 @@ method new($class: %args) {
     $Sizer->Add($InputPane, 0, wxALL|wxGROW, 5);
     $self->SetSizer($Sizer);
 
+    ### don't keep this here
+    my $sock = WxMOO::Connection->new($self);
+    $sock->connect;
+    $self->{'current_connection'} = $sock;
+
     return $self;
 }
+
+method connection { $self->{'current_connection'} }
 
 method showAboutBox { Wx::AboutBox(our $aboutDialogInfo) }
 

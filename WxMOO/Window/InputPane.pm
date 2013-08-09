@@ -15,18 +15,20 @@ method new($class: $parent) {
         wxTE_PROCESS_ENTER
     );
 
+    $self->{'parent'} = $parent;
+
     # TODO - get this font from prefs
     my $testFont = Wx::Font->new( 12, wxTELETYPE, wxNORMAL, wxNORMAL );
     $self->SetFont($testFont);
 
-    EVT_TEXT_ENTER( $self, $self, \&put_line_to_output );
+    EVT_TEXT_ENTER( $self, -1, \&put_line_to_output );
 
     bless $self, $class;
 }
 
 method put_line_to_output {
     my $stuff = $self->GetValue;
-    Wx::Window::FindWindowById(id('OUTPUT_PANE'))->AppendText("$stuff\n");
+    $self->{'parent'}->connection->output("$stuff\n");
     $self->Clear;
 }
 
