@@ -1,0 +1,22 @@
+package WxMOO::Window::OutputPane;
+use strict;
+use perl5i::2;
+
+use Wx qw( :richtextctrl :font );
+use Wx::RichText;
+use WxMOO::Utility qw( id );
+
+use base 'Wx::RichTextCtrl';
+
+method new($class: $parent) {
+    my $self = $class->SUPER::new(
+        $parent, id('OUTPUT_PANE'), "", [-1, -1], [400,300], wxRE_READONLY );
+
+    # TODO - get this font from prefs
+    my $testFont = Wx::Font->new( 12, wxTELETYPE, wxNORMAL, wxNORMAL );
+    $self->SetFont($testFont);
+
+    return bless $self, $class;
+}
+
+1;

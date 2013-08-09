@@ -5,6 +5,7 @@ use perl5i::2;
 use parent 'WxMOO::Window';
 
 use Wx qw(:sizer);
+use Wx::Event qw( EVT_MENU );
 use WxMOO::Window::InputPane;
 use WxMOO::Window::OutputPane;
 use WxMOO::Utility qw(id);
@@ -41,20 +42,20 @@ method new($class: %args) {
     $self->SetMenuBar($MenuBar);
 
     # MENUBAR EVENTS
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_WORLDS'), sub {1} );
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_OPEN'),   sub {1} );
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_CLOSE'),  sub {1} );
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_QUIT'),   \&quitApplication );
+    EVT_MENU( $self, id('MENUITEM_WORLDS'), sub {1} );
+    EVT_MENU( $self, id('MENUITEM_OPEN'),   sub {1} );
+    EVT_MENU( $self, id('MENUITEM_CLOSE'),  sub {1} );
+    EVT_MENU( $self, id('MENUITEM_QUIT'),   \&quitApplication );
 
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_CUT'),    sub {1} );
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_COPY'),   sub {1} );
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_PASTE'),  sub {1} );
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_CLEAR'),  sub {1} );
+    EVT_MENU( $self, id('MENUITEM_CUT'),    sub {1} );
+    EVT_MENU( $self, id('MENUITEM_COPY'),   sub {1} );
+    EVT_MENU( $self, id('MENUITEM_PASTE'),  sub {1} );
+    EVT_MENU( $self, id('MENUITEM_CLEAR'),  sub {1} );
 
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_PREFS'),  sub {1} );
+    EVT_MENU( $self, id('MENUITEM_PREFS'),  sub {1} );
 
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_HELP'),   sub {1} );
-    Wx::Event::EVT_MENU( $self, id('MENUITEM_ABOUT'),  \&showAboutBox );
+    EVT_MENU( $self, id('MENUITEM_HELP'),   sub {1} );
+    EVT_MENU( $self, id('MENUITEM_ABOUT'),  \&showAboutBox );
 
     my $OutputPane = WxMOO::Window::OutputPane->new($self);
     my $InputPane  = WxMOO::Window::InputPane ->new($self);
