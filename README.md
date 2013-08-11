@@ -23,8 +23,8 @@ To do:
 * object browser, like MacMOOSE but hopefully nicer.
 
 Things that aren't currently on the rader:
-* tkMOO-light has a whole plugin architecture, and all sorts of third-party additions (I even wrote one, years ago).  I'm not delusional enough to think that there'll be a flourishing ecosystem of developers around **this** MOO client.
-* I MOO socially, occasionally.  I don't do RPG MUDs or things like that, so 
+* tkMOO-light has a whole plugin architecture, and all sorts of third-party additions (I even wrote one, years ago).  I'm not delusional enough to think that there'll be a flourishing ecosystem of developers around **this** MOO client, so I'm not actually desigining with that in mind.
+* I MOO socially, occasionally.  I don't do RPG MUDs or things like that, so I have no need for triggers and macros and so forth.  I don't even have a clear idea of what people do with them.
 
 Guiding thoughts:
 * Monospaced fonts and intuitive, pleasant uis are not inherently incompatible.
