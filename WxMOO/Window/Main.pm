@@ -1,8 +1,6 @@
 package WxMOO::Window::Main;
 use perl5i::2;
 
-use parent 'WxMOO::Window';
-
 use Wx qw( :misc :sizer );
 use Wx::Event qw( EVT_MENU );
 use WxMOO::Connection;  # Might go away later
@@ -12,8 +10,10 @@ use WxMOO::Window::OutputPane;
 use WxMOO::Prefs;
 use WxMOO::Utility qw(id);
 
-method new($class: %args) {
-    my $self = $class->SUPER::new( %args );
+use base 'Wx::Frame';
+
+method new($class:) {
+    my $self = $class->SUPER::new( undef, -1, 'WxMOO' );
 
     $self->buildMenu;
 
