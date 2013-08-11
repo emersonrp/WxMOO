@@ -5,7 +5,6 @@ use Wx qw( :font );
 use base 'Class::Singleton';
 
 method _new_instance($class: %init) {
-        say STDERR "ok, creating the singleton";
         my $self = bless {%init}, $class;
         # TODO:  $self = get_my_prefs_from_storage;
 
@@ -16,6 +15,12 @@ $self->output_font($font);
 
         return $self;
 }
+# TODO - represent this internally as:
+# $prefs = { saved => { font => 'stan', love => 'like oxygen',... },
+#            current => { font => 'something else',...}
+# }
+# so we can know if the prefs are 'dirty' and need saving, and
+# also 'revert to saved'
 
 method input_font($new) {
     $self->{'input_font'} = $new if $new;
