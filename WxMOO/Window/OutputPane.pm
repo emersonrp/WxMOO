@@ -1,7 +1,7 @@
 package WxMOO::Window::OutputPane;
 use perl5i::2;
 
-use Wx qw( :richtextctrl :font );
+use Wx qw( :misc :richtextctrl );
 use Wx::RichText;
 use Wx::Event qw( EVT_SET_FOCUS );
 use WxMOO::Prefs;
@@ -14,7 +14,7 @@ use base 'Wx::RichTextCtrl';
 
 method new($class: $parent) {
     my $self = $class->SUPER::new(
-        $parent, id('OUTPUT_PANE'), "", [-1, -1], [400,300], wxRE_READONLY );
+        $parent, id('OUTPUT_PANE'), "", wxDefaultPosition, wxDefaultSize, wxRE_READONLY );
 
     $self->{'parent'} = $parent;
     my $font = WxMOO::Prefs->instance->output_font;
@@ -27,6 +27,10 @@ method new($class: $parent) {
 
 method AppendText {
     $self->SUPER::AppendText(@_);
+    $self->ScrollIfAppropriate;
+}
+
+method ScrollIfAppropriate {
     # TODO:  "if we want scroll-on-output or are already at the bottom..."
     $self->ShowPosition($self->GetCaretPosition);
 }

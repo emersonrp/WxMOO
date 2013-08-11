@@ -34,6 +34,5 @@ method port { '7777' }
 method connect {
     $self->Connect($self->host, $self->port);
     carp "Can't connect to host/port" unless $self->IsConnected;
-    $self->output('testtest');
 }
 

@@ -11,6 +11,7 @@ use WxMOO::Window::Main;
 sub OnInit {
     my $frame = WxMOO::Window::Main->new;
     $frame->Show(1);
+    $frame->Initialize;
     shift->SetTopWindow($frame);
     return 1;
 }

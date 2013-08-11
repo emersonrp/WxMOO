@@ -3,9 +3,10 @@ use perl5i::2;
 
 use parent 'WxMOO::Window';
 
-use Wx qw(:sizer);
+use Wx qw( :misc :sizer );
 use Wx::Event qw( EVT_MENU );
 use WxMOO::Connection;  # Might go away later
+use WxMOO::Window::MainSplitter;
 use WxMOO::Window::InputPane;
 use WxMOO::Window::OutputPane;
 use WxMOO::Prefs;
@@ -14,6 +15,45 @@ use WxMOO::Utility qw(id);
 method new($class: %args) {
     my $self = $class->SUPER::new( %args );
 
+    $self->buildMenu;
+
+    # TODO - don't connect until we ask for it.
+    $self->{'connection'} = WxMOO::Connection->new($self);
+
+    my $Splitter = WxMOO::Window::MainSplitter->new($self);
+
+    my $OutputPane = WxMOO::Window::OutputPane->new($Splitter);
+    my $InputPane  = WxMOO::Window::InputPane ->new($Splitter, $self->{'connection'});
+
+    $Splitter->SplitHorizontally($OutputPane, $InputPane);
+    $Splitter->SetMinimumPaneSize(20); # TODO - set to "one line of input field"
+
+    my $Sizer = Wx::BoxSizer->new( wxVERTICAL );
+    $Sizer->Add($Splitter, 1, wxALL|wxGROW, 5);
+    $self->SetSizer($Sizer);
+
+    return $self;
+}
+
+# post ->Show stuff
+method Initialize {
+    # TODO - don't connect until we ask for it.
+    $self->{'connection'}->connect;
+}
+
+method showPrefsEditor {
+    $self->{'prefsEditor'} ||= WxMOO::Window::PrefsEditor->new($self);
+    $self->{'prefsEditor'}->Show;
+}
+
+method showAboutBox { Wx::AboutBox(our $aboutDialogInfo) }
+
+method quitApplication {
+    $self->Close(1);
+    WxMOO::Prefs->instance->save;
+}
+
+method buildMenu {
     my $WorldsMenu = Wx::Menu->new;
     $WorldsMenu->Append(id('MENUITEM_WORLDS'), "Worlds...", "");
     $WorldsMenu->Append(id('MENUITEM_OPEN'), "Open...", "");
@@ -57,30 +97,4 @@ method new($class: %args) {
 
     EVT_MENU( $self, id('MENUITEM_HELP'),   sub {1} );
     EVT_MENU( $self, id('MENUITEM_ABOUT'),  \&showAboutBox );
-
-
-    ### don't keep this here
-    my $sock = WxMOO::Connection->new($self);
-    $sock->connect;
-    $self->{'current_connection'} = $sock;
-
-    my $OutputPane = WxMOO::Window::OutputPane->new($self);
-    my $InputPane  = WxMOO::Window::InputPane ->new($self);
-
-    my $Sizer = Wx::BoxSizer->new( wxVERTICAL );
-    $Sizer->Add($OutputPane, 1, wxALL|wxGROW, 5);
-    $Sizer->Add($InputPane, 0, wxALL|wxGROW, 5);
-    $self->SetSizer($Sizer);
-    return $self;
 }
-
-method connection { $self->{'current_connection'} }
-
-method showPrefsEditor {
-    $self->{'prefsEditor'} ||= WxMOO::Window::PrefsEditor->new($self);
-    $self->{'prefsEditor'}->Show;
-}
-
-method showAboutBox { Wx::AboutBox(our $aboutDialogInfo) }
-
-method quitApplication { $self->Close(1); }

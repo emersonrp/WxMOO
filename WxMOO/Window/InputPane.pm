@@ -6,21 +6,23 @@ use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_CHAR );
 use WxMOO::Prefs;
 use WxMOO::Utility qw( id );
 
-use base 'Wx::TextCtrl';
+use base qw( Wx::TextCtrl Class::Accessor::Fast );
+WxMOO::Window::InputPane->mk_accessors(qw( parent connection cmd_history ));
 
-method new($class: $parent) {
+method new($class: $parent, $connection) {
 
     my $self = $class->SUPER::new( $parent, id('INPUT_PANE'), "",
         wxDefaultPosition, wxDefaultSize,
         wxTE_PROCESS_ENTER | wxTE_MULTILINE
     );
 
-    $self->{'parent'} = $parent;
+    $self->parent($parent);
+    $self->connection($connection);
 
     my $font = WxMOO::Prefs->instance->input_font;
     $self->SetFont($font);
 
-    $self->{'cmd_history'} = WxMOO::Window::InputPane::CommandHistory->new;
+    $self->cmd_history(WxMOO::Window::InputPane::CommandHistory->new);
 
     EVT_TEXT_ENTER( $self, -1, \&send_to_connection );
     EVT_TEXT      ( $self, -1, \&update_command_history );
@@ -34,20 +36,19 @@ method new($class: $parent) {
 
 method send_to_connection {
     my $stuff = $self->GetValue;
-    $self->{'cmd_history'}->add($stuff);
-    # TODO - having to stash 'parent' away to get the connection seems w0rng.
-    $self->{'parent'}->connection->output("$stuff\n");
+    $self->cmd_history->add($stuff);
+    $self->connection->output("$stuff\n");
     $self->Clear;
 }
 
-method update_command_history { $self->{'cmd_history'}->update($self->GetValue) }
+method update_command_history { $self->cmd_history->update($self->GetValue) }
 
 method check_command_history($evt) {
     my $k = $evt->GetKeyCode;
     if ($k == WXK_UP) {
-        $self->SetValue($self->{'cmd_history'}->prev);
+        $self->SetValue($self->cmd_history->prev);
     } elsif ($k == WXK_DOWN) {
-        $self->SetValue($self->{'cmd_history'}->next);
+        $self->SetValue($self->cmd_history->next);
     } else {
         $evt->Skip and return;
     }
