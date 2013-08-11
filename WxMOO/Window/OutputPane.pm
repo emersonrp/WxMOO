@@ -3,7 +3,11 @@ use perl5i::2;
 
 use Wx qw( :richtextctrl :font );
 use Wx::RichText;
+use Wx::Event qw( EVT_SET_FOCUS );
 use WxMOO::Utility qw( id );
+
+# TODO remove when plugins work
+use WxMOO::Plugins::ANSI;
 
 use base 'Wx::RichTextCtrl';
 
@@ -15,6 +19,8 @@ method new($class: $parent) {
     my $testFont = Wx::Font->new( 12, wxTELETYPE, wxNORMAL, wxNORMAL );
     $self->SetFont($testFont);
 
+    EVT_SET_FOCUS($self, \&focus_input);
+
     return bless $self, $class;
 }
 
@@ -24,4 +30,23 @@ method AppendText {
     $self->ShowPosition($self->GetCaretPosition);
 }
 
-1;
+method display ($text) {
+    if (1 or $WxMOO::Preferences::UseANSI) {
+        my $stuff = WxMOO::Plugins::ANSI::output_filter($text);
+        for my $bit (@$stuff) {
+            if (ref $bit) {
+                $self->BeginStyle($bit);
+            } else {
+                $self->AppendText($bit);
+            }
+        }
+    } else {
+        $self->AppendText($text);
+    }
+}
+
+method focus_input {
+    # TODO - make this a little less intrusive
+    my $input_field = Wx::Window::FindWindowById(id('INPUT_PANE'));
+    $input_field->SetFocus if $input_field;
+}

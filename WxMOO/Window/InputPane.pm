@@ -1,7 +1,7 @@
 package WxMOO::Window::InputPane;
 use perl5i::2;
 
-use Wx qw(:misc :textctrl :font);
+use Wx qw( :misc :textctrl :font );
 use Wx::Event qw( EVT_TEXT_ENTER );
 use WxMOO::Utility qw( id );
 
@@ -20,12 +20,15 @@ method new($class: $parent) {
     my $testFont = Wx::Font->new( 12, wxTELETYPE, wxNORMAL, wxNORMAL );
     $self->SetFont($testFont);
 
-    EVT_TEXT_ENTER( $self, -1, \&put_line_to_output );
+    EVT_TEXT_ENTER( $self, -1, \&send_to_connection );
+
+    $self->SetFocus;
+    $self->Clear;
 
     bless $self, $class;
 }
 
-method put_line_to_output {
+method send_to_connection {
     my $stuff = $self->GetValue;
     $self->{'parent'}->connection->output("$stuff\n");
     $self->Clear;

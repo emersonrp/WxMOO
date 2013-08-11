@@ -20,7 +20,7 @@ method new($class: $parent) {
 method onInput {
     state $output //= Wx::Window::FindWindowById(id('OUTPUT_PANE'));
     while ($self->Read(my $poop, 1024)) {
-        $output->AppendText($poop);
+        $output->display($poop);
     }
 }
 
