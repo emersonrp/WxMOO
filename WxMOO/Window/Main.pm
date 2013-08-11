@@ -8,6 +8,7 @@ use Wx::Event qw( EVT_MENU );
 use WxMOO::Connection;  # Might go away later
 use WxMOO::Window::InputPane;
 use WxMOO::Window::OutputPane;
+use WxMOO::Prefs;
 use WxMOO::Utility qw(id);
 
 method new($class: %args) {
@@ -52,10 +53,16 @@ method new($class: %args) {
     EVT_MENU( $self, id('MENUITEM_PASTE'),  sub {1} );
     EVT_MENU( $self, id('MENUITEM_CLEAR'),  sub {1} );
 
-    EVT_MENU( $self, id('MENUITEM_PREFS'),  sub {1} );
+    EVT_MENU( $self, id('MENUITEM_PREFS'),  \&showPrefsEditor );
 
     EVT_MENU( $self, id('MENUITEM_HELP'),   sub {1} );
     EVT_MENU( $self, id('MENUITEM_ABOUT'),  \&showAboutBox );
+
+
+    ### don't keep this here
+    my $sock = WxMOO::Connection->new($self);
+    $sock->connect;
+    $self->{'current_connection'} = $sock;
 
     my $OutputPane = WxMOO::Window::OutputPane->new($self);
     my $InputPane  = WxMOO::Window::InputPane ->new($self);
@@ -64,16 +71,15 @@ method new($class: %args) {
     $Sizer->Add($OutputPane, 1, wxALL|wxGROW, 5);
     $Sizer->Add($InputPane, 0, wxALL|wxGROW, 5);
     $self->SetSizer($Sizer);
-
-    ### don't keep this here
-    my $sock = WxMOO::Connection->new($self);
-    $sock->connect;
-    $self->{'current_connection'} = $sock;
-
     return $self;
 }
 
 method connection { $self->{'current_connection'} }
+
+method showPrefsEditor {
+    $self->{'prefsEditor'} ||= WxMOO::Window::PrefsEditor->new($self);
+    $self->{'prefsEditor'}->Show;
+}
 
 method showAboutBox { Wx::AboutBox(our $aboutDialogInfo) }
 

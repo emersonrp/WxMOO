@@ -4,6 +4,7 @@ use perl5i::2;
 use Wx qw( :richtextctrl :font );
 use Wx::RichText;
 use Wx::Event qw( EVT_SET_FOCUS );
+use WxMOO::Prefs;
 use WxMOO::Utility qw( id );
 
 # TODO remove when plugins work
@@ -15,9 +16,9 @@ method new($class: $parent) {
     my $self = $class->SUPER::new(
         $parent, id('OUTPUT_PANE'), "", [-1, -1], [400,300], wxRE_READONLY );
 
-    # TODO - get this font from prefs
-    my $testFont = Wx::Font->new( 12, wxTELETYPE, wxNORMAL, wxNORMAL );
-    $self->SetFont($testFont);
+    $self->{'parent'} = $parent;
+    my $font = WxMOO::Prefs->instance->output_font;
+    $self->SetFont($font);
 
     EVT_SET_FOCUS($self, \&focus_input);
 
