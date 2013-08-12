@@ -3,14 +3,17 @@ use perl5i::2;
 
 use Wx qw( :misc :sizer );
 use Wx::Event qw( EVT_MENU );
+
 use WxMOO::Connection;  # Might go away later
-use WxMOO::Window::MainSplitter;
-use WxMOO::Window::InputPane;
-use WxMOO::Window::OutputPane;
-use WxMOO::Window::PrefsEditor;
-use WxMOO::Window::ConnectDialog;
 use WxMOO::Prefs;
 use WxMOO::Utility qw(id);
+
+use WxMOO::Window::ConnectDialog;
+use WxMOO::Window::InputPane;
+use WxMOO::Window::MainSplitter;
+use WxMOO::Window::OutputPane;
+use WxMOO::Window::PrefsEditor;
+use WxMOO::Window::WorldsList;
 
 use base 'Wx::Frame';
 
@@ -22,17 +25,17 @@ method new($class:) {
     # TODO - don't connect until we ask for it.
     $self->{'connection'} = WxMOO::Connection->new($self);
 
-    my $Splitter = WxMOO::Window::MainSplitter->new($self);
+    $self->{'splitter'} = WxMOO::Window::MainSplitter->new($self);
 
-    my $OutputPane = WxMOO::Window::OutputPane->new($Splitter);
-    my $InputPane  = WxMOO::Window::InputPane ->new($Splitter, $self->{'connection'});
+    $self->{'input_pane'}  = WxMOO::Window::InputPane ->new($self->{'splitter'}, $self->{'connection'});
+    $self->{'output_pane'} = WxMOO::Window::OutputPane->new($self->{'splitter'});
 
-    $Splitter->SplitHorizontally($OutputPane, $InputPane);
-    $Splitter->SetMinimumPaneSize(20); # TODO - set to "one line of input field"
+    $self->{'splitter'}->SplitHorizontally($self->{'output_pane'}, $self->{'input_pane'});
+    $self->{'splitter'}->SetMinimumPaneSize(20); # TODO - set to "one line of input field"
 
-    my $Sizer = Wx::BoxSizer->new( wxVERTICAL );
-    $Sizer->Add($Splitter, 1, wxALL|wxGROW, 5);
-    $self->SetSizer($Sizer);
+    $self->{'sizer'} = Wx::BoxSizer->new( wxVERTICAL );
+    $self->{'sizer'}->Add($self->{'splitter'}, 1, wxALL|wxGROW, 5);
+    $self->SetSizer($self->{'sizer'});
 
     return $self;
 }
@@ -41,23 +44,6 @@ method new($class:) {
 method Initialize {
     # TODO - don't connect until we ask for it.
     $self->{'connection'}->connect;
-}
-
-method showPrefsEditor {
-    $self->{'prefsEditor'} ||= WxMOO::Window::PrefsEditor->new($self);
-    $self->{'prefsEditor'}->Show;
-}
-
-method showConnectDialog {
-    $self->{'connectDialog'} ||= WxMOO::Window::ConnectDialog->new($self);
-    $self->{'connectDialog'}->Show;
-}
-
-method showAboutBox { Wx::AboutBox("It's about this long, and about this wide.") }
-
-method quitApplication {
-    WxMOO::Prefs->instance->save;
-    $self->Close(1);
 }
 
 method buildMenu {
@@ -90,10 +76,10 @@ method buildMenu {
     $self->SetMenuBar($MenuBar);
 
     # MENUBAR EVENTS
-    EVT_MENU( $self, id('MENUITEM_WORLDS'),  sub {1} );
+    EVT_MENU( $self, id('MENUITEM_WORLDS'),  \&showWorldsList    );
     EVT_MENU( $self, id('MENUITEM_CONNECT'), \&showConnectDialog );
-    EVT_MENU( $self, id('MENUITEM_CLOSE'),   sub {1} );
-    EVT_MENU( $self, id('MENUITEM_QUIT'),    \&quitApplication );
+    EVT_MENU( $self, id('MENUITEM_CLOSE'),   \&closeConnection   );
+    EVT_MENU( $self, id('MENUITEM_QUIT'),    \&quitApplication   );
 
     EVT_MENU( $self, id('MENUITEM_CUT'),     sub {1} );
     EVT_MENU( $self, id('MENUITEM_COPY'),    sub {1} );
@@ -104,4 +90,46 @@ method buildMenu {
 
     EVT_MENU( $self, id('MENUITEM_HELP'),    sub {1} );
     EVT_MENU( $self, id('MENUITEM_ABOUT'),   \&showAboutBox );
+}
+
+method closeConnection {
+    $self->{'connection'}->Destroy;
+    $self->{'connection'} = undef;
+}
+
+### DIALOGS AND SUBWINDOWS
+
+method showWorldsList {
+    $self->{'worlds_list'} ||= WxMOO::Window::WorldsList->new($self);
+    $self->{'worlds_list'}->Show;
+}
+
+method showConnectDialog {
+    $self->{'connect_dialog'} ||= WxMOO::Window::ConnectDialog->new($self);
+    $self->{'connect_dialog'}->Show;
+}
+
+method showPrefsEditor {
+    $self->{'prefs_editor'} ||= WxMOO::Window::PrefsEditor->new($self);
+    $self->{'prefs_editor'}->Show;
+}
+
+# TODO - WxMOO::Window::About
+method showAboutBox {
+    $self->{'about_info'} ||= eval {
+        my $info = Wx::AboutDialogInfo->new;
+        $info->AddDeveloper('R Pickett (emerson@hayseed.net)');
+        $info->SetCopyright('(c) 2013');
+        $info->SetName('WxMOO');
+        $info->SetVersion('0.0.1');
+        return $info;
+    };
+
+    Wx::AboutBox($self->{'about_info'});
+}
+
+method quitApplication {
+    WxMOO::Prefs->instance->save;
+    $self->closeConnection;
+    $self->Close(1);
 }
