@@ -1,33 +1,37 @@
 package WxMOO::Window::PrefsEditor;
 use perl5i::2;
 
-use Wx qw( :misc :notebook );
-use parent -norequire, 'Wx::Notebook';
+use Wx qw( :dialog :sizer :id :misc :notebook );
+use Wx::Event qw( EVT_BUTTON );
+use parent -norequire, 'Wx::Dialog';
 use WxMOO::Utility qw( id );
 
 method new($class: $parent) {
-    state $count;
+
     my $self = $class->SUPER::new(
-        $parent, id('PREFS_EDITOR'), wxDefaultPosition, wxDefaultSize,
-        wxNB_TOP | wxNB_FIXEDWIDTH);
+        $parent, id('PREFS_EDITOR'), '',
+        wxDefaultPosition, wxDefaultSize,
+    );
 
-    $self->AddPage(WxMOO::Window::PrefsPage->new, 'page ' . ++$count, 0, $count);
+    $self->{'notebook'}        = Wx::Notebook->new($self, -1, wxDefaultPosition, wxDefaultSize, 0);
+    $self->{'notebook_page_1'} = Wx::Panel->new($self->{'notebook'}, -1, wxDefaultPosition, wxDefaultSize, );
+    $self->{'notebook_page_2'} = Wx::Panel->new($self->{'notebook'}, -1, wxDefaultPosition, wxDefaultSize, );
+    $self->{'notebook_page_3'} = Wx::Panel->new($self->{'notebook'}, -1, wxDefaultPosition, wxDefaultSize, );
 
+    $self->{'sizer_staticbox'} = Wx::StaticBox->new($self, -1, "" );
+    $self->{'sizer'}           = Wx::StaticBoxSizer->new($self->{'sizer_staticbox'}, wxVERTICAL);
+    $self->{'button_sizer'}    = $self->CreateButtonSizer( wxOK | wxCANCEL );
 
-    return $self;
-}
+    $self->{'notebook'}->AddPage($self->{'notebook_page_1'}, "General");
+    $self->{'notebook'}->AddPage($self->{'notebook_page_2'}, "Fonts and Colors");
+    $self->{'notebook'}->AddPage($self->{'notebook_page_3'}, "Paths and Dirs");
 
+    $self->{'sizer'}->Add($self->{'notebook'}, 1, wxEXPAND | wxFIXED_MINSIZE, );
+    $self->{'sizer'}->Add($self->{'button_sizer'}, 0, wxTOP | wxALIGN_CENTER_HORIZONTAL, 5);
 
-package WxMOO::Window::PrefsPage;
-use perl5i::2;
-use parent -norequire, 'Wx::Window';
+    $self->SetSizer($self->{'sizer'});
 
-method new($class: $parent, $name) {
-    my $self = $class->SUPER::new($parent);
-
-    bless $self, $class;
-
-    $self->Name = $name;
+    $self->Layout();
 
     return $self;
 }
