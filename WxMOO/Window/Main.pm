@@ -8,6 +8,7 @@ use WxMOO::Window::MainSplitter;
 use WxMOO::Window::InputPane;
 use WxMOO::Window::OutputPane;
 use WxMOO::Window::PrefsEditor;
+use WxMOO::Window::ConnectDialog;
 use WxMOO::Prefs;
 use WxMOO::Utility qw(id);
 
@@ -44,11 +45,15 @@ method Initialize {
 
 method showPrefsEditor {
     $self->{'prefsEditor'} ||= WxMOO::Window::PrefsEditor->new($self);
-    $self->{'prefsEditor'}->Layout;
     $self->{'prefsEditor'}->Show;
 }
 
-method showAboutBox { Wx::AboutBox(our $aboutDialogInfo) }
+method showConnectDialog {
+    $self->{'connectDialog'} ||= WxMOO::Window::ConnectDialog->new($self);
+    $self->{'connectDialog'}->Show;
+}
+
+method showAboutBox { Wx::AboutBox("It's about this long, and about this wide.") }
 
 method quitApplication {
     WxMOO::Prefs->instance->save;
@@ -57,24 +62,24 @@ method quitApplication {
 
 method buildMenu {
     my $WorldsMenu = Wx::Menu->new;
-    $WorldsMenu->Append(id('MENUITEM_WORLDS'), "Worlds...",        "");
-    $WorldsMenu->Append(id('MENUITEM_OPEN'),   "Open...",          "");
-    $WorldsMenu->Append(id('MENUITEM_CLOSE'),  "Close",            "");
+    $WorldsMenu->Append(id('MENUITEM_WORLDS'),  "Worlds...",        "");
+    $WorldsMenu->Append(id('MENUITEM_CONNECT'), "Connect...",       "");
+    $WorldsMenu->Append(id('MENUITEM_CLOSE'),   "Close",            "");
     $WorldsMenu->AppendSeparator;
-    $WorldsMenu->Append(id('MENUITEM_QUIT'),   "Quit",             "");
+    $WorldsMenu->Append(id('MENUITEM_QUIT'),    "Quit",             "");
 
     my $EditMenu = Wx::Menu->new;
-    $EditMenu->Append(id('MENUITEM_CUT'),      "Cut",              "");
-    $EditMenu->Append(id('MENUITEM_COPY'),     "Copy",             "");
-    $EditMenu->Append(id('MENUITEM_PASTE'),    "Paste",            "");
-    $EditMenu->Append(id('MENUITEM_CLEAR'),    "Clear",            "");
+    $EditMenu->Append(id('MENUITEM_CUT'),       "Cut",              "");
+    $EditMenu->Append(id('MENUITEM_COPY'),      "Copy",             "");
+    $EditMenu->Append(id('MENUITEM_PASTE'),     "Paste",            "");
+    $EditMenu->Append(id('MENUITEM_CLEAR'),     "Clear",            "");
 
     my $PrefsMenu = Wx::Menu->new;
-    $PrefsMenu->Append(id('MENUITEM_PREFS'),   "Edit Preferences", "");
+    $PrefsMenu->Append(id('MENUITEM_PREFS'),    "Edit Preferences", "");
 
     my $HelpMenu = Wx::Menu->new;
-    $HelpMenu->Append(id('MENUITEM_HELP'),     "Help Topics",      "");
-    $HelpMenu->Append(id('MENUITEM_ABOUT'),    "About WxMOO",      "");
+    $HelpMenu->Append(id('MENUITEM_HELP'),      "Help Topics",      "");
+    $HelpMenu->Append(id('MENUITEM_ABOUT'),     "About WxMOO",      "");
 
     my $MenuBar = Wx::MenuBar->new;
     $MenuBar->Append($WorldsMenu, "Worlds");
@@ -85,18 +90,18 @@ method buildMenu {
     $self->SetMenuBar($MenuBar);
 
     # MENUBAR EVENTS
-    EVT_MENU( $self, id('MENUITEM_WORLDS'), sub {1} );
-    EVT_MENU( $self, id('MENUITEM_OPEN'),   sub {1} );
-    EVT_MENU( $self, id('MENUITEM_CLOSE'),  sub {1} );
-    EVT_MENU( $self, id('MENUITEM_QUIT'),   \&quitApplication );
+    EVT_MENU( $self, id('MENUITEM_WORLDS'),  sub {1} );
+    EVT_MENU( $self, id('MENUITEM_CONNECT'), \&showConnectDialog );
+    EVT_MENU( $self, id('MENUITEM_CLOSE'),   sub {1} );
+    EVT_MENU( $self, id('MENUITEM_QUIT'),    \&quitApplication );
 
-    EVT_MENU( $self, id('MENUITEM_CUT'),    sub {1} );
-    EVT_MENU( $self, id('MENUITEM_COPY'),   sub {1} );
-    EVT_MENU( $self, id('MENUITEM_PASTE'),  sub {1} );
-    EVT_MENU( $self, id('MENUITEM_CLEAR'),  sub {1} );
+    EVT_MENU( $self, id('MENUITEM_CUT'),     sub {1} );
+    EVT_MENU( $self, id('MENUITEM_COPY'),    sub {1} );
+    EVT_MENU( $self, id('MENUITEM_PASTE'),   sub {1} );
+    EVT_MENU( $self, id('MENUITEM_CLEAR'),   sub {1} );
 
-    EVT_MENU( $self, id('MENUITEM_PREFS'),  \&showPrefsEditor );
+    EVT_MENU( $self, id('MENUITEM_PREFS'),   \&showPrefsEditor );
 
-    EVT_MENU( $self, id('MENUITEM_HELP'),   sub {1} );
-    EVT_MENU( $self, id('MENUITEM_ABOUT'),  \&showAboutBox );
+    EVT_MENU( $self, id('MENUITEM_HELP'),    sub {1} );
+    EVT_MENU( $self, id('MENUITEM_ABOUT'),   \&showAboutBox );
 }
