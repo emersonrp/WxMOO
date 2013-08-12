@@ -22,12 +22,12 @@ method new($class: $parent) {
 
 method saveSplitterSize ($evt) {
     my ($w, $h)  = $self->GetSizeWH;
-    WxMOO::Prefs->instance->input_height( $h - $evt->GetSashPosition );
+    WxMOO::Prefs->prefs->input_height( $h - $evt->GetSashPosition );
 }
 
 method HandleResize {
     my ($w, $h)  = $self->GetSizeWH;
-    my $InputHeight = WxMOO::Prefs->instance->input_height;
+    my $InputHeight = WxMOO::Prefs->prefs->input_height;
     $self->SetSashPosition($h - $InputHeight, 'resize');
     $self->GetWindow1->ScrollIfAppropriate;
 }

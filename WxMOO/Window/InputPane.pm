@@ -19,7 +19,7 @@ method new($class: $parent, $connection) {
     $self->parent($parent);
     $self->connection($connection);
 
-    my $font = WxMOO::Prefs->instance->input_font;
+    my $font = WxMOO::Prefs->prefs->input_font;
     $self->SetFont($font);
 
     $self->cmd_history(WxMOO::Window::InputPane::CommandHistory->new);

@@ -129,7 +129,7 @@ method showAboutBox {
 }
 
 method quitApplication {
-    WxMOO::Prefs->instance->save;
+    WxMOO::Prefs->prefs->save;
     $self->closeConnection;
     $self->Close(1);
 }

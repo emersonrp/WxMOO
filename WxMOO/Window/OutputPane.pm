@@ -17,7 +17,7 @@ method new($class: $parent) {
         $parent, id('OUTPUT_PANE'), "", wxDefaultPosition, wxDefaultSize, wxRE_READONLY );
 
     $self->{'parent'} = $parent;
-    my $font = WxMOO::Prefs->instance->output_font;
+    my $font = WxMOO::Prefs->prefs->output_font;
     $self->SetFont($font);
 
     EVT_SET_FOCUS($self, \&focus_input);
