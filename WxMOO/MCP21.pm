@@ -21,14 +21,17 @@ our $connection = '';
 
 # This is probably the right place for this, though.
 our $registry = WxMOO::MCP21::Registry->new;
+our $multiline_messages = {};
 
 # We'd like to enumerate this automatically.
 use WxMOO::MCP21::Package::mcp;
 use WxMOO::MCP21::Package::mcp_cord;
 use WxMOO::MCP21::Package::mcp_negotiate;
+use WxMOO::MCP21::Package::dns_org_mud_moo_simpleedit;
 my $pkg_mcp           = WxMOO::MCP21::Package::mcp          ->new;
 my $pkg_mcp_cord      = WxMOO::MCP21::Package::mcp_cord     ->new;
 my $pkg_mcp_negotiate = WxMOO::MCP21::Package::mcp_negotiate->new;
+my $pkg_mcp_simpleedit = WxMOO::MCP21::Package::dns_org_mud_moo_simpleedit->new;
 
 func output_filter($data) {
 
@@ -63,17 +66,17 @@ func output_filter($data) {
     }
 
     my $message = {};  # here's where we decode this
-    # multi-line message handling.  Very TODO still
+
+    # multi-line message handling.  This is awful.
     if ($message_name eq '*') {
-        my ($tag, $field, $value) = ($rest =~ /^ (\S*) ([^:]*): (.*)/);
-        say STDERR "mcp - multiline message continuation";
-        $message->{'_data_tag'} = $tag;
-        $message->{'field'}     = $field;
-        $message->{'value'}     = $value;
+        my ($tag, $field, $value) = ($rest =~ /^(\S*) ([^:]*): (.*)/);
+        $message = $multiline_messages->{$tag};
+        $message->{'_data-tag'} = $tag;
+        push @{$message->{'data'}->{$field}}, $value;
     } elsif ($message_name eq ':') {
-        say STDERR "mcp - multiline message end";
-        my ($tag) = ($rest =! /^ (\S+)/);
-        $message->{'_data_tag'} = $tag;
+        my ($tag) = ($rest =~ /^(\S+)/);
+        $message = $multiline_messages->{$tag};
+        delete $message->{'multi_in_progress'};
     } else {
         $message = parse($rest);
     }
@@ -87,17 +90,14 @@ func output_filter($data) {
         return;
     }
 
-    $message->{'message'} = $message_name;
+    $message->{'message'} //= $message_name;
 
-    if ($message->{'multiline'}) {
-        # TODO - what is going on here?  Are we... stashing away the multiline lines between requests?
-        say STDERR "mcp - multiline message start";
-#         $tag = $message->{'_data_tag'};
-#         $message->{'_message'} = $message_name;
-#         $request{$tag} = dclone $request{'current'};
+    if ($message->{'multi_in_progress'}) {
+        $multiline_messages->{$message->{'_data-tag'}} ||= $message;
+    } else {
+        # don't dispatch multilines in progress
+        dispatch($message);
     }
-
-    dispatch($message);
 
     # always return undef so the output widget skips this line
     return;
@@ -114,20 +114,23 @@ func parse($raw) {
         $message->{'auth_key'} = $first;
         $raw =~ s/^$first\s+//;
     }
-    while ($raw =~ /([-\*a-z0-9]+)           # keyword
+    while ($raw =~ /([-_*a-z0-9]+)           # keyword
                         :                       # followed by colon
                         \s+                     # some space
                         (                       # and either
-                            (?:"[^"]+")         # a quoted string - TODO - the grammar is more picky than [^"]
+                            (?:"[^"]*")         # a quoted string - TODO - the grammar is more picky than [^"]
                             |                   # or
                             (?:$simpleChars)+   # a value
                         )/igx)
     {
         my ($keyword, $value) = ($1, $2);
+        $value =~ s/^"|"$//;  # get the innards of quoted strings pls.
         if ($keyword =~ s/\*$//) {
-            $message->{'data'}->{$keyword} ||= [];
-            push @{$message->{'data'}->{$keyword}}, $value;
-            $message->{'multiline'} = 1;
+            say STDERR "mcp - multiline message start";
+            $message->{'data'}->{$keyword} = [];
+            $message->{'multi_in_progress'} = 1;
+        } elsif ($keyword eq '_data-tag') {
+            $message->{'_data-tag'} = $value;
         } else {
             $message->{'data'}->{$keyword} = $value;
         }

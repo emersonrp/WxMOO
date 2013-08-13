@@ -12,9 +12,6 @@ method new($class:) {
     $WxMOO::MCP21::registry->register($self, qw(mcp : *));
 }
 
-method do_colon   { say STDERR "do_colon called with @_"; }
-method do_splat   { say STDERR "do_splat called with @_"; }
-
 method dispatch($message) {
     given ($message->{'message'}) {
         when ( /mcp/ ) { $self->do_mcp($message); }
@@ -47,4 +44,12 @@ method do_mcp($args) {
         });
     }
     WxMOO::MCP21::server_notify('mcp-negotiation-end');
+}
+
+method do_splat($args) {
+    # all taken care of in MCP21.pm
+}
+
+method do_colon($args) {
+    # all taken care of in MCP21.pm
 }
