@@ -5,6 +5,7 @@ use Wx qw( :socket );
 use Wx::Socket;
 use Wx::Event qw( EVT_SOCKET_INPUT EVT_SOCKET_LOST EVT_SOCKET_CONNECTION );
 use WxMOO::Utility qw( id );
+use WxMOO::MCP21;  # this is icky
 
 use base 'Wx::SocketClient';
 
@@ -19,9 +20,11 @@ method new($class: $parent) {
 
 method onInput {
     state $output //= Wx::Window::FindWindowById(id('OUTPUT_PANE'));
-    while ($self->Read(my $poop, 1024)) {
-        $output->display($poop);
+    my $poop = '';
+    while ($self->Read($poop, 1, length $poop)) {
+        last if $poop =~ /\n$/s;
     }
+    $output->display($poop);
 }
 
 method onClose { }
@@ -33,6 +36,7 @@ method port { '7777' }
 
 method connect {
     $self->Connect($self->host, $self->port);
+    $WxMOO::MCP21::connection = $self;  # this is icky
     carp "Can't connect to host/port" unless $self->IsConnected;
 }
 

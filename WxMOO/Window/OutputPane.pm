@@ -4,11 +4,13 @@ use perl5i::2;
 use Wx qw( :misc :richtextctrl );
 use Wx::RichText;
 use Wx::Event qw( EVT_SET_FOCUS );
+
 use WxMOO::Prefs;
 use WxMOO::Utility qw( id );
 
-# TODO remove when plugins work
-use WxMOO::Plugins::ANSI;
+# TODO we need a better output_filter scheme, probably?
+use WxMOO::ANSI;
+use WxMOO::MCP21;
 
 use base 'Wx::RichTextCtrl';
 
@@ -36,17 +38,22 @@ method ScrollIfAppropriate {
 }
 
 method display ($text) {
-    if (1 or $WxMOO::Preferences::UseANSI) {
-        my $stuff = WxMOO::Plugins::ANSI::output_filter($text);
-        for my $bit (@$stuff) {
-            if (ref $bit) {
-                $self->BeginStyle($bit);
-            } else {
-                $self->AppendText($bit);
+    for my $line (split /\n/, $text) {
+        if (1 or WxMOO::Prefs->prefs->use_mcp) {
+            next unless ($line = WxMOO::MCP21::output_filter($line));
+        }
+        if (1 or WxMOO::Prefs->prefs->use_ansi) {
+            my $stuff = WxMOO::ANSI::output_filter($line);
+            $line = '';
+            for my $bit (@$stuff) {
+                if (ref $bit) {
+                    $self->BeginStyle($bit);
+                } else {
+                    $line .= $bit;
+                }
             }
         }
-    } else {
-        $self->AppendText($text);
+        $self->AppendText($line);
     }
 }
 

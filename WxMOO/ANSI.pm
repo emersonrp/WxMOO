@@ -1,4 +1,4 @@
-package WxMOO::Plugins::ANSI;
+package WxMOO::ANSI;
 use perl5i::2;
 use WxMOO::Theme;
 
