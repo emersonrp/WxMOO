@@ -124,9 +124,7 @@ func parse($raw) {
                         )/igx)
     {
         my ($keyword, $value) = ($1, $2);
-        $value =~ s/^"|"$//;  # get the innards of quoted strings pls.
         if ($keyword =~ s/\*$//) {
-            say STDERR "mcp - multiline message start";
             $message->{'data'}->{$keyword} = [];
             $message->{'multi_in_progress'} = 1;
         } elsif ($keyword eq '_data-tag') {
@@ -155,12 +153,31 @@ func server_notify($msg, $args) {
 
     my $out = "#\$#$msg $key ";
 
+    my ($multiline, $datatag);
     while (my ($k, $v) = each %$args) {
         # TODO escape $v if needed
         $v //= '';
-        $out .= "$k: $v ";
+        if (ref $v) { # multiline!
+            $multiline->{$k} = $v;
+            $datatag = int(rand(1000000));
+            $out .= qq|$k*: "" _data-tag: $datatag |;
+        } else {
+            $out .= "$k: $v ";
+        }
     }
     say STDERR "C->S: $out";
     $connection->Write("$out\n");
+
+    if ($multiline) {
+        while (my ($k, $l) = each %$multiline) {
+            for my $line (@$l) {
+                $connection->Write("#\$#* $datatag $k: $line\n");
+                say STDERR "#\$#* $datatag $k: $line";
+            }
+            $connection->Write("#\$#: $datatag\n");
+            say STDERR "#\$#: $datatag";
+        }
+    }
+
 }
 
