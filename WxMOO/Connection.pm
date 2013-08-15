@@ -7,7 +7,10 @@ use Wx::Event qw( EVT_SOCKET_INPUT EVT_SOCKET_LOST EVT_SOCKET_CONNECTION );
 use WxMOO::Utility qw( id );
 use WxMOO::MCP21;  # this is icky
 
-use base 'Wx::SocketClient';
+use parent -norequire, 'Wx::SocketClient';
+use parent 'Class::Accessor::Fast';
+
+WxMOO::Connection->mk_accessors(qw( host port ));
 
 method new($class: $parent) {
     my $self = $class->SUPER::new;
@@ -31,12 +34,16 @@ method onClose { }
 
 method output { $self->Write(@_); }
 
-method host { 'hayseed.net' }
-method port { '7777' }
+method connect($host, $port) {
+    $self->host( $host );
+    $self->port( $port );
 
-method connect {
     $self->Connect($self->host, $self->port);
-    $WxMOO::MCP21::connection = $self;  # this is icky
+
+    # TODO - this is icky;  we'd much rather do this in an
+    # mcp initialization step that auto-happens at connect time.
+    $WxMOO::MCP21::connection = $self;
+
     carp "Can't connect to host/port" unless $self->IsConnected;
 }
 

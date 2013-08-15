@@ -43,7 +43,7 @@ method new($class:) {
 # post ->Show stuff
 method Initialize {
     # TODO - don't connect until we ask for it.
-    $self->{'connection'}->connect;
+    $self->{'connection'}->connect('hayseed.net',7777);
 }
 
 method buildMenu {

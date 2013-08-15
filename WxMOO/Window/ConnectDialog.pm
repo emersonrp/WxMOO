@@ -1,7 +1,8 @@
 package WxMOO::Window::ConnectDialog;
 use perl5i::2;
 
-use Wx qw( :misc :dialog :sizer );
+use Wx qw( :id :misc :dialog :sizer );
+use Wx::Event qw( EVT_BUTTON );
 use base qw(Wx::Dialog);
 
 method new($class: $parent) {
@@ -10,6 +11,8 @@ method new($class: $parent) {
        wxDefaultPosition, wxDefaultSize,
        wxDEFAULT_DIALOG_STYLE | wxSTAY_ON_TOP
     );
+
+    $self->{'parent'} = $parent;
 
     $self->{'host_label'}   = Wx::StaticText->new($self, -1, "Host:", wxDefaultPosition, wxDefaultSize, );
     $self->{'host_field'}   = Wx::TextCtrl  ->new($self, -1, "",      wxDefaultPosition, wxDefaultSize, );
@@ -33,6 +36,19 @@ method new($class: $parent) {
     $self->{'sizer'}->Fit($self);
     $self->Layout();
 
+    EVT_BUTTON($self, wxID_OK, \&connect_please);
+
     return $self;
+}
+
+method connect_please($evt) {
+    my $host = $self->{'host_field'}->GetValue;
+    my $port = $self->{'port_field'}->GetValue;
+
+    $self->{'host_field'}->Clear;
+    $self->{'port_field'}->Clear;
+
+    $self->{'parent'}->{'connection'}->connect($host, $port);
+    $evt->Skip;
 }
 

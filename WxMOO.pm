@@ -1,9 +1,10 @@
 #!/usr/bin/perl
+package WxMOO;
 use perl5i::2;
 
 require 5.014;
 
-package WxMOO;
+use Wx;
 use parent 'Wx::App';
 
 use WxMOO::Window::Main;
