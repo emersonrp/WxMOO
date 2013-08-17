@@ -50,7 +50,11 @@ method check_command_history($evt) {
     } elsif ($k == WXK_DOWN) {
         $self->SetValue($self->cmd_history->next);
     } else {
-        $evt->Skip and return;
+        if ($self->GetValue =~ /^con?n?e?c?t? +\w+ +/) {
+            say STDERR "looks like a connect attempt"
+
+        }
+        $evt->Skip; return;
     }
     $self->SetInsertionPointEnd;
 }

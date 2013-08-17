@@ -42,42 +42,11 @@ method display ($text) {
             next unless ($line = WxMOO::MCP21::output_filter($line));
         }
         if (1 or WxMOO::Prefs->prefs->use_ansi) {
-            my $stuff = $self->ansi_filter($line);
+            my $stuff = $self->ansi_parse($line);
             $line = '';
             for my $bit (@$stuff) {
                 if (ref $bit) {
-                    my ($type, $payload) = @$bit;
-                    if ($type eq 'control') {
-                        given ($payload) {
-                            when ('normal')       { $self->EndAllStyles; }
-                            when ('bold')         { $self->BeginBold;     }
-                            when ('dim')          { $self->EndBold;       } # TODO - dim further than normal?
-                            when ('underline')    { $self->BeginUnderline }
-                            when ('blink')     {
-                                # TODO - create timer
-                                # apply style name
-                                # periodically switch foreground color to background
-                            }
-                            when ('inverse')   {
-                                # fg = foreground;  bg=background
-                                # foreground = bgl  background=fg;
-                            }
-                            when ('hidden')       { 1; }
-                            when ('strikethru')   { 1; }
-                            when ('no_bold')      { $self->EndBold; }
-                            when ('no_underline') { $self->EndUnderline }
-                            when ('no_blink')  {
-                                # TODO - remove blink-code-handles style
-                            }
-                            when ('no_strikethru') { 1; }
-                        };
-                    } elsif ($type eq 'foreground') {
-                        $self->BeginTextColour($self->lookup_color($payload));
-                    } elsif ($type eq "background") {
-                        # $self->BeginBackgroundColour($self->lookup_color($payload));
-                    } else {
-                        say STDERR "unknown ANSI type $type";
-                    }
+                    $self->apply_ansi($bit);
                 } else {
                     $self->WriteText($bit);
                 }
@@ -95,7 +64,7 @@ method focus_input {
     $input_field->SetFocus if $input_field;
 }
 
-my %colors = (
+my %ansi_colors = (
     black   => [ Wx::Colour->new(  0,  0,  0), Wx::Colour->new(127,127,127) ],
     red     => [ Wx::Colour->new(205,  0,  0), Wx::Colour->new(255,  0,  0) ],
     green   => [ Wx::Colour->new(  0,205,  0), Wx::Colour->new(  0,255,  0) ],
@@ -106,8 +75,62 @@ my %colors = (
     white   => [ Wx::Colour->new(229,229,229), Wx::Colour->new(255,255,255) ],
 );
 method lookup_color($color) {
-    # TODO -- make this look it up each 
-    return $self->{'bright'} ? $colors{$color}->[1] : $colors{$color}->[0];
+    return $self->{'bright'} ? $ansi_colors{$color}->[1] : $ansi_colors{$color}->[0];
+}
+
+method apply_ansi($bit) {
+    my ($type, $payload) = @$bit;
+    if ($type eq 'control') {
+        given ($payload) {
+            when ('normal')       {
+                my $plain_style = Wx::TextAttr->new;
+                if ($self->{'inverse'}) {
+                    say STDERR "I'm inverse!";
+                    $self->invert_colors;
+                }
+                $self->SetDefaultStyle($plain_style);
+            }
+            when ('bold')         { $self->BeginBold;     }
+            when ('dim')          { $self->EndBold;       } # TODO - dim further than normal?
+            when ('underline')    { $self->BeginUnderline }
+            when ('blink')     {
+                # TODO - create timer
+                # apply style name
+                # periodically switch foreground color to background
+            }
+            when ('inverse')      { $self->invert_colors; }
+            when ('hidden')       { 1; }
+            when ('strikethru')   { 1; }
+            when ('no_bold')      { $self->EndBold; }
+            when ('no_underline') { $self->EndUnderline }
+            when ('no_blink')  {
+                # TODO - remove blink-code-handles style
+            }
+            when ('no_strikethru') { 1; }
+        };
+    } elsif ($type eq 'foreground') {
+        $self->BeginTextColour($self->lookup_color($payload));
+    } elsif ($type eq "background") {
+        my $bg_attr = Wx::TextAttr->new;
+        $bg_attr->SetBackgroundColour($self->lookup_color($payload));
+        $self->SetDefaultStyle($bg_attr);
+        # $self->BeginBackgroundColour($self->lookup_color($payload));
+    } else {
+        say STDERR "unknown ANSI type $type";
+    }
+}
+
+method invert_colors {
+    my $current = $self->GetStyle($self->GetInsertionPoint);
+    my $fg = $current->GetTextColour;
+    my $bg = $current->GetBackgroundColour;
+    # TODO - hrmn current bg color seems to be coming out wrong.
+
+    $current->SetTextColour($bg);
+    $current->SetBackgroundColour($fg);
+
+    $self->{'inverse'} = !$self->{'inverse'};
+    # $self->SetDefaultStyle($current);  # commenting this out until bg color confusion is resolved
 }
 
 my %ansi_codes = (
@@ -143,7 +166,7 @@ my %ansi_codes = (
 );
 
 
-method ansi_filter($line) {
+method ansi_parse($line) {
     if (my $beepcount = $line =~ s/\007//g) {
         for (1..$beepcount) {
             say STDERR "found a beep";
