@@ -1,7 +1,7 @@
 package WxMOO::Window::OutputPane;
 use perl5i::2;
 
-use Wx qw( :misc :richtextctrl );
+use Wx qw( :color :misc :richtextctrl );
 use Wx::RichText;
 use Wx::Event qw( EVT_SET_FOCUS );
 
@@ -9,7 +9,6 @@ use WxMOO::Prefs;
 use WxMOO::Utility qw( id );
 
 # TODO we need a better output_filter scheme, probably?
-use WxMOO::ANSI;
 use WxMOO::MCP21;
 
 use base 'Wx::RichTextCtrl';
@@ -27,8 +26,8 @@ method new($class: $parent) {
     return bless $self, $class;
 }
 
-method AppendText {
-    $self->SUPER::AppendText(@_);
+method WriteText {
+    $self->SUPER::WriteText(@_);
     $self->ScrollIfAppropriate;
 }
 
@@ -43,22 +42,128 @@ method display ($text) {
             next unless ($line = WxMOO::MCP21::output_filter($line));
         }
         if (1 or WxMOO::Prefs->prefs->use_ansi) {
-            my $stuff = WxMOO::ANSI::output_filter($line);
+            my $stuff = $self->ansi_filter($line);
             $line = '';
             for my $bit (@$stuff) {
                 if (ref $bit) {
-                    $self->BeginStyle($bit);
+                    my ($type, $payload) = @$bit;
+                    if ($type eq 'control') {
+                        given ($payload) {
+                            when ('normal')       { $self->EndAllStyles; }
+                            when ('bold')         { $self->BeginBold;     }
+                            when ('dim')          { $self->EndBold;       } # TODO - dim further than normal?
+                            when ('underline')    { $self->BeginUnderline }
+                            when ('blink')     {
+                                # TODO - create timer
+                                # apply style name
+                                # periodically switch foreground color to background
+                            }
+                            when ('inverse')   {
+                                # fg = foreground;  bg=background
+                                # foreground = bgl  background=fg;
+                            }
+                            when ('hidden')       { 1; }
+                            when ('strikethru')   { 1; }
+                            when ('no_bold')      { $self->EndBold; }
+                            when ('no_underline') { $self->EndUnderline }
+                            when ('no_blink')  {
+                                # TODO - remove blink-code-handles style
+                            }
+                            when ('no_strikethru') { 1; }
+                        };
+                    } elsif ($type eq 'foreground') {
+                        $self->BeginTextColour($self->lookup_color($payload));
+                    } elsif ($type eq "background") {
+                        # $self->BeginBackgroundColour($self->lookup_color($payload));
+                    } else {
+                        say STDERR "unknown ANSI type $type";
+                    }
                 } else {
-                    $line .= $bit;
+                    $self->WriteText($bit);
                 }
             }
+        } else {
+            $self->WriteText($line);
         }
-        $self->AppendText($line);
     }
+    print STDERR "\n";
 }
 
 method focus_input {
     # TODO - make this a little less intrusive
     my $input_field = Wx::Window::FindWindowById(id('INPUT_PANE'));
     $input_field->SetFocus if $input_field;
+}
+
+my %colors = (
+    black   => [ Wx::Colour->new(  0,  0,  0), Wx::Colour->new(127,127,127) ],
+    red     => [ Wx::Colour->new(205,  0,  0), Wx::Colour->new(255,  0,  0) ],
+    green   => [ Wx::Colour->new(  0,205,  0), Wx::Colour->new(  0,255,  0) ],
+    yellow  => [ Wx::Colour->new(205,205,  0), Wx::Colour->new(255,255,  0) ],
+    blue    => [ Wx::Colour->new(  0,  0,238), Wx::Colour->new( 92, 92,255) ],
+    magenta => [ Wx::Colour->new(205,  0,205), Wx::Colour->new(255,  0,255) ],
+    cyan    => [ Wx::Colour->new(  0,205,205), Wx::Colour->new(  0,255,255) ],
+    white   => [ Wx::Colour->new(229,229,229), Wx::Colour->new(255,255,255) ],
+);
+method lookup_color($color) {
+    # TODO -- make this look it up each 
+    return $self->{'bright'} ? $colors{$color}->[1] : $colors{$color}->[0];
+}
+
+my %ansi_codes = (
+    0     => [ control => 'normal'        ],
+    1     => [ control => 'bold'          ],
+    2     => [ control => 'dim'           ],
+    4     => [ control => 'underline'     ],
+    5     => [ control => 'blink'         ],
+    7     => [ control => 'inverse'       ],
+    8     => [ control => 'hidden'        ],
+    9     => [ control => 'strikethru'    ],
+    22    => [ control => 'no_bold'       ], # normal font weight also cancels 'dim'
+    24    => [ control => 'no_underline'  ],
+    25    => [ control => 'no_blink'      ],
+    29    => [ control => 'no_strikethru' ],
+    30    => [ foreground => 'black'  ],
+    31    => [ foreground => 'red'    ],
+    32    => [ foreground => 'green'  ],
+    33    => [ foreground => 'yellow' ],
+    34    => [ foreground => 'blue'   ],
+    35    => [ foreground => 'magenta'],
+    36    => [ foreground => 'cyan'   ],
+    37    => [ foreground => 'white'  ],
+
+    40    => [ background => 'black'  ],
+    41    => [ background => 'red'    ],
+    42    => [ background => 'green'  ],
+    43    => [ background => 'yellow' ],
+    44    => [ background => 'blue'   ],
+    45    => [ background => 'magenta'],
+    46    => [ background => 'cyan'   ],
+    47    => [ background => 'white'  ],
+);
+
+
+method ansi_filter($line) {
+    if (my $beepcount = $line =~ s/\007//g) {
+        for (1..$beepcount) {
+            say STDERR "found a beep";
+            Wx::Bell();  # TODO -- "if beep is enabled in the prefs"
+        }
+    }
+
+    my @bits = split /\e\[(\d+(?:;\d+)*)m/, $line;
+
+    my @styled_text;
+    while (my ($i, $val) = each @bits) {
+        if ($i % 2) {
+            for my $c (split /;/, $val) {
+                if (my $style = $ansi_codes{$val}) {
+                    push @styled_text, $style;
+                }
+            }
+        } else {
+            push @styled_text, $val if $val;
+        }
+    }
+    return [@styled_text];
 }
