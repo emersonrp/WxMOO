@@ -42,7 +42,7 @@ method do_mcp_negotiate_can($message) {
     my $pkg = $data->{'package'};
     if (my $ver = $WxMOO::MCP21::registry->get_best_version($pkg, $min, $max)) {
         say STDERR "activating $pkg";
-        $WxMOO::MCP21::registry->get_package($pkg)->activate($ver);
+        $WxMOO::MCP21::registry->get_package($pkg)->activated($ver);
     }
 }
 
