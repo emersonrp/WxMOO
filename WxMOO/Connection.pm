@@ -40,9 +40,7 @@ method connect($host, $port) {
 
     $self->Connect($self->host, $self->port);
 
-    # TODO - this is icky;  we'd much rather do this in an
-    # mcp initialization step that auto-happens at connect time.
-    $WxMOO::MCP21::connection = $self;
+    WxMOO::MCP21::new_connection($self);
 
     carp "Can't connect to host/port" unless $self->IsConnected;
 }

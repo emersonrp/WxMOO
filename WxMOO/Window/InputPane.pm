@@ -51,8 +51,7 @@ method check_command_history($evt) {
         $self->SetValue($self->cmd_history->next);
     } else {
         if ($self->GetValue =~ /^con?n?e?c?t? +\w+ +/) {
-            say STDERR "looks like a connect attempt"
-
+            # it's a connection attempt, style the passwd to come out as *****
         }
         $evt->Skip; return;
     }

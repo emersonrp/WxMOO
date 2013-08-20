@@ -1,8 +1,6 @@
 package WxMOO::MCP21;
 use perl5i::2;
 
-use Storable qw(dclone);
-
 use WxMOO::MCP21::Registry;
 
 # This module was developed by squinting directly at both the MCP spec
@@ -28,16 +26,12 @@ use WxMOO::MCP21::Package::mcp;
 use WxMOO::MCP21::Package::mcp_cord;
 use WxMOO::MCP21::Package::mcp_negotiate;
 use WxMOO::MCP21::Package::dns_org_mud_moo_simpleedit;
-my $pkg_mcp           = WxMOO::MCP21::Package::mcp          ->new;
-my $pkg_mcp_cord      = WxMOO::MCP21::Package::mcp_cord     ->new;
-my $pkg_mcp_negotiate = WxMOO::MCP21::Package::mcp_negotiate->new;
+my $pkg_mcp            = WxMOO::MCP21::Package::mcp          ->new;
+my $pkg_mcp_cord       = WxMOO::MCP21::Package::mcp_cord     ->new;
+my $pkg_mcp_negotiate  = WxMOO::MCP21::Package::mcp_negotiate->new;
 my $pkg_mcp_simpleedit = WxMOO::MCP21::Package::dns_org_mud_moo_simpleedit->new;
 
 func output_filter($data) {
-
-    # this is random frantic experimenting to get mcp fragments to stop appearing
-    # in the in-band stuff.  Hypothesis:  multiple lines are filling the 1024-byte
-    # read and then when it starts the next read, we're in the middle of a message.
 
     # MCP spec, 2.1:
     # A received network line that begins with the characters #$# is translated
@@ -114,7 +108,7 @@ func parse($raw) {
         $message->{'auth_key'} = $first;
         $raw =~ s/^$first\s+//;
     }
-    while ($raw =~ /([-_*a-z0-9]+)           # keyword
+    while ($raw =~ /([-_*a-z0-9]+)              # keyword
                         :                       # followed by colon
                         \s+                     # some space
                         (                       # and either
@@ -137,13 +131,9 @@ func parse($raw) {
 }
 
 func dispatch($message) {
-    # my $overlap = $registry->overlap;
     my $package = $registry->package_for_message($message->{'message'}) or return;
-    # my $version = $package->version;
 
-    # TODO need a better representation of the play among packages, versions, and messages
-    # Meanwhile, let's assume versions are not a problem
-    $package->dispatch($message);
+    $package->dispatch($message) if $package->activated;
 }
 
 
@@ -178,6 +168,11 @@ func server_notify($msg, $args) {
             say STDERR "#\$#: $datatag";
         }
     }
+}
 
+func new_connection($conn) { $connection = $conn; }
+
+func start_mcp {
+    for my $p ($registry->packages) { $p->_init; }
 }
 

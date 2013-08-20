@@ -55,7 +55,6 @@ method display ($text) {
             $self->WriteText($line);
         }
     }
-    print STDERR "\n";
 }
 
 method focus_input {

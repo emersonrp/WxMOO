@@ -16,7 +16,8 @@ use constant EDITOR => '/usr/bin/gvim';
 method new($class:) {
     my $self = $class->SUPER::new({
         package => 'dns-org-mud-moo-simpleedit',
-        version => 1.0,
+        min     => '1.0',
+        max     => '1.0',
     });
 
     $WxMOO::MCP21::registry->register($self, qw( dns-org-mud-moo-simpleedit-content ));
