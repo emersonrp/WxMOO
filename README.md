@@ -36,7 +36,7 @@ Guiding thoughts:
 (Aside, you could also check out my fork of tkMOO-light, [tkmoo-ttk](https://github.com/emersonrp/tkmoo-ttk), which moved lots of the innards of it to the ttk widget set, which was much more pleasant to look at.  I managed to break some stuff around the edges, though.  It's what I use day-to-day, until/unless this gets past the "toy" stage.)
 
 Dependencies
-============
+------------
 
 In addition to perl, wx, and the requisite "use Wx" glue, this currently uses [perl5i](http://search.cpan.org/~mschwern/perl5i-v2.12.0/lib/perl5i.pm), mostly because I wanted to try it out.  That drags in an immense number of dependencies, so I hope to pare it back down later to just the parts I actually use.
 
@@ -49,132 +49,133 @@ If you like CPAN for all things Perl, just:
 I develop in Fedora, and I try to keep as much stuff as possible curated via the rpm system, so I have a list below of the packages I installed via RPM and the ones that I had to go to CPAN for.  YMMV.
 
 
+### via CPAN
+    autobox::dump
+    autodie
+    Text::Exception::LessClever
+    Carp::Fix::1\_25
+    CLASS
+    Exporter::Declare
+    ExtUtils::Depends
+    Fatal
+    Fennec
+    Hash::StoredIterator
+    Meta::Builder
+    Mock::Quick
+    Object::ID
+    Parallel::Runner
+    perl5i
+    Perl6::Caller
+    Test::Exception::LessClever
+    Test::Output
+    Test::Workflow
+    utf8::all
 
-CPAN autobox::dump
-CPAN autodie
-CPAN Text::Exception::LessClever
-CPAN Carp::Fix::1\_25
-CPAN CLASS
-CPAN Exporter::Declare
-CPAN ExtUtils::Depends
-CPAN Fatal
-CPAN Fennec
-CPAN Hash::StoredIterator
-CPAN Meta::Builder
-CPAN Mock::Quick
-CPAN Object::ID
-CPAN Parallel::Runner
-CPAN perl5i
-CPAN Perl6::Caller
-CPAN Test::Exception::LessClever
-CPAN Test::Output
-CPAN Test::Workflow
-CPAN utf8::all
-
-perl-Algorithm-Dependency
-perl-Algorithm-Diff
-perl-Archive-Tar
-perl-Archive-Zip
-perl-autobox
-perl-autobox-Core
-perl-autobox-List-Util
-perl-autovivification
-perl-B-Hooks-EndOfScope
-perl-B-Hooks-OP-Check
-perl-Cache
-perl-Capture-Tiny
-perl-Child
-perl-Class-Accessor
-perl-Class-Accessor-Chained
-perl-Class-Data-Inheritable
-perl-Class-Inspector
-perl-Class-Load
-perl-Class-Singleton
-perl-Config-Tiny
-perl-Data-Optlist
-perl-Date-ISO8601
-perl-Date-Manip
-perl-DateTime
-perl-DateTime-Locale
-perl-DateTime-TimeZone
-perl-DateTime-TimeZone-SystemV
-perl-DateTime-TimeZone-Tzfile
-perl-Devel-Declare
-perl-Devel-StackTrace
-perl-Dist-CheckConflicts
-perl-Email-Date-Format
-perl-Exception-Class
-perl-ExtUtils-CBuilder
-perl-File-chdir
-perl-File-Copy-Recursive
-perl-File-HomeDir
-perl-File-Listing
-perl-File-Which
-perl-Hash-FieldHash
-perl-Hash-Merge-Simple
-perl-HTTP-Cookies
-perl-HTTP-Daemon
-perl-HTTP-Negotiate
-perl-Import-Info
-perl-IO-Zlib
-perl-IPC-Cmd
-perl-IPC-Run3
-perl-IPC-System-Simple
-perl-JSON
-perl-JSON-PP
-perl-libwww-perl
-perl-Locale-Maketext-Simple
-perl-Log-Dispatch
-perl-Log-Dispatch-FileRotate
-perl-Log-Log4perl
-perl-Mail-Sender
-perl-Mail-Sendmail
-perl-MailTools
-perl-MIME-Lite
-perl-MIME-Types
-perl-Modern-Perl
-perl-Module-Depends
-perl-Module-Implementation
-perl-Module-Load
-perl-Module-Load-Conditional
-perl-Module-Runtime
-perl-Net-SMTP-SSL
-perl-Package-Constants
-perl-Package-Stash
-perl-Package-Stash-XS
-perl-Params-Check
-perl-Params-Classify
-perl-Params-Validate
-perl-Perl-OSType
-perl-Probe-Perl
-perl-Scope-Guard
-perl-Sub-Exporter
-perl-Sub-Install
-perl-Sub-Name
-perl-Sys-Syslog
-perl-Term-ReadLine-Perl
-perl-Test-ClassAPI
-perl-Test-Deep
-perl-Test-Diff
-perl-Test-Differences
-perl-Test-Fatal
-perl-Test-Most
-perl-Test-NoWarnings
-perl-Test-Output
-perl-Test-Requires
-perl-Test-Tester
-perl-Tree-DAG\_Node
-perl-Try-Tiny
-perl-Variable-Magic
-perl-version
-perl-Version-Requirements
-perl-Want
-perl-WWW-RobotRules
-perl-WWW-RobotRules
-perl-XML-DOM
-perl-XML-Parser
-perl-XML-RegExp
-perl-YAML
-rrdtool
-rrdtool-perl
+### via yum
+    perl-Algorithm-Dependency
+    perl-Algorithm-Diff
+    perl-Archive-Tar
+    perl-Archive-Zip
+    perl-autobox
+    perl-autobox-Core
+    perl-autobox-List-Util
+    perl-autovivification
+    perl-B-Hooks-EndOfScope
+    perl-B-Hooks-OP-Check
+    perl-Cache
+    perl-Capture-Tiny
+    perl-Child
+    perl-Class-Accessor
+    perl-Class-Accessor-Chained
+    perl-Class-Data-Inheritable
+    perl-Class-Inspector
+    perl-Class-Load
+    perl-Class-Singleton
+    perl-Config-Tiny
+    perl-Data-Optlist
+    perl-Date-ISO8601
+    perl-Date-Manip
+    perl-DateTime
+    perl-DateTime-Locale
+    perl-DateTime-TimeZone
+    perl-DateTime-TimeZone-SystemV
+    perl-DateTime-TimeZone-Tzfile
+    perl-Devel-Declare
+    perl-Devel-StackTrace
+    perl-Dist-CheckConflicts
+    perl-Email-Date-Format
+    perl-Exception-Class
+    perl-ExtUtils-CBuilder
+    perl-File-chdir
+    perl-File-Copy-Recursive
+    perl-File-HomeDir
+    perl-File-Listing
+    perl-File-Which
+    perl-Hash-FieldHash
+    perl-Hash-Merge-Simple
+    perl-HTTP-Cookies
+    perl-HTTP-Daemon
+    perl-HTTP-Negotiate
+    perl-Import-Info
+    perl-IO-Zlib
+    perl-IPC-Cmd
+    perl-IPC-Run3
+    perl-IPC-System-Simple
+    perl-JSON
+    perl-JSON-PP
+    perl-libwww-perl
+    perl-Locale-Maketext-Simple
+    perl-Log-Dispatch
+    perl-Log-Dispatch-FileRotate
+    perl-Log-Log4perl
+    perl-Mail-Sender
+    perl-Mail-Sendmail
+    perl-MailTools
+    perl-MIME-Lite
+    perl-MIME-Types
+    perl-Modern-Perl
+    perl-Module-Depends
+    perl-Module-Implementation
+    perl-Module-Load
+    perl-Module-Load-Conditional
+    perl-Module-Runtime
+    perl-Net-SMTP-SSL
+    perl-Package-Constants
+    perl-Package-Stash
+    perl-Package-Stash-XS
+    perl-Params-Check
+    perl-Params-Classify
+    perl-Params-Validate
+    perl-Perl-OSType
+    perl-Probe-Perl
+    perl-Scope-Guard
+    perl-Sub-Exporter
+    perl-Sub-Install
+    perl-Sub-Name
+    perl-Sys-Syslog
+    perl-Term-ReadLine-Perl
+    perl-Test-ClassAPI
+    perl-Test-Deep
+    perl-Test-Diff
+    perl-Test-Differences
+    perl-Test-Fatal
+    perl-Test-Most
+    perl-Test-NoWarnings
+    perl-Test-Output
+    perl-Test-Requires
+    perl-Test-Tester
+    perl-Tree-DAG\_Node
+    perl-Try-Tiny
+    perl-Variable-Magic
+    perl-version
+    perl-Version-Requirements
+    perl-Want
+    perl-WWW-RobotRules
+    perl-WWW-RobotRules
+    perl-XML-DOM
+    perl-XML-Parser
+    perl-XML-RegExp
+    perl-YAML
+    rrdtool
+    rrdtool-perl
 
