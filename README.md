@@ -72,6 +72,7 @@ I develop in Fedora, and I try to keep as much stuff as possible curated via the
     utf8::all
 
 ### via yum
+    perl
     perl-Algorithm-Dependency
     perl-Algorithm-Diff
     perl-Archive-Tar
@@ -91,6 +92,7 @@ I develop in Fedora, and I try to keep as much stuff as possible curated via the
     perl-Class-Inspector
     perl-Class-Load
     perl-Class-Singleton
+    perl-Config-Simple
     perl-Config-Tiny
     perl-Data-Optlist
     perl-Date-ISO8601
@@ -110,6 +112,7 @@ I develop in Fedora, and I try to keep as much stuff as possible curated via the
     perl-File-Copy-Recursive
     perl-File-HomeDir
     perl-File-Listing
+    perl-File-Slurp
     perl-File-Which
     perl-Hash-FieldHash
     perl-Hash-Merge-Simple
@@ -172,10 +175,13 @@ I develop in Fedora, and I try to keep as much stuff as possible curated via the
     perl-Want
     perl-WWW-RobotRules
     perl-WWW-RobotRules
+    perl-Wx
     perl-XML-DOM
     perl-XML-Parser
     perl-XML-RegExp
     perl-YAML
     rrdtool
     rrdtool-perl
-
+    wxBase
+    wxGTK
+    wxGTK-media
