@@ -53,7 +53,7 @@ I develop in Fedora, and I try to keep as much stuff as possible curated via the
     autobox::dump
     autodie
     Text::Exception::LessClever
-    Carp::Fix::1\_25
+    Carp::Fix::1_25
     CLASS
     Exporter::Declare
     ExtUtils::Depends
@@ -167,7 +167,7 @@ I develop in Fedora, and I try to keep as much stuff as possible curated via the
     perl-Test-Output
     perl-Test-Requires
     perl-Test-Tester
-    perl-Tree-DAG\_Node
+    perl-Tree-DAG_Node
     perl-Try-Tiny
     perl-Variable-Magic
     perl-version
