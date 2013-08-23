@@ -35,6 +35,7 @@ method new($class: $parent) {
     $self->SetSizer($self->{'sizer'});
     $self->{'sizer'}->Fit($self);
     $self->Layout();
+    $self->Centre(wxBOTH);
 
     EVT_BUTTON($self, wxID_OK, \&connect_please);
 

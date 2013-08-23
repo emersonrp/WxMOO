@@ -10,7 +10,8 @@ Done:
 * It takes input, and shows output.  Almost pleasantly, even.
 * The input field has a super-basic but functional command history.
 * ANSI color/style codes are, for the most part honored.
-* Partial MCP/2.1 implementation, along with dns-org-mud-moo-simpleedit -- currently it's hard-coded to launch gvim, but that'll be a preference later
+* Incomplete MCP/2.1 implementation -- mcp-notify is implemented, but mcp-cord is not, though the client lies and says it is.
+* Starting in on MCP packages: dns-org-mud-moo-simpleedit -- currently it's hard-coded to launch gvim, but that'll be a preference later;  also dns-com-awns-status, which goes to STDERR.
 * It breaks horribly if you try many of the menu items.
 
 

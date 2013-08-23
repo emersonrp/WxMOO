@@ -3,7 +3,7 @@ use perl5i::2;
 
 use Wx qw( :dialog :sizer :id :misc :notebook );
 use Wx::Event qw( EVT_BUTTON );
-use parent -norequire, 'Wx::Dialog';
+use parent -norequire, 'Wx::PropertySheetDialog';
 use WxMOO::Utility qw( id );
 
 method new($class: $parent) {
@@ -13,25 +13,24 @@ method new($class: $parent) {
         wxDefaultPosition, wxDefaultSize,
     );
 
-    $self->{'notebook'}        = Wx::Notebook->new($self, -1, wxDefaultPosition, wxDefaultSize, 0);
-    $self->{'notebook_page_1'} = Wx::Panel->new($self->{'notebook'}, -1, wxDefaultPosition, wxDefaultSize, );
-    $self->{'notebook_page_2'} = Wx::Panel->new($self->{'notebook'}, -1, wxDefaultPosition, wxDefaultSize, );
-    $self->{'notebook_page_3'} = Wx::Panel->new($self->{'notebook'}, -1, wxDefaultPosition, wxDefaultSize, );
+    $self->{'page_1'} = Wx::Panel->new($self->GetBookCtrl, -1, wxDefaultPosition, wxDefaultSize, );
+    $self->{'page_2'} = Wx::Panel->new($self->GetBookCtrl, -1, wxDefaultPosition, wxDefaultSize, );
+    $self->{'page_3'} = Wx::Panel->new($self->GetBookCtrl, -1, wxDefaultPosition, wxDefaultSize, );
 
-    $self->{'sizer_staticbox'} = Wx::StaticBox->new($self, -1, "" );
-    $self->{'sizer'}           = Wx::StaticBoxSizer->new($self->{'sizer_staticbox'}, wxVERTICAL);
-    $self->{'button_sizer'}    = $self->CreateButtonSizer( wxOK | wxCANCEL );
+    $self->{'sizer'}        = Wx::BoxSizer->new(wxVERTICAL);
+    $self->{'button_sizer'} = $self->CreateButtonSizer( wxOK | wxCANCEL );
 
-    $self->{'notebook'}->AddPage($self->{'notebook_page_1'}, "General");
-    $self->{'notebook'}->AddPage($self->{'notebook_page_2'}, "Fonts and Colors");
-    $self->{'notebook'}->AddPage($self->{'notebook_page_3'}, "Paths and Dirs");
+    $self->GetBookCtrl->AddPage($self->{'page_1'}, "General");
+    $self->GetBookCtrl->AddPage($self->{'page_2'}, "Fonts and Colors");
+    $self->GetBookCtrl->AddPage($self->{'page_3'}, "Paths and Dirs");
 
-    $self->{'sizer'}->Add($self->{'notebook'}, 1, wxEXPAND | wxFIXED_MINSIZE, );
-    $self->{'sizer'}->Add($self->{'button_sizer'}, 0, wxTOP | wxALIGN_CENTER_HORIZONTAL, 5);
+    $self->{'sizer'}->Add($self->GetBookCtrl, 1, wxEXPAND | wxFIXED_MINSIZE | wxALL , 5 );
+    $self->{'sizer'}->Add($self->{'button_sizer'}, 0, wxALIGN_CENTER_HORIZONTAL);
 
     $self->SetSizer($self->{'sizer'});
 
     $self->Layout();
+    $self->Centre(wxBOTH);
 
     return $self;
 }

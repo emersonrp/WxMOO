@@ -91,7 +91,7 @@ method _send_file_if_needed($file) {
     if ($mtime > $self->{'watched'}->{$file}) {
         # shipit!
         my $mcp_msg = $self->{'msgs_in_progress'}->{$file};
-        my @content = slurp($file);
+        my @content = slurp($file) or return;
         WxMOO::MCP21::server_notify(
             'dns-org-mud-moo-simpleedit-set', {
                 reference => $mcp_msg->{'data'}->{'reference'},
