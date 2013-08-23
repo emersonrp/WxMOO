@@ -49,6 +49,7 @@ package WxMOO::Window::WorldPanel;
 use perl5i::2;
 
 use Wx qw( :misc :sizer :textctrl );
+use Wx::Event qw(EVT_CHOICE);
 
 use WxMOO::Prefs;
 # use WxMOO::Prefs::World;
@@ -67,28 +68,46 @@ method new($class: $parent) {
     $self->{'host_label'}     = Wx::StaticText->new($self, -1, "Host:",     wxDefaultPosition, wxDefaultSize, );
     $self->{'host_field'}     = Wx::TextCtrl  ->new($self, -1, "",          wxDefaultPosition, wxDefaultSize, );
     $self->{'port_label'}     = Wx::StaticText->new($self, -1, "Port:",     wxDefaultPosition, wxDefaultSize, );
-    $self->{'port_field'}     = Wx::TextCtrl  ->new($self, -1, "",          wxDefaultPosition, wxDefaultSize, );
+    $self->{'port_field'}     = Wx::SpinCtrl  ->new($self, -1, "",          wxDefaultPosition, wxDefaultSize, );
+    $self->{'port_field'}->SetRange(0, 65535);
+    $self->{'port_field'}->SetValue(7777);
     $self->{'username_label'} = Wx::StaticText->new($self, -1, "Username:", wxDefaultPosition, wxDefaultSize, );
     $self->{'username_field'} = Wx::TextCtrl  ->new($self, -1, "",          wxDefaultPosition, wxDefaultSize, );
     $self->{'password_label'} = Wx::StaticText->new($self, -1, "Password:", wxDefaultPosition, wxDefaultSize, );
     $self->{'password_field'} = Wx::TextCtrl  ->new($self, -1, "",          wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
-    $self->{'type_label'}     = Wx::StaticText->new($self, -1, "Type", wxDefaultPosition, wxDefaultSize, );
+    $self->{'type_label'}     = Wx::StaticText->new($self, -1, "Type:", wxDefaultPosition, wxDefaultSize, );
     $self->{'type_picker'}    = Wx::Choice    ->new($self, -1, wxDefaultPosition, wxDefaultSize,
                                                         ['Socket','SSL','SSH Forwarding'], );
     $self->{'type_picker'}->SetSelection(0);
+
+    $self->{'ssh_server_label'}   = Wx::StaticText->new($self, -1, "SSH Host:",     wxDefaultPosition, wxDefaultSize, );
+    $self->{'ssh_server_field'}   = Wx::TextCtrl  ->new($self, -1, "",              wxDefaultPosition, wxDefaultSize, );
+    $self->{'ssh_username_label'} = Wx::StaticText->new($self, -1, "SSH Username:", wxDefaultPosition, wxDefaultSize, );
+    $self->{'ssh_username_field'} = Wx::TextCtrl  ->new($self, -1, "",              wxDefaultPosition, wxDefaultSize, );
+    $self->{'local_port_label'}   = Wx::StaticText->new($self, -1, "Local Port:",   wxDefaultPosition, wxDefaultSize, );
+    $self->{'local_port_field'}   = Wx::SpinCtrl  ->new($self, -1, "",              wxDefaultPosition, wxDefaultSize, );
+    $self->{'local_port_field'}->SetRange(0, 65535);
+    $self->{'local_port_field'}->SetValue(7777);
+
     $self->{'field_sizer'} = Wx::FlexGridSizer->new(5, 2, 5, 10);
-    $self->{'field_sizer'}->Add($self->{'name_label'},     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'name_field'},     0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'host_label'},     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'host_field'},     0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'port_label'},     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'port_field'},     0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'username_label'}, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'username_field'}, 0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'password_label'}, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'password_field'}, 0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'type_label'},     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'type_picker'},    0, wxEXPAND, 0);
+    $self->{'field_sizer'}->Add($self->{'name_label'},         0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $self->{'field_sizer'}->Add($self->{'name_field'},         0, wxEXPAND, 0);
+    $self->{'field_sizer'}->Add($self->{'host_label'},         0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $self->{'field_sizer'}->Add($self->{'host_field'},         0, wxEXPAND, 0);
+    $self->{'field_sizer'}->Add($self->{'port_label'},         0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $self->{'field_sizer'}->Add($self->{'port_field'},         0, wxEXPAND, 0);
+    $self->{'field_sizer'}->Add($self->{'username_label'},     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $self->{'field_sizer'}->Add($self->{'username_field'},     0, wxEXPAND, 0);
+    $self->{'field_sizer'}->Add($self->{'password_label'},     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $self->{'field_sizer'}->Add($self->{'password_field'},     0, wxEXPAND, 0);
+    $self->{'field_sizer'}->Add($self->{'type_label'},         0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $self->{'field_sizer'}->Add($self->{'type_picker'},        0, wxEXPAND, 0);
+    $self->{'field_sizer'}->Add($self->{'ssh_server_label'},   0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $self->{'field_sizer'}->Add($self->{'ssh_server_field'},   0, wxEXPAND, 0);
+    $self->{'field_sizer'}->Add($self->{'ssh_username_label'}, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $self->{'field_sizer'}->Add($self->{'ssh_username_field'}, 0, wxEXPAND, 0);
+    $self->{'field_sizer'}->Add($self->{'local_port_label'},   0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $self->{'field_sizer'}->Add($self->{'local_port_field'},   0, wxEXPAND, 0);
     $self->{'field_sizer'}->AddGrowableCol(1);
 
     $self->{'notes_box_staticbox'} = Wx::StaticBox->new($self, -1, "Notes" );
@@ -117,8 +136,28 @@ method new($class: $parent) {
     $self->{'panel_sizer'}->Add($self->{'checkbox_sizer'}, 0, wxEXPAND, 0);
     $self->{'panel_sizer'}->Add($self->{'button_sizer'}, 0, wxEXPAND, 0);
 
-    $self->SetSizer($self->{'panel_sizer'});
-    $self->{'panel_sizer'}->Fit($self);
+    $self->SetSizerAndFit($self->{'panel_sizer'});
+
+    EVT_CHOICE($self, $self->{'type_picker'}, \&show_hide_ssh_controls);
+
+    $self->{'ssh_server_label'}->Hide;
+    $self->{'ssh_server_field'}->Hide;
+    $self->{'ssh_username_label'}->Hide;
+    $self->{'ssh_username_field'}->Hide;
+    $self->{'local_port_label'}->Hide;
+    $self->{'local_port_field'}->Hide;
 
     return $self;
+}
+
+method show_hide_ssh_controls{
+    my $to_show = $self->{'type_picker'}->GetSelection == 2;
+    $self->{'ssh_server_label'}->Show($to_show);
+    $self->{'ssh_server_field'}->Show($to_show);
+    $self->{'ssh_username_label'}->Show($to_show);
+    $self->{'ssh_username_field'}->Show($to_show);
+    $self->{'local_port_label'}->Show($to_show);
+    $self->{'local_port_field'}->Show($to_show);
+
+    $self->{'panel_sizer'}->Layout;
 }
