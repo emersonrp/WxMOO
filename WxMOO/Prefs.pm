@@ -1,9 +1,14 @@
 package WxMOO::Prefs;
 use perl5i::2;
-use Wx qw( :font );
+use Wx qw( :font :colour );
 use Config::Simple '-strict';
+use Class::Accessor::Fast;
 
-use base 'Config::Simple';
+use base qw(Config::Simple Class::Accessor::Fast);
+WxMOO::Prefs->mk_accessors( qw(
+    output_fgcolour input_fgcolour output_bgcolour input_bgcolour
+    use_ansi use_mcp
+) );
 
 # TODO - cross-platform config file locater
 my $FILENAME = "$ENV{'HOME'}/.wxmoorc";
@@ -31,8 +36,8 @@ method save { $self->write($FILENAME) or carp "can't write config file: $!"; }
 method input_font($new) {
     state $font //= Wx::Font->new($self->param('input_font'));
     if ($new) {
-        $self->param('input_font', $new);
-        $font->SetNativeFontInfo($new);
+        $font = $new;
+        $self->param('input_font', $new->GetNativeFontInfoDesc);
     }
     return $font;
 }
@@ -40,8 +45,8 @@ method input_font($new) {
 method output_font($new) {
     state $font //= Wx::Font->new($self->param('output_font'));
     if ($new) {
-        $self->param('output_font', $new);
-        $font->SetNativeFontInfo($new);
+        $font = $new;
+        $self->param('output_font', $new->GetNativeFontInfoDesc);
     }
     return $font;
 }
@@ -49,10 +54,47 @@ method output_font($new) {
 method input_height($new) {
     state $height //= $self->param('input_height'); # TODO - should we determine this based on font size?
     if ($new) {
+        $height = $new;
         $self->param('input_height', $new);
         $self->save;
     }
     return $height;
+}
+
+method output_fgcolour($new) {
+    state $colour //= Wx::Colour->new($self->param('output_fgcolour'));
+    if ($new) {
+        $colour = $new;
+        $self->param('output_fgcolour', $new->GetAsString(wxC2S_HTML_SYNTAX));
+    }
+    return $colour;
+}
+
+method output_bgcolour($new) {
+    state $colour //= Wx::Colour->new($self->param('output_bgcolour'));
+    if ($new) {
+        $colour = $new;
+        $self->param('output_bgcolour', $new->GetAsString(wxC2S_HTML_SYNTAX));
+    }
+    return $colour;
+}
+
+method input_fgcolour($new) {
+    state $colour //= Wx::Colour->new($self->param('input_fgcolour'));
+    if ($new) {
+        $colour = $new;
+        $self->param('input_fgcolour', $new->GetAsString(wxC2S_HTML_SYNTAX));
+    }
+    return $colour;
+}
+
+method input_bgcolour($new) {
+    state $colour //= Wx::Colour->new($self->param('input_bgcolour'));
+    if ($new) {
+        $colour = $new;
+        $self->param('input_bgcolour', $new->GetAsString(wxC2S_HTML_SYNTAX));
+    }
+    return $colour;
 }
 
 ### DEFAULTS -- this will set everything to a default value if it's not already set.
@@ -61,11 +103,16 @@ method input_height($new) {
     my $defaultFont = Wx::Font->new( 10, wxTELETYPE, wxNORMAL, wxNORMAL );
     my $defaultFontString = $defaultFont->GetNativeFontInfo->ToString;
     my %defaults = (
-        input_font   => $defaultFontString,
-        output_font  => $defaultFontString,
-        theme        => 'solarized',
-        input_height => 25,
-        use_ansi     => 1,
+        input_font      => $defaultFontString,
+        output_font     => $defaultFontString,
+        output_fgcolour => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
+        output_bgcolour => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
+        input_fgcolour  => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
+        input_bgcolour  => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
+        theme           => 'solarized',
+        input_height    => 25,
+        use_ansi        => 1,
+        use_mcp         => 1,
     );
 
     method get_defaults {

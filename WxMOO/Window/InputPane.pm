@@ -34,6 +34,12 @@ method new($class: $parent, $connection) {
     bless $self, $class;
 }
 
+method restyle_thyself {
+    $self->SetForegroundColour(WxMOO::Prefs->prefs->input_fgcolour);
+    $self->SetBackgroundColour(WxMOO::Prefs->prefs->input_bgcolour);
+    $self->SetFont(WxMOO::Prefs->prefs->input_font);
+}
+
 method send_to_connection {
     my $stuff = $self->GetValue;
     $self->cmd_history->add($stuff);

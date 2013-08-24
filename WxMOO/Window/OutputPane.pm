@@ -18,8 +18,8 @@ method new($class: $parent) {
         $parent, id('OUTPUT_PANE'), "", wxDefaultPosition, wxDefaultSize, wxRE_READONLY );
 
     $self->{'parent'} = $parent;
-    my $font = WxMOO::Prefs->prefs->output_font;
-    $self->SetFont($font);
+
+    $self->restyle_thyself;
 
     EVT_SET_FOCUS($self, \&focus_input);
 
@@ -36,12 +36,20 @@ method ScrollIfAppropriate {
     $self->ShowPosition($self->GetCaretPosition);
 }
 
+method restyle_thyself {
+    my $basic_style = Wx::RichTextAttr->new;
+    $basic_style->SetTextColour(WxMOO::Prefs->prefs->output_fgcolour);
+    $basic_style->SetBackgroundColour(WxMOO::Prefs->prefs->output_bgcolour);
+    $self->SetBasicStyle($basic_style);
+    $self->SetFont(WxMOO::Prefs->prefs->output_font);
+}
+
 method display ($text) {
     for my $line (split /\n/, $text) {
-        if (1 or WxMOO::Prefs->prefs->use_mcp) {
+        if (WxMOO::Prefs->prefs->use_mcp) {
             next unless ($line = WxMOO::MCP21::output_filter($line));
         }
-        if (1 or WxMOO::Prefs->prefs->use_ansi) {
+        if (WxMOO::Prefs->prefs->use_ansi) {
             my $stuff = $self->ansi_parse($line);
             $line = '';
             for my $bit (@$stuff) {
