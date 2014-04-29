@@ -186,3 +186,11 @@ I develop in Fedora, and I try to keep as much stuff as possible curated via the
     wxBase
     wxGTK
     wxGTK-media
+
+
+
+
+    perl-Spiffy
+    perl-Alien-wxWidgets
+    perl-ExtUtils-XSpp
+    perl-Test-Base

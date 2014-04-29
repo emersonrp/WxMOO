@@ -4,11 +4,7 @@ use Wx qw( :font :colour );
 use Config::Simple '-strict';
 use Class::Accessor::Fast;
 
-use base qw(Config::Simple Class::Accessor::Fast);
-WxMOO::Prefs->mk_accessors( qw(
-    output_fgcolour input_fgcolour output_bgcolour input_bgcolour
-    use_ansi use_mcp
-) );
+use base qw(Config::Simple);
 
 # TODO - cross-platform config file locater
 my $FILENAME = "$ENV{'HOME'}/.wxmoorc";
@@ -97,6 +93,16 @@ method input_bgcolour($new) {
     return $colour;
 }
 
+method use_mcp($new) {
+    $self->param('use_mcp', $new) if $new;
+    $self->param('use_mcp');
+}
+
+method use_ansi($new) {
+    $self->param('use_ansi', $new) if $new;
+    $self->param('use_ansi');
+}
+
 ### DEFAULTS -- this will set everything to a default value if it's not already set.
 #               This gives us both brand-new-file and add-new-params'-default-values
 {
@@ -117,7 +123,7 @@ method input_bgcolour($new) {
 
     method get_defaults {
         while (my ($key,$val) = each %defaults) {
-            $self->param($key, $val) unless $self->param($key);
+            $self->param($key, $val) unless defined $self->param($key);
         }
     }
 }
