@@ -1,5 +1,9 @@
 package WxMOO::MCP21;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
 
 use WxMOO::MCP21::Registry;
 
@@ -140,7 +144,7 @@ func dispatch($message) {
 }
 
 
-func server_notify($msg, $args) {
+func server_notify($msg, $args?) {
 
     my $key = $WxMOO::MCP21::mcp_auth_key;
 
@@ -179,3 +183,4 @@ func start_mcp {
     for my $p ($registry->packages) { $p->_init; }
 }
 
+1;

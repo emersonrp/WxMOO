@@ -1,5 +1,10 @@
 package WxMOO::Window::OutputPane;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use Wx qw( :color :misc :richtextctrl );
 use Wx::RichText;
@@ -26,8 +31,8 @@ method new($class: $parent) {
     return bless $self, $class;
 }
 
-method WriteText {
-    $self->SUPER::WriteText(@_);
+method WriteText(@stuff) {
+    $self->SUPER::WriteText(@stuff);
     $self->ScrollIfAppropriate;
 }
 
@@ -197,3 +202,5 @@ method ansi_parse($line) {
     }
     return [@styled_text];
 }
+
+1;

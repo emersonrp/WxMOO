@@ -1,5 +1,11 @@
 package WxMOO::MCP21::Package::dns_org_mud_moo_simpleedit;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Carp;
+use Method::Signatures;
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 # this code is already in dire need of a rework, but it's starting work at all, at least.
 
@@ -122,3 +128,5 @@ method _make_tempfile($mcp_msg) {
 
     return $tempfile;
 }
+
+1;

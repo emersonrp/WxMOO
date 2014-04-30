@@ -1,5 +1,9 @@
 package WxMOO::Window::PrefsEditor;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
 
 use Wx qw( :dialog :sizer :id :misc :notebook :font :colour :textctrl
             wxFNTP_USEFONT_FOR_LABEL wxFNTP_FONTDESC_AS_LABEL
@@ -42,13 +46,17 @@ method new($class: $parent) {
 }
 
 method update_prefs($evt) {
-    WxMOO::Prefs->prefs->output_font($self->{'page_2'}->{'ofont_ctrl'}->GetSelectedFont);
-    WxMOO::Prefs->prefs->input_font( $self->{'page_2'}->{'ifont_ctrl'}->GetSelectedFont);
+    my $fc_page = $self->{'page_2'};
 
-    WxMOO::Prefs->prefs->output_fgcolour($self->{'page_2'}->{'o_fgcolour_ctrl'}->GetColour);
-    WxMOO::Prefs->prefs->output_bgcolour($self->{'page_2'}->{'o_bgcolour_ctrl'}->GetColour);
-    WxMOO::Prefs->prefs->input_fgcolour( $self->{'page_2'}->{'i_fgcolour_ctrl'}->GetColour);
-    WxMOO::Prefs->prefs->input_bgcolour( $self->{'page_2'}->{'i_bgcolour_ctrl'}->GetColour);
+    WxMOO::Prefs->prefs->output_font($fc_page->{'ofont_ctrl'}->GetSelectedFont);
+    WxMOO::Prefs->prefs->input_font( $fc_page->{'ifont_ctrl'}->GetSelectedFont);
+
+    WxMOO::Prefs->prefs->output_fgcolour($fc_page->{'o_fgcolour_ctrl'}->GetColour);
+    WxMOO::Prefs->prefs->output_bgcolour($fc_page->{'o_bgcolour_ctrl'}->GetColour);
+    WxMOO::Prefs->prefs->input_fgcolour( $fc_page->{'i_fgcolour_ctrl'}->GetColour);
+    WxMOO::Prefs->prefs->input_bgcolour( $fc_page->{'i_bgcolour_ctrl'}->GetColour);
+
+    WxMOO::Prefs->prefs->use_ansi( $fc_page->{'ansi_checkbox'}->GetValue + 0 );
 
     WxMOO::Prefs->prefs->save;
 
@@ -69,8 +77,8 @@ method populateFontPanel {
     my $i_fgcolour = WxMOO::Prefs->prefs->input_fgcolour  || wxBLACK;
     my $i_bgcolour = WxMOO::Prefs->prefs->input_bgcolour  || wxWHITE;
 
-    $fcp->{'o_sample'} = Wx::TextCtrl      ->new($fcp, -1, "",     wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
-    $fcp->{'ofont_ctrl' }   = Wx::FontPickerCtrl->new($fcp, -1, $ofont, wxDefaultPosition, wxDefaultSize,
+    $fcp->{'o_sample'}    = Wx::TextCtrl      ->new($fcp, -1, "",     wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+    $fcp->{'ofont_ctrl' } = Wx::FontPickerCtrl->new($fcp, -1, $ofont, wxDefaultPosition, wxDefaultSize,
                                                                             wxFNTP_FONTDESC_AS_LABEL|wxFNTP_USEFONT_FOR_LABEL);
 
     my $button_size = $fcp->{'ofont_ctrl'}->GetSize->GetHeight;
@@ -83,8 +91,8 @@ method populateFontPanel {
     $fcp->{'o_sample'}->SetForegroundColour($o_fgcolour);
     $fcp->{'o_sample'}->SetValue(qq|Haakon says, "This is the output window."|);
 
-    $fcp->{'i_sample'}  = Wx::TextCtrl      ->new($fcp, -1, "",     wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
-    $fcp->{'ifont_ctrl' }   = Wx::FontPickerCtrl->new($fcp, -1, $ifont, wxDefaultPosition, wxDefaultSize,
+    $fcp->{'i_sample'}    = Wx::TextCtrl      ->new($fcp, -1, "",     wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+    $fcp->{'ifont_ctrl' } = Wx::FontPickerCtrl->new($fcp, -1, $ifont, wxDefaultPosition, wxDefaultSize,
                                                                             wxFNTP_FONTDESC_AS_LABEL|wxFNTP_USEFONT_FOR_LABEL);
     $fcp->{'i_fgcolour_ctrl' } = Wx::ColourPickerCtrl->new($fcp, -1, $i_fgcolour, wxDefaultPosition, [$button_size, $button_size]);
     $fcp->{'i_bgcolour_ctrl' } = Wx::ColourPickerCtrl->new($fcp, -1, $o_bgcolour, wxDefaultPosition, [$button_size, $button_size]);
@@ -93,6 +101,9 @@ method populateFontPanel {
     $fcp->{'i_sample'}->SetBackgroundColour($i_bgcolour);
     $fcp->{'i_sample'}->SetForegroundColour($i_fgcolour);
     $fcp->{'i_sample'}->SetValue(qq|`Haakon Hello from the input window.|);
+
+    $fcp->{'ansi_checkbox'} = Wx::CheckBox->new($fcp, -1, 'Use ANSI colors');
+    $fcp->{'ansi_checkbox'}->SetValue( WxMOO::Prefs->prefs->use_ansi );
 
     $fcp->{'output_sizer'} = Wx::FlexGridSizer->new(1, 3, 5, 10);
     $fcp->{'output_sizer'}->Add($fcp->{'ofont_ctrl'      }, 0, wxEXPAND, 0);
@@ -108,12 +119,17 @@ method populateFontPanel {
     $fcp->{'input_sizer'}->AddGrowableCol(0);
     $fcp->{'input_sizer'}->Fit($fcp);
 
+    $fcp->{'ansi_sizer'} = Wx::BoxSizer->new(wxHORIZONTAL);
+
+
     $fcp->{'panel_sizer'} = Wx::BoxSizer->new(wxVERTICAL);
     $fcp->{'panel_sizer'}->Add($fcp->{'o_sample'}, 1, wxRIGHT|wxLEFT|wxTOP|wxEXPAND, 10);
     $fcp->{'panel_sizer'}->Add($fcp->{'output_sizer'},  0, wxRIGHT|wxLEFT|wxEXPAND, 10);
     $fcp->{'panel_sizer'}->AddSpacer($button_size);
     $fcp->{'panel_sizer'}->Add($fcp->{'i_sample'},  1, wxRIGHT|wxLEFT|wxBOTTOM|wxEXPAND, 10);
     $fcp->{'panel_sizer'}->Add($fcp->{'input_sizer'},   0, wxRIGHT|wxLEFT|wxEXPAND, 10);
+    $fcp->{'panel_sizer'}->AddSpacer($button_size);
+    $fcp->{'panel_sizer'}->Add($fcp->{'ansi_checkbox'});
 
     EVT_FONTPICKER_CHANGED  ($fcp, $fcp->{'ofont_ctrl'}, \&update_sample_text);
     EVT_FONTPICKER_CHANGED  ($fcp, $fcp->{'ifont_ctrl'}, \&update_sample_text);
@@ -133,3 +149,5 @@ method update_sample_text($evt) {
     }
     $evt->Skip;
 }
+
+1;

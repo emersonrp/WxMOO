@@ -1,5 +1,9 @@
 package WxMOO::MCP21::Package;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
 
 use Wx;
 use parent "Class::Accessor::Fast";
@@ -15,3 +19,5 @@ method new($class: $args) {
 }
 
 method _init { }
+
+1;

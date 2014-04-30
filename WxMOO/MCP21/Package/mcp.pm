@@ -1,5 +1,10 @@
 package WxMOO::MCP21::Package::mcp;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use parent 'WxMOO::MCP21::Package';
 
@@ -46,3 +51,5 @@ method do_splat($args) {
 method do_colon($args) {
     # all taken care of in MCP21.pm
 }
+
+1;

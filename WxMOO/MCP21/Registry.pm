@@ -1,5 +1,10 @@
 package WxMOO::MCP21::Registry;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Carp;
+use Method::Signatures;
 
 method new($class:) {
     bless {
@@ -19,11 +24,11 @@ method register($package, @messages) {
     }
 }
 
-method get_package { $self->{'packages'}->{shift()} }
+method packages                  { values %{$self->{'packages'}} }
 
-method packages { values %{$self->{'packages'}} }
+method get_package($pkg)         { $self->{'packages'}->{$pkg} }
 
-method package_for_message($message) { $self->{'registry'}->{$message}; }
+method package_for_message($msg) { $self->{'registry'}->{$msg} }
 
 
 # next two subs taken from MCP 2.1 specification, section 2.4.3
@@ -43,3 +48,5 @@ func _version_cmp ($v1, $v2) {
 
     return ($v1[0] > $v2[0] or ($v1[0] == $v2[0] and $v1[1] >= $v2[1]));
 }
+
+1;

@@ -1,5 +1,10 @@
 package WxMOO::MCP21::Package::mcp_cord;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use parent 'WxMOO::MCP21::Package';
 
@@ -23,3 +28,5 @@ method dispatch($message) {
 method do_mcp_cord        { say STDERR "do_mcp_cord called with @_"; }
 method do_mcp_cord_open   { say STDERR "do_mcp_cord_open called with @_"; }
 method do_mcp_cord_closed { say STDERR "do_mcp_cord_closed called with @_"; }
+
+1;

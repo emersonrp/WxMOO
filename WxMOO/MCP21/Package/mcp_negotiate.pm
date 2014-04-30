@@ -1,5 +1,10 @@
 package WxMOO::MCP21::Package::mcp_negotiate;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use parent 'WxMOO::MCP21::Package';
 
@@ -49,3 +54,5 @@ method do_mcp_negotiate_can($message) {
 method do_mcp_negotiate_end {
     # TODO - do we need to do anything?  maybe like unregister packages that aren't activated?
 }
+
+1;

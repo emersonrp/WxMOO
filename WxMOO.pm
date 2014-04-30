@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 package WxMOO;
-use perl5i::2;
+
+use strict;
+use warnings;
 
 require 5.014;
 
@@ -20,5 +22,7 @@ sub OnInit {
 __PACKAGE__->run( @ARGV ) unless caller();
 
 sub run { WxMOO->new->MainLoop; }
+
+1;
 
 __END__

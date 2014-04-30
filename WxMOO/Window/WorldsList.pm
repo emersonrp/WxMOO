@@ -1,5 +1,9 @@
 package WxMOO::Window::WorldsList;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
 
 use Wx qw( :misc :dialog :sizer );
 
@@ -46,7 +50,11 @@ method new($class: $parent) {
 
 
 package WxMOO::Window::WorldPanel;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
 
 use Wx qw( :misc :sizer :textctrl );
 use Wx::Event qw(EVT_CHOICE);
@@ -161,3 +169,5 @@ method show_hide_ssh_controls{
 
     $self->{'panel_sizer'}->Layout;
 }
+
+1;

@@ -1,5 +1,9 @@
 package WxMOO::Window::ConnectDialog;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
 
 use Wx qw( :id :misc :dialog :sizer );
 use Wx::Event qw( EVT_BUTTON );
@@ -53,3 +57,4 @@ method connect_please($evt) {
     $evt->Skip;
 }
 
+1;

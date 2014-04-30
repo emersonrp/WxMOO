@@ -1,5 +1,9 @@
 package WxMOO::Window::MainSplitter;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
 
 use Wx qw( :misc :splitterwindow );
 use Wx::Event qw( EVT_SIZE EVT_SPLITTER_SASH_POS_CHANGED );
@@ -20,14 +24,16 @@ method new($class: $parent) {
     return $self;
 }
 
-method saveSplitterSize ($evt) {
+method saveSplitterSize($evt) {
     my ($w, $h)  = $self->GetSizeWH;
     WxMOO::Prefs->prefs->input_height( $h - $evt->GetSashPosition );
 }
 
-method HandleResize {
+method HandleResize($evt) {
     my ($w, $h)  = $self->GetSizeWH;
     my $InputHeight = WxMOO::Prefs->prefs->input_height;
     $self->SetSashPosition($h - $InputHeight, 'resize');
     $self->GetWindow1->ScrollIfAppropriate;
 }
+
+1;

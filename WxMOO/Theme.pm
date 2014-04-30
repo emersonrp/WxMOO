@@ -1,5 +1,9 @@
 package WxMOO::Theme;
-use perl5i::2;
+use strict;
+use warnings;
+use v.5.14;
+
+use Method::Signatures;
 
 method new($class: %args) {
     bless {
@@ -32,3 +36,5 @@ method get_wxColour ($color, $brightness) {
     my @rgb = map $_ / 255, unpack 'C*', pack 'H*', $c;
     return Wx::Colour->new(@rgb);
 }
+
+1;

@@ -1,5 +1,9 @@
 package WxMOO::Window::InputPane;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
 
 use Wx qw( :misc :textctrl :font WXK_UP WXK_DOWN );
 use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_CHAR );
@@ -40,14 +44,14 @@ method restyle_thyself {
     $self->SetFont(WxMOO::Prefs->prefs->input_font);
 }
 
-method send_to_connection {
+method send_to_connection($evt) {
     my $stuff = $self->GetValue;
     $self->cmd_history->add($stuff);
     $self->connection->output("$stuff\n");
     $self->Clear;
 }
 
-method update_command_history { $self->cmd_history->update($self->GetValue) }
+method update_command_history($evt) { $self->cmd_history->update($self->GetValue) }
 
 method check_command_history($evt) {
     my $k = $evt->GetKeyCode;
@@ -66,7 +70,10 @@ method check_command_history($evt) {
 
 ######################
 package WxMOO::Window::InputPane::CommandHistory;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+use Method::Signatures;
 
 # Rolling our own simplified command history here b/c Term::Readline
 # et al are differently-supported on different platforms.  We only
@@ -87,8 +94,8 @@ method new($class:) {
 method end { $#{$self->{'history'}} }
 
 # which entry does our 'cursor' point to?
-method current_entry ($new) {
-    $self->{'history'}->[$self->{'current'}] = $new if $new;
+method current_entry ($new?) {
+    $self->{'history'}->[$self->{'current'}] = $new if defined $new;
     $self->{'history'}->[$self->{'current'}];
 }
 
@@ -120,3 +127,5 @@ method add($string) {
     push @{$self->{'history'}}, '';
     $self->{'current'} = $self->end;
 }
+
+1;

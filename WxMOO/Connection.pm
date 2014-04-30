@@ -1,5 +1,10 @@
 package WxMOO::Connection;
-use perl5i::2;
+use strict;
+use warnings;
+use Method::Signatures;
+
+use v5.14;
+use Carp;
 
 use Wx qw( :socket );
 use Wx::Socket;
@@ -21,7 +26,7 @@ method new($class: $parent) {
     bless $self, $class;
 }
 
-method onInput {
+method onInput(@stuff) {
     state $output //= Wx::Window::FindWindowById(id('OUTPUT_PANE'));
     my $poop = '';
     while ($self->Read($poop, 1, length $poop)) {
@@ -30,9 +35,9 @@ method onInput {
     $output->display($poop);
 }
 
-method onClose { }
+method onClose(@stuff) { }
 
-method output { $self->Write(@_); }
+method output(@stuff) { $self->Write(@stuff); }
 
 method connect($host, $port) {
     $self->host( $host );
@@ -45,3 +50,4 @@ method connect($host, $port) {
     carp "Can't connect to host/port" unless $self->IsConnected;
 }
 
+1;

@@ -1,8 +1,12 @@
 package WxMOO::Prefs;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Carp;
+use Method::Signatures;
 use Wx qw( :font :colour );
 use Config::Simple '-strict';
-use Class::Accessor::Fast;
 
 use base qw(Config::Simple);
 
@@ -29,7 +33,7 @@ method prefs($class:) {
 method save { $self->write($FILENAME) or carp "can't write config file: $!"; }
 
 ### Massager-accessors; transform from config-file strings to useful data
-method input_font($new) {
+method input_font($new?) {
     state $font //= Wx::Font->new($self->param('input_font'));
     if ($new) {
         $font = $new;
@@ -38,7 +42,7 @@ method input_font($new) {
     return $font;
 }
 
-method output_font($new) {
+method output_font($new?) {
     state $font //= Wx::Font->new($self->param('output_font'));
     if ($new) {
         $font = $new;
@@ -47,7 +51,7 @@ method output_font($new) {
     return $font;
 }
 
-method input_height($new) {
+method input_height($new?) {
     state $height //= $self->param('input_height'); # TODO - should we determine this based on font size?
     if ($new) {
         $height = $new;
@@ -57,7 +61,7 @@ method input_height($new) {
     return $height;
 }
 
-method output_fgcolour($new) {
+method output_fgcolour($new?) {
     state $colour //= Wx::Colour->new($self->param('output_fgcolour'));
     if ($new) {
         $colour = $new;
@@ -66,7 +70,7 @@ method output_fgcolour($new) {
     return $colour;
 }
 
-method output_bgcolour($new) {
+method output_bgcolour($new?) {
     state $colour //= Wx::Colour->new($self->param('output_bgcolour'));
     if ($new) {
         $colour = $new;
@@ -75,7 +79,7 @@ method output_bgcolour($new) {
     return $colour;
 }
 
-method input_fgcolour($new) {
+method input_fgcolour($new?) {
     state $colour //= Wx::Colour->new($self->param('input_fgcolour'));
     if ($new) {
         $colour = $new;
@@ -84,7 +88,7 @@ method input_fgcolour($new) {
     return $colour;
 }
 
-method input_bgcolour($new) {
+method input_bgcolour($new?) {
     state $colour //= Wx::Colour->new($self->param('input_bgcolour'));
     if ($new) {
         $colour = $new;
@@ -93,13 +97,13 @@ method input_bgcolour($new) {
     return $colour;
 }
 
-method use_mcp($new) {
-    $self->param('use_mcp', $new) if $new;
+method use_mcp($new?) {
+    $self->param('use_mcp', $new) if defined $new;
     $self->param('use_mcp');
 }
 
-method use_ansi($new) {
-    $self->param('use_ansi', $new) if $new;
+method use_ansi($new?) {
+    $self->param('use_ansi', $new) if defined $new;
     $self->param('use_ansi');
 }
 
@@ -127,3 +131,5 @@ method use_ansi($new) {
         }
     }
 }
+
+1;

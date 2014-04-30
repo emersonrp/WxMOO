@@ -1,5 +1,9 @@
 package WxMOO::Window::Main;
-use perl5i::2;
+use strict;
+use warnings;
+use v5.14;
+
+use Method::Signatures;
 
 use Wx qw( :misc :sizer );
 use Wx::Event qw( EVT_MENU );
@@ -133,3 +137,5 @@ method quitApplication {
     $self->closeConnection;
     $self->Close(1);
 }
+
+1;
