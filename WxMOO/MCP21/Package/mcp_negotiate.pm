@@ -3,12 +3,12 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use parent 'WxMOO::MCP21::Package';
 
-method new($class:) {
+sub new {
+    my ($class) = @_;
     my $self = $class->SUPER::new({
         package   => 'mcp-negotiate',
         min       => '2.0',
@@ -20,7 +20,7 @@ method new($class:) {
     bless $self, $class;
 }
 
-method _init {
+sub _init {
     for my $p ($WxMOO::MCP21::registry->packages) {
         next if $p->package eq 'mcp';
         WxMOO::MCP21::server_notify("mcp-negotiate-can", {
@@ -32,7 +32,8 @@ method _init {
     WxMOO::MCP21::server_notify('mcp-negotiation-end');
 }
 
-method dispatch($message) {
+sub dispatch {
+    my ($self, $message) = @_;
     given ($message->{'message'}) {
         when (/mcp-negotiate-can/) { $self->do_mcp_negotiate_can($message); }
         when (/mcp-negotiate-end/) { $self->do_mcp_negotiate_end; }
@@ -40,7 +41,8 @@ method dispatch($message) {
 }
 
 
-method do_mcp_negotiate_can($message) {
+sub do_mcp_negotiate_can {
+    my ($self, $message) = @_;
     my $data = $message->{'data'};
     my $min = $data->{'min-version'};
     my $max = $data->{'max-version'};
@@ -51,7 +53,7 @@ method do_mcp_negotiate_can($message) {
     }
 }
 
-method do_mcp_negotiate_end {
+sub do_mcp_negotiate_end {
     # TODO - do we need to do anything?  maybe like unregister packages that aren't activated?
 }
 

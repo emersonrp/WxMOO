@@ -3,8 +3,6 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
-
 use WxMOO::MCP21::Registry;
 
 # This module was developed by squinting directly at both the MCP spec
@@ -38,7 +36,9 @@ my $pkg_mcp_negotiate  = WxMOO::MCP21::Package::mcp_negotiate->new;
 my $pkg_mcp_simpleedit = WxMOO::MCP21::Package::dns_org_mud_moo_simpleedit->new;
 my $pkg_mcp_status     = WxMOO::MCP21::Package::dns_com_awns_status->new;
 
-func output_filter($data) {
+sub output_filter {
+    my ($data) = @_;
+
 
     # MCP spec, 2.1:
     # A received network line that begins with the characters #$# is translated
@@ -106,7 +106,9 @@ func output_filter($data) {
 
 my $simpleChars = q|[-a-z0-9~`!@#$%^&*()=+{}[\]\|';?/><.,]|;
 
-func parse($raw) {
+sub parse {
+    my ($raw) = @_;
+
     return unless $raw;
     my ($first) = split /\s+/, $raw;
     my $message = {};
@@ -137,14 +139,17 @@ func parse($raw) {
     return $message;
 }
 
-func dispatch($message) {
+sub dispatch {
+    my ($message) = @_;
+
     my $package = $registry->package_for_message($message->{'message'}) or return;
 
     $package->dispatch($message) if $package->activated;
 }
 
 
-func server_notify($msg, $args?) {
+sub server_notify {
+    my ($msg, $args) = @_;
 
     my $key = $WxMOO::MCP21::mcp_auth_key;
 
@@ -177,9 +182,9 @@ func server_notify($msg, $args?) {
     }
 }
 
-func new_connection($conn) { $connection = $conn; }
+sub new_connection { $connection = shift; }
 
-func start_mcp {
+sub start_mcp {
     for my $p ($registry->packages) { $p->_init; }
 }
 

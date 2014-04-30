@@ -3,8 +3,6 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
-
 use Wx qw( :misc :textctrl :font WXK_UP WXK_DOWN );
 use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_CHAR );
 use WxMOO::Prefs;
@@ -13,7 +11,8 @@ use WxMOO::Utility qw( id );
 use base qw( Wx::TextCtrl Class::Accessor::Fast );
 WxMOO::Window::InputPane->mk_accessors(qw( parent connection cmd_history ));
 
-method new($class: $parent, $connection) {
+sub new {
+    my ($class, $parent, $connection) = @_;
 
     my $self = $class->SUPER::new( $parent, id('INPUT_PANE'), "",
         wxDefaultPosition, wxDefaultSize,
@@ -38,22 +37,26 @@ method new($class: $parent, $connection) {
     bless $self, $class;
 }
 
-method restyle_thyself {
+sub restyle_thyself {
+    my ($self) = @_;
     $self->SetForegroundColour(WxMOO::Prefs->prefs->input_fgcolour);
     $self->SetBackgroundColour(WxMOO::Prefs->prefs->input_bgcolour);
     $self->SetFont(WxMOO::Prefs->prefs->input_font);
 }
 
-method send_to_connection($evt) {
+sub send_to_connection {
+    my ($self, $evt) = @_;
     my $stuff = $self->GetValue;
     $self->cmd_history->add($stuff);
     $self->connection->output("$stuff\n");
     $self->Clear;
 }
 
-method update_command_history($evt) { $self->cmd_history->update($self->GetValue) }
+sub update_command_history {
+    my ($self, $evt) = @_; $self->cmd_history->update($self->GetValue) }
 
-method check_command_history($evt) {
+sub check_command_history {
+    my ($self, $evt) = @_;
     my $k = $evt->GetKeyCode;
     if ($k == WXK_UP) {
         $self->SetValue($self->cmd_history->prev);
@@ -73,7 +76,6 @@ package WxMOO::Window::InputPane::CommandHistory;
 use strict;
 use warnings;
 use v5.14;
-use Method::Signatures;
 
 # Rolling our own simplified command history here b/c Term::Readline
 # et al are differently-supported on different platforms.  We only
@@ -84,34 +86,39 @@ use Method::Signatures;
 # entry in the history gets twiddled as we go.  Once we are done
 # with it and enter it into history, a fresh '' gets appended to
 # the array, on and on, world without end.
-method new($class:) {
+sub new {
+    my ($class) = @_;
     bless {
         'history' => [''],
         'current' => 0,
     }, $class;
 }
 
-method end { $#{$self->{'history'}} }
+sub end { $#{shift->{'history'}} }
 
 # which entry does our 'cursor' point to?
-method current_entry ($new?) {
+sub current_entry {
+    my ($self, $new) = @_;
     $self->{'history'}->[$self->{'current'}] = $new if defined $new;
     $self->{'history'}->[$self->{'current'}];
 }
 
-method prev {
+sub prev {
+    my ($self) = @_;
     $self->{'current'}-- if $self->{'current'} > 0;
     $self->current_entry;
 }
 
-method next {
+sub next {
+    my ($self) = @_;
     $self->{'current'}++ if $self->{'current'} < $self->end;
     $self->current_entry;
 }
 
 # if we've actually changed anything, take the changed value
 # and use it as the new "current" value, at the end of the array.
-method update($string) {
+sub update {
+    my ($self, $string) = @_;
     if ($self->current_entry ne $string) {
         $self->{'current'} = $self->end;
         $self->current_entry($string);
@@ -120,7 +127,8 @@ method update($string) {
 
 # this is the final state of the thing we input.
 # Make sure it's updated, then push a fresh '' onto the end
-method add($string) {
+sub add {
+    my ($self, $string) = @_;
     return unless $string;  # don't stick blank lines in there.
     @{$self->{'history'}}[-1] = $string;
 

@@ -3,9 +3,8 @@ use strict;
 use warnings;
 use v.5.14;
 
-use Method::Signatures;
-
-method new($class: %args) {
+sub new {
+    my ($class, %args) = @_;
     bless {
         b_black   => '002b36',
         d_black   => '073642',
@@ -26,12 +25,14 @@ method new($class: %args) {
     }, $class;
 }
 
-method get_color ($color, $brightness) {
+sub get_color {
+    my ($self, $color, $brightness) = @_;
     $brightness = $brightness ? substr($brightness, 0, 1) : 'd';
     $self->{"${brightness}_$color"};
 }
 
-method get_wxColour ($color, $brightness) {
+sub get_wxColour {
+    my ($self, $color, $brightness) = @_;
     my $c = $self->get_color(@_);
     my @rgb = map $_ / 255, unpack 'C*', pack 'H*', $c;
     return Wx::Colour->new(@rgb);

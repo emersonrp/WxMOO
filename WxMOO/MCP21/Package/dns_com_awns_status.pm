@@ -3,12 +3,12 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use parent 'WxMOO::MCP21::Package';
 
-method new($class:) {
+sub new {
+    my $class = shift;
     my $self = $class->SUPER::new({
         package => 'dns-com-awns-status',
         min     => '1.0',
@@ -19,16 +19,17 @@ method new($class:) {
     $self->_init;
 }
 
-method _init {
-}
-method dispatch($message) {
+sub _init { }
+
+sub dispatch {
+    my ($self, $message) = @_;
     given ($message->{'message'}) {
         when ('dns-com-awns-status') { $self->do_status($message); }
     }
 }
 
-method do_status($message) {
-    say STDERR $message;
+sub do_status {
+    say STDERR @_;
 }
 
 1;

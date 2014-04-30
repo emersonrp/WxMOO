@@ -3,8 +3,6 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
-
 use Wx qw( :misc :splitterwindow );
 use Wx::Event qw( EVT_SIZE EVT_SPLITTER_SASH_POS_CHANGED );
 
@@ -13,7 +11,8 @@ use WxMOO::Utility qw(id);
 
 use base "Wx::SplitterWindow";
 
-method new($class: $parent) {
+sub new {
+    my ($class, $parent) = @_;
     my $self = $class->SUPER::new($parent, id('SPLITTER'),
         wxDefaultPosition, wxDefaultSize,
         wxSP_3D | wxSP_LIVE_UPDATE
@@ -24,12 +23,14 @@ method new($class: $parent) {
     return $self;
 }
 
-method saveSplitterSize($evt) {
+sub saveSplitterSize {
+    my ($self, $evt) = @_;
     my ($w, $h)  = $self->GetSizeWH;
     WxMOO::Prefs->prefs->input_height( $h - $evt->GetSashPosition );
 }
 
-method HandleResize($evt) {
+sub HandleResize {
+    my ($self, $evt) = @_;
     my ($w, $h)  = $self->GetSizeWH;
     my $InputHeight = WxMOO::Prefs->prefs->input_height;
     $self->SetSashPosition($h - $InputHeight, 'resize');

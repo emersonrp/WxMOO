@@ -3,13 +3,12 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
-
 use Wx qw( :id :misc :dialog :sizer );
 use Wx::Event qw( EVT_BUTTON );
 use base qw(Wx::Dialog);
 
-method new($class: $parent) {
+sub new {
+    my ($class, $parent) = @_;
 
     my $self = $class->SUPER::new( $parent, -1, "Connect to World",
        wxDefaultPosition, wxDefaultSize,
@@ -46,7 +45,8 @@ method new($class: $parent) {
     return $self;
 }
 
-method connect_please($evt) {
+sub connect_please {
+    my ($self, $evt) = @_;
     my $host = $self->{'host_field'}->GetValue;
     my $port = $self->{'port_field'}->GetValue;
 

@@ -13,11 +13,11 @@ Done:
 * Incomplete MCP/2.1 implementation -- mcp-notify is implemented, but mcp-cord is not, though the client lies and says it is.
 * Starting in on MCP packages: dns-org-mud-moo-simpleedit -- currently it's hard-coded to launch gvim, but that'll be a preference later;  also dns-com-awns-status, which goes to STDERR.
 * It breaks horribly if you try many of the menu items.
+* Saving prefs now works, for the small set of prefs it honors.  As new prefs get added, they'll Just Work.
 
 
 To do:
 * Basic quality of life things like keyboard shortcuts.
-* Saving prefs, fonts, colors, sizes, etc.  Themes are on the roadmap.
 * MCP 2.1 completed.  It does the version dance with the server (both the MCP version, and mcp-negotiate package-version), but ignores whatever it sees.  Also mcp-cord isn't implemented at all.
 * Proper list of 'worlds' / accounts, MOOs, what-have-you.  Pondering schemes to scrape online MOO lists to offer suggestions.
 * object browser, like MacMOOSE but hopefully nicer.
@@ -39,158 +39,38 @@ Guiding thoughts:
 Dependencies
 ------------
 
-In addition to perl, wx, and the requisite "use Wx" glue, this currently uses [perl5i](http://search.cpan.org/~mschwern/perl5i-v2.12.0/lib/perl5i.pm), mostly because I wanted to try it out.  That drags in an immense number of dependencies, so I hope to pare it back down later to just the parts I actually use.
+In addition to perl, wx, and the requisite "use Wx" glue, Module::ScanDeps (not itself a dependency) reports the following:
 
-If you like CPAN for all things Perl, just:
+'Carp'                  => '1.26',
+'Class::Accessor'       => '0.34',
+'Class::Accessor::Fast' => '0.34',
+'Config::Simple'        => '4.59',
+'constant'              => '1.27',
+'Cwd'                   => '3.40',
+'Data::Dumper'          => '2.151',
+'Exporter'              => '5.68',
+'Exporter::Heavy'       => '5.68',
+'File::Path'            => '2.09',
+'File::Slurp'           => '9999.19',
+'File::Spec'            => '3.40',
+'File::Spec::Unix'      => '3.40',
+'File::Temp'            => '0.2301',
+'List::Util'            => '1.31',
+'parent'                => '0.228',
+'Scalar::Util'          => '1.31',
+'Socket'                => '2.013',
+'Text::ParseWords'      => '3.29',
+'threads'               => '1.92',
+'Wx'                    => '0.9921',
+'Wx::App'               => 'undef',
+'Wx::Event'             => 'undef',
+'Wx::Locale'            => 'undef',
+'Wx::Menu'              => 'undef',
+'Wx::Mini'              => '0.9921',
+'Wx::Print'             => '0.01',
+'Wx::RadioBox'          => 'undef',
+'Wx::RichText'          => '0.01',
+'Wx::Socket'            => '0.01',
+'Wx::Timer'             => 'undef',
+'Wx::Wx_Exp'            => 'undef',
 
-    cpan install perl5i
-
-...and it should dtrt.
-
-I develop in Fedora, and I try to keep as much stuff as possible curated via the rpm system, so I have a list below of the packages I installed via RPM and the ones that I had to go to CPAN for.  YMMV.
-
-
-### via CPAN
-    autobox::dump
-    autodie
-    Text::Exception::LessClever
-    Carp::Fix::1_25
-    CLASS
-    Exporter::Declare
-    ExtUtils::Depends
-    Fatal
-    Fennec
-    Hash::StoredIterator
-    Meta::Builder
-    Mock::Quick
-    Object::ID
-    Parallel::Runner
-    perl5i
-    Perl6::Caller
-    Test::Exception::LessClever
-    Test::Output
-    Test::Workflow
-    utf8::all
-
-### via yum
-    perl
-    perl-Algorithm-Dependency
-    perl-Algorithm-Diff
-    perl-Archive-Tar
-    perl-Archive-Zip
-    perl-autobox
-    perl-autobox-Core
-    perl-autobox-List-Util
-    perl-autovivification
-    perl-B-Hooks-EndOfScope
-    perl-B-Hooks-OP-Check
-    perl-Cache
-    perl-Capture-Tiny
-    perl-Child
-    perl-Class-Accessor
-    perl-Class-Accessor-Chained
-    perl-Class-Data-Inheritable
-    perl-Class-Inspector
-    perl-Class-Load
-    perl-Class-Singleton
-    perl-Config-Simple
-    perl-Config-Tiny
-    perl-Data-Optlist
-    perl-Date-ISO8601
-    perl-Date-Manip
-    perl-DateTime
-    perl-DateTime-Locale
-    perl-DateTime-TimeZone
-    perl-DateTime-TimeZone-SystemV
-    perl-DateTime-TimeZone-Tzfile
-    perl-Devel-Declare
-    perl-Devel-StackTrace
-    perl-Dist-CheckConflicts
-    perl-Email-Date-Format
-    perl-Exception-Class
-    perl-ExtUtils-CBuilder
-    perl-File-chdir
-    perl-File-Copy-Recursive
-    perl-File-HomeDir
-    perl-File-Listing
-    perl-File-Slurp
-    perl-File-Which
-    perl-Hash-FieldHash
-    perl-Hash-Merge-Simple
-    perl-HTTP-Cookies
-    perl-HTTP-Daemon
-    perl-HTTP-Negotiate
-    perl-Import-Info
-    perl-IO-Zlib
-    perl-IPC-Cmd
-    perl-IPC-Run3
-    perl-IPC-System-Simple
-    perl-JSON
-    perl-JSON-PP
-    perl-libwww-perl
-    perl-Locale-Maketext-Simple
-    perl-Log-Dispatch
-    perl-Log-Dispatch-FileRotate
-    perl-Log-Log4perl
-    perl-Mail-Sender
-    perl-Mail-Sendmail
-    perl-MailTools
-    perl-MIME-Lite
-    perl-MIME-Types
-    perl-Modern-Perl
-    perl-Module-Depends
-    perl-Module-Implementation
-    perl-Module-Load
-    perl-Module-Load-Conditional
-    perl-Module-Runtime
-    perl-Net-SMTP-SSL
-    perl-Package-Constants
-    perl-Package-Stash
-    perl-Package-Stash-XS
-    perl-Params-Check
-    perl-Params-Classify
-    perl-Params-Validate
-    perl-Perl-OSType
-    perl-Probe-Perl
-    perl-Scope-Guard
-    perl-Sub-Exporter
-    perl-Sub-Install
-    perl-Sub-Name
-    perl-Sys-Syslog
-    perl-Term-ReadLine-Perl
-    perl-Test-ClassAPI
-    perl-Test-Deep
-    perl-Test-Diff
-    perl-Test-Differences
-    perl-Test-Fatal
-    perl-Test-Most
-    perl-Test-NoWarnings
-    perl-Test-Output
-    perl-Test-Requires
-    perl-Test-Tester
-    perl-Tree-DAG_Node
-    perl-Try-Tiny
-    perl-Variable-Magic
-    perl-version
-    perl-Version-Requirements
-    perl-Want
-    perl-WWW-RobotRules
-    perl-WWW-RobotRules
-    perl-Wx
-    perl-XML-DOM
-    perl-XML-Parser
-    perl-XML-RegExp
-    perl-YAML
-    rrdtool
-    rrdtool-perl
-    wxBase
-    wxGTK
-    wxGTK-media
-
-
-
-
-    perl-Spiffy
-    perl-Alien-wxWidgets
-    perl-ExtUtils-XSpp
-    perl-Test-Base

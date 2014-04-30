@@ -3,12 +3,12 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use parent 'WxMOO::MCP21::Package';
 
-method new($class:) {
+sub new {
+    my ($class) = @_;
     my $self = $class->SUPER::new({
         package => 'mcp-cord',
         min     => '1.0',
@@ -17,7 +17,8 @@ method new($class:) {
     $WxMOO::MCP21::registry->register($self, qw( mcp-cord mcp_cord mcp-cord-open ));
 }
 
-method dispatch($message) {
+sub dispatch {
+    my ($self, $message) = @_;
     given ($message->{'message'}) {
         when ( /mcp-cord/ )        { $self->do_mcp_cord($message); }
         when ( /mcp-cord-open/ )   { $self->do_mcp_cord_open($message); }
@@ -25,8 +26,8 @@ method dispatch($message) {
     }
 }
 
-method do_mcp_cord        { say STDERR "do_mcp_cord called with @_"; }
-method do_mcp_cord_open   { say STDERR "do_mcp_cord_open called with @_"; }
-method do_mcp_cord_closed { say STDERR "do_mcp_cord_closed called with @_"; }
+sub do_mcp_cord        { say STDERR "do_mcp_cord called with @_"; }
+sub do_mcp_cord_open   { say STDERR "do_mcp_cord_open called with @_"; }
+sub do_mcp_cord_closed { say STDERR "do_mcp_cord_closed called with @_"; }
 
 1;

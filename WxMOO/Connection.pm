@@ -1,7 +1,6 @@
 package WxMOO::Connection;
 use strict;
 use warnings;
-use Method::Signatures;
 
 use v5.14;
 use Carp;
@@ -17,7 +16,8 @@ use parent 'Class::Accessor::Fast';
 
 WxMOO::Connection->mk_accessors(qw( host port ));
 
-method new($class: $parent) {
+sub new {
+    my ($class, $parent) = @_;
     my $self = $class->SUPER::new;
 
     EVT_SOCKET_INPUT($parent, $self, \&onInput);
@@ -26,7 +26,8 @@ method new($class: $parent) {
     bless $self, $class;
 }
 
-method onInput(@stuff) {
+sub onInput {
+    my ($self) = @_;
     state $output //= Wx::Window::FindWindowById(id('OUTPUT_PANE'));
     my $poop = '';
     while ($self->Read($poop, 1, length $poop)) {
@@ -35,11 +36,12 @@ method onInput(@stuff) {
     $output->display($poop);
 }
 
-method onClose(@stuff) { }
+sub onClose { }
 
-method output(@stuff) { $self->Write(@stuff); }
+sub output { shift->Write(@_); }
 
-method connect($host, $port) {
+sub connect {
+    my ($self, $host, $port) = @_;
     $self->host( $host );
     $self->port( $port );
 

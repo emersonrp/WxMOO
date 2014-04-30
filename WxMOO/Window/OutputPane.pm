@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use Wx qw( :color :misc :richtextctrl );
@@ -18,7 +17,8 @@ use WxMOO::MCP21;
 
 use base 'Wx::RichTextCtrl';
 
-method new($class: $parent) {
+sub new {
+    my ($class, $parent) = @_;
     my $self = $class->SUPER::new(
         $parent, id('OUTPUT_PANE'), "", wxDefaultPosition, wxDefaultSize, wxRE_READONLY );
 
@@ -31,17 +31,20 @@ method new($class: $parent) {
     return bless $self, $class;
 }
 
-method WriteText(@stuff) {
-    $self->SUPER::WriteText(@stuff);
+sub WriteText {
+    my ($self, @rest) = @_;
+    $self->SUPER::WriteText(@rest);
     $self->ScrollIfAppropriate;
 }
 
-method ScrollIfAppropriate {
+sub ScrollIfAppropriate {
+    my ($self) = @_;
     # TODO:  "if we want scroll-on-output or are already at the bottom..."
     $self->ShowPosition($self->GetCaretPosition);
 }
 
-method restyle_thyself {
+sub restyle_thyself {
+    my ($self) = @_;
     my $basic_style = Wx::RichTextAttr->new;
     $basic_style->SetTextColour(WxMOO::Prefs->prefs->output_fgcolour);
     $basic_style->SetBackgroundColour(WxMOO::Prefs->prefs->output_bgcolour);
@@ -49,7 +52,8 @@ method restyle_thyself {
     $self->SetFont(WxMOO::Prefs->prefs->output_font);
 }
 
-method display ($text) {
+sub display {
+    my ($self, $text) = @_;
     for my $line (split /\n/, $text) {
         if (WxMOO::Prefs->prefs->use_mcp) {
             next unless ($line = WxMOO::MCP21::output_filter($line));
@@ -70,7 +74,8 @@ method display ($text) {
     }
 }
 
-method focus_input {
+sub focus_input {
+    my ($self) = @_;
     # TODO - make this a little less intrusive
     my $input_field = Wx::Window::FindWindowById(id('INPUT_PANE'));
     $input_field->SetFocus if $input_field;
@@ -86,11 +91,13 @@ my %ansi_colors = (
     cyan    => [ Wx::Colour->new(  0,205,205), Wx::Colour->new(  0,255,255) ],
     white   => [ Wx::Colour->new(229,229,229), Wx::Colour->new(255,255,255) ],
 );
-method lookup_color($color) {
+sub lookup_color {
+    my ($self, $color) = @_;
     return $self->{'bright'} ? $ansi_colors{$color}->[1] : $ansi_colors{$color}->[0];
 }
 
-method apply_ansi($bit) {
+sub apply_ansi {
+    my ($self, $bit) = @_;
     my ($type, $payload) = @$bit;
     if ($type eq 'control') {
         given ($payload) {
@@ -132,7 +139,8 @@ method apply_ansi($bit) {
     }
 }
 
-method invert_colors {
+sub invert_colors {
+    my ($self) = @_;
     my $current = $self->GetStyle($self->GetInsertionPoint);
     my $fg = $current->GetTextColour;
     my $bg = $current->GetBackgroundColour;
@@ -178,7 +186,8 @@ my %ansi_codes = (
 );
 
 
-method ansi_parse($line) {
+sub ansi_parse {
+    my ($self, $line) = @_;
     if (my $beepcount = $line =~ s/\007//g) {
         for (1..$beepcount) {
             say STDERR "found a beep";

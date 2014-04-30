@@ -4,16 +4,17 @@ use warnings;
 use v5.14;
 
 use Carp;
-use Method::Signatures;
 
-method new($class:) {
+sub new {
+    my ($class) = @_;
     bless {
         registry => {},
         packages => {},
     }, $class;
 }
 
-method register($package, @messages) {
+sub register {
+    my ($self, $package, @messages) = @_;
     unless ($package->isa('WxMOO::MCP21::Package')) {
         carp "something not a package tried to register with the mcp registry";
         return;
@@ -24,15 +25,16 @@ method register($package, @messages) {
     }
 }
 
-method packages                  { values %{$self->{'packages'}} }
+sub packages            { values %{shift->{'packages'}} }
 
-method get_package($pkg)         { $self->{'packages'}->{$pkg} }
+sub get_package         { shift->{'packages'}->{shift()} }
 
-method package_for_message($msg) { $self->{'registry'}->{$msg} }
+sub package_for_message { shift->{'registry'}->{shift()} }
 
 
 # next two subs taken from MCP 2.1 specification, section 2.4.3
-method get_best_version($package, $smin, $smax) {
+sub get_best_version {
+    my ($self, $package, $smin, $smax) = @_;
     return unless grep { $_->{'package'} eq $package } $self->packages;
     my $cmax = $self->{'packages'}->{$package}->max;
     my $cmin = $self->{'packages'}->{$package}->min;
@@ -42,7 +44,8 @@ method get_best_version($package, $smin, $smax) {
         undef;
 }
 
-func _version_cmp ($v1, $v2) {
+sub _version_cmp {
+    my ($v1, $v2) = @_;
     my @v1 = split /\./, $v1;
     my @v2 = split /\./, $v2;
 

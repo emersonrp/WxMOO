@@ -3,12 +3,12 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use parent 'WxMOO::MCP21::Package';
 
-method new($class:) {
+sub new {
+    my ($class) = @_;
     my $self = $class->SUPER::new({
         activated => 1,
         package   => 'mcp',
@@ -19,14 +19,16 @@ method new($class:) {
     $WxMOO::MCP21::registry->register($self, qw(mcp));
 }
 
-method dispatch($message) {
+sub dispatch {
+    my ($self, $message) = @_;
     given ($message->{'message'}) {
         when ( /mcp/ ) { $self->do_mcp($message); }
     }
 }
 
 ### handlers
-method do_mcp($args) {
+sub do_mcp {
+    my ($self, $args) = @_;
 
     if ($args->{'data'}->{'version'}+0 == 2.1 or $args->{'data'}->{'to'}+0 >= 2.1) {
         $WxMOO::MCP21::mcp_active = 1;
@@ -44,11 +46,11 @@ method do_mcp($args) {
 
 }
 
-method do_splat($args) {
+sub do_splat {
     # all taken care of in MCP21.pm
 }
 
-method do_colon($args) {
+sub do_colon {
     # all taken care of in MCP21.pm
 }
 

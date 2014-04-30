@@ -3,8 +3,6 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
-
 use Wx qw( :dialog :sizer :id :misc :notebook :font :colour :textctrl
             wxFNTP_USEFONT_FOR_LABEL wxFNTP_FONTDESC_AS_LABEL
             wxCLRP_USE_TEXTCTRL wxCLRP_SHOW_LABEL
@@ -12,7 +10,8 @@ use Wx qw( :dialog :sizer :id :misc :notebook :font :colour :textctrl
 use Wx::Event qw( EVT_BUTTON EVT_FONTPICKER_CHANGED EVT_COLOURPICKER_CHANGED );
 use parent -norequire, 'Wx::PropertySheetDialog';
 
-method new($class: $parent) {
+sub new {
+    my ($class, $parent) = @_;
 
     my $self = $class->SUPER::new( $parent, -1, '', wxDefaultPosition, wxDefaultSize, );
 
@@ -45,7 +44,8 @@ method new($class: $parent) {
     return $self;
 }
 
-method update_prefs($evt) {
+sub update_prefs {
+    my ($self, $evt) = @_;
     my $fc_page = $self->{'page_2'};
 
     WxMOO::Prefs->prefs->output_font($fc_page->{'ofont_ctrl'}->GetSelectedFont);
@@ -65,7 +65,8 @@ method update_prefs($evt) {
     $evt->Skip;
 }
 
-method populateFontPanel {
+sub populateFontPanel {
+    my ($self) = @_;
     # fonts and colors
     my $fcp = $self->{'page_2'};
 
@@ -141,7 +142,8 @@ method populateFontPanel {
     $fcp->SetSizer($fcp->{'panel_sizer'});
 }
 
-method update_sample_text($evt) {
+sub update_sample_text {
+    my ($self, $evt) = @_;
     for my $l ('o','i') {
         $self->{"${l}_sample"}->SetFont($self->{"${l}font_ctrl"}->GetSelectedFont);
         $self->{"${l}_sample"}->SetForegroundColour($self->{"${l}_fgcolour_ctrl"}->GetColour);

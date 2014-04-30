@@ -3,15 +3,14 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
-
 use Wx qw( :misc :dialog :sizer );
 
 use WxMOO::Prefs;
 
 use base qw(Wx::Dialog);
 
-method new($class: $parent) {
+sub new {
+    my ($class, $parent) = @_;
 
     my $self = $class->SUPER::new(
         $parent, -1, 'Worlds List',
@@ -54,8 +53,6 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
-
 use Wx qw( :misc :sizer :textctrl );
 use Wx::Event qw(EVT_CHOICE);
 
@@ -64,7 +61,8 @@ use WxMOO::Prefs;
 
 use base qw(Wx::Panel);
 
-method new($class: $parent) {
+sub new {
+    my ($class, $parent) = @_;
 
     my $self = $class->SUPER::new( $parent, -1,
         wxDefaultPosition, wxDefaultSize,
@@ -158,7 +156,8 @@ method new($class: $parent) {
     return $self;
 }
 
-method show_hide_ssh_controls{
+sub show_hide_ssh_controls{
+    my ($self) = @_;
     my $to_show = $self->{'type_picker'}->GetSelection == 2;
     $self->{'ssh_server_label'}->Show($to_show);
     $self->{'ssh_server_field'}->Show($to_show);

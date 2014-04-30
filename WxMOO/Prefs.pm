@@ -4,7 +4,6 @@ use warnings;
 use v5.14;
 
 use Carp;
-use Method::Signatures;
 use Wx qw( :font :colour );
 use Config::Simple '-strict';
 
@@ -13,7 +12,8 @@ use base qw(Config::Simple);
 # TODO - cross-platform config file locater
 my $FILENAME = "$ENV{'HOME'}/.wxmoorc";
 
-method prefs($class:) {
+sub prefs {
+    my ($class) = @_;
     state $self;
 
     unless ($self) {
@@ -30,10 +30,11 @@ method prefs($class:) {
     return $self;
 }
 
-method save { $self->write($FILENAME) or carp "can't write config file: $!"; }
+sub save { shift->write($FILENAME) or carp "can't write config file: $!"; }
 
 ### Massager-accessors; transform from config-file strings to useful data
-method input_font($new?) {
+sub input_font {
+    my ($self, $new) = @_;
     state $font //= Wx::Font->new($self->param('input_font'));
     if ($new) {
         $font = $new;
@@ -42,7 +43,8 @@ method input_font($new?) {
     return $font;
 }
 
-method output_font($new?) {
+sub output_font {
+    my ($self, $new) = @_;
     state $font //= Wx::Font->new($self->param('output_font'));
     if ($new) {
         $font = $new;
@@ -51,7 +53,8 @@ method output_font($new?) {
     return $font;
 }
 
-method input_height($new?) {
+sub input_height {
+    my ($self, $new) = @_;
     state $height //= $self->param('input_height'); # TODO - should we determine this based on font size?
     if ($new) {
         $height = $new;
@@ -61,7 +64,8 @@ method input_height($new?) {
     return $height;
 }
 
-method output_fgcolour($new?) {
+sub output_fgcolour {
+    my ($self, $new) = @_;
     state $colour //= Wx::Colour->new($self->param('output_fgcolour'));
     if ($new) {
         $colour = $new;
@@ -70,7 +74,8 @@ method output_fgcolour($new?) {
     return $colour;
 }
 
-method output_bgcolour($new?) {
+sub output_bgcolour {
+    my ($self, $new) = @_;
     state $colour //= Wx::Colour->new($self->param('output_bgcolour'));
     if ($new) {
         $colour = $new;
@@ -79,7 +84,8 @@ method output_bgcolour($new?) {
     return $colour;
 }
 
-method input_fgcolour($new?) {
+sub input_fgcolour {
+    my ($self, $new) = @_;
     state $colour //= Wx::Colour->new($self->param('input_fgcolour'));
     if ($new) {
         $colour = $new;
@@ -88,7 +94,8 @@ method input_fgcolour($new?) {
     return $colour;
 }
 
-method input_bgcolour($new?) {
+sub input_bgcolour {
+    my ($self, $new) = @_;
     state $colour //= Wx::Colour->new($self->param('input_bgcolour'));
     if ($new) {
         $colour = $new;
@@ -97,12 +104,14 @@ method input_bgcolour($new?) {
     return $colour;
 }
 
-method use_mcp($new?) {
+sub use_mcp {
+    my ($self, $new) = @_;
     $self->param('use_mcp', $new) if defined $new;
     $self->param('use_mcp');
 }
 
-method use_ansi($new?) {
+sub use_ansi {
+    my ($self, $new) = @_;
     $self->param('use_ansi', $new) if defined $new;
     $self->param('use_ansi');
 }
@@ -125,7 +134,8 @@ method use_ansi($new?) {
         use_mcp         => 1,
     );
 
-    method get_defaults {
+    sub get_defaults {
+        my ($self) = @_;
         while (my ($key,$val) = each %defaults) {
             $self->param($key, $val) unless defined $self->param($key);
         }

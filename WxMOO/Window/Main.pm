@@ -3,8 +3,6 @@ use strict;
 use warnings;
 use v5.14;
 
-use Method::Signatures;
-
 use Wx qw( :misc :sizer );
 use Wx::Event qw( EVT_MENU );
 
@@ -21,7 +19,8 @@ use WxMOO::Window::WorldsList;
 
 use base 'Wx::Frame';
 
-method new($class:) {
+sub new {
+    my ($class) = @_;
     my $self = $class->SUPER::new( undef, -1, 'WxMOO' );
 
     $self->buildMenu;
@@ -45,12 +44,14 @@ method new($class:) {
 }
 
 # post ->Show stuff
-method Initialize {
+sub Initialize {
+    my ($self) = @_;
     # TODO - don't connect until we ask for it.
     $self->{'connection'}->connect('hayseed.net',7777);
 }
 
-method buildMenu {
+sub buildMenu {
+    my ($self) = @_;
     my $WorldsMenu = Wx::Menu->new;
     $WorldsMenu->Append(id('MENUITEM_WORLDS'),  "Worlds...",        "");
     $WorldsMenu->Append(id('MENUITEM_CONNECT'), "Connect...",       "");
@@ -96,30 +97,35 @@ method buildMenu {
     EVT_MENU( $self, id('MENUITEM_ABOUT'),   \&showAboutBox );
 }
 
-method closeConnection {
+sub closeConnection {
+    my ($self) = @_;
     $self->{'connection'}->Destroy;
     $self->{'connection'} = undef;
 }
 
 ### DIALOGS AND SUBWINDOWS
 
-method showWorldsList {
+sub showWorldsList {
+    my ($self) = @_;
     $self->{'worlds_list'} ||= WxMOO::Window::WorldsList->new($self);
     $self->{'worlds_list'}->Show;
 }
 
-method showConnectDialog {
+sub showConnectDialog {
+    my ($self) = @_;
     $self->{'connect_dialog'} ||= WxMOO::Window::ConnectDialog->new($self);
     $self->{'connect_dialog'}->Show;
 }
 
-method showPrefsEditor {
+sub showPrefsEditor {
+    my ($self) = @_;
     $self->{'prefs_editor'} ||= WxMOO::Window::PrefsEditor->new($self);
     $self->{'prefs_editor'}->Show;
 }
 
 # TODO - WxMOO::Window::About
-method showAboutBox {
+sub showAboutBox {
+    my ($self) = @_;
     $self->{'about_info'} ||= eval {
         my $info = Wx::AboutDialogInfo->new;
         $info->AddDeveloper('R Pickett (emerson@hayseed.net)');
@@ -132,7 +138,8 @@ method showAboutBox {
     Wx::AboutBox($self->{'about_info'});
 }
 
-method quitApplication {
+sub quitApplication {
+    my ($self) = @_;
     WxMOO::Prefs->prefs->save;
     $self->closeConnection;
     $self->Close(1);
