@@ -12,7 +12,7 @@ use WxMOO::Utility qw( id );
 use WxMOO::MCP21;  # this is icky
 
 use parent -norequire, 'Wx::SocketClient';
-use parent 'Class::Accessor::Fast';
+use parent 'Class::Accessor';
 
 WxMOO::Connection->mk_accessors(qw( host port ));
 

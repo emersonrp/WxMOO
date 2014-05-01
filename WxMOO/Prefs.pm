@@ -116,6 +116,20 @@ sub use_ansi {
     $self->param('use_ansi');
 }
 
+sub save_window_size { 1; }
+
+sub window_height {
+    my ($self, $new) = @_;
+    $self->param('window_height', $new) if defined $new;
+    $self->param('window_height');
+}
+
+sub window_width {
+    my ($self, $new) = @_;
+    $self->param('window_width', $new) if defined $new;
+    $self->param('window_width');
+}
+
 ### DEFAULTS -- this will set everything to a default value if it's not already set.
 #               This gives us both brand-new-file and add-new-params'-default-values
 {
@@ -128,6 +142,8 @@ sub use_ansi {
         output_bgcolour => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
         input_fgcolour  => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
         input_bgcolour  => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
+        window_width    => 800,
+        window_height   => 600,
         theme           => 'solarized',
         input_height    => 25,
         use_ansi        => 1,

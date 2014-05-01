@@ -4,7 +4,7 @@ use warnings;
 use v5.14;
 
 use Wx qw( :misc :sizer );
-use Wx::Event qw( EVT_MENU );
+use Wx::Event qw( EVT_MENU EVT_SIZE );
 
 use WxMOO::Connection;  # Might go away later
 use WxMOO::Prefs;
@@ -21,9 +21,17 @@ use base 'Wx::Frame';
 
 sub new {
     my ($class) = @_;
-    my $self = $class->SUPER::new( undef, -1, 'WxMOO' );
+    my $self = $class->SUPER::new( undef, -1, 'WxMOO');
 
     $self->buildMenu;
+
+    $self->addEvents;
+
+    if (1 || WxMOO::Prefs->prefs->save_window_size) {
+        my $w = WxMOO::Prefs->prefs->window_width  || 800;
+        my $h = WxMOO::Prefs->prefs->window_height || 600;
+#        $self->SetSize([$w, $h]);
+    }
 
     # TODO - don't connect until we ask for it.
     $self->{'connection'} = WxMOO::Connection->new($self);
@@ -97,10 +105,28 @@ sub buildMenu {
     EVT_MENU( $self, id('MENUITEM_ABOUT'),   \&showAboutBox );
 }
 
+sub addEvents {
+    my ($self) = @_;
+
+    EVT_SIZE( $self, \&onSize );
+}
+
 sub closeConnection {
     my ($self) = @_;
     $self->{'connection'}->Destroy;
     $self->{'connection'} = undef;
+}
+
+sub onSize {
+    my ($self, $evt) = @_;
+
+    if (1 || WxMOO::Prefs->prefs->save_window_size) {
+        my ($w, $h) = $self->GetSizeWH;
+        WxMOO::Prefs->prefs->window_width($w);
+        WxMOO::Prefs->prefs->window_height($h);
+        WxMOO::Prefs->prefs->save;
+    }
+    $evt->Skip;
 }
 
 ### DIALOGS AND SUBWINDOWS

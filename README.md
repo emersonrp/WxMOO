@@ -43,7 +43,6 @@ In addition to perl, wx, and the requisite "use Wx" glue, Module::ScanDeps (not 
 
 'Carp'                  => '1.26',
 'Class::Accessor'       => '0.34',
-'Class::Accessor::Fast' => '0.34',
 'Config::Simple'        => '4.59',
 'constant'              => '1.27',
 'Cwd'                   => '3.40',

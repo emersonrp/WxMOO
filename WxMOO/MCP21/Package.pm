@@ -4,7 +4,7 @@ use warnings;
 use v5.14;
 
 use Wx;
-use parent "Class::Accessor::Fast";
+use parent "Class::Accessor";
 use parent -norequire, "Wx::EvtHandler";
 WxMOO::MCP21::Package->mk_accessors( qw( package min max message callback activated ) );
 

@@ -8,7 +8,7 @@ use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_CHAR );
 use WxMOO::Prefs;
 use WxMOO::Utility qw( id );
 
-use base qw( Wx::TextCtrl Class::Accessor::Fast );
+use base qw( Wx::TextCtrl Class::Accessor );
 WxMOO::Window::InputPane->mk_accessors(qw( parent connection cmd_history ));
 
 sub new {
