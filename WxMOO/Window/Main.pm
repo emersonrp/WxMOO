@@ -155,7 +155,8 @@ sub showAboutBox {
     $self->{'about_info'} ||= eval {
         my $info = Wx::AboutDialogInfo->new;
         $info->AddDeveloper('R Pickett (emerson@hayseed.net)');
-        $info->SetCopyright('(c) 2013');
+        $info->SetCopyright('(c) 2013, 2014');
+        $info->SetWebSite('http://github.com/emersonrp/WxMOO');
         $info->SetName('WxMOO');
         $info->SetVersion('0.0.1');
         return $info;

@@ -5,22 +5,22 @@ use v5.14;
 
 use Wx qw( :id :misc :dialog :sizer );
 use Wx::Event qw( EVT_BUTTON );
+use wxPerl::Constructors;
 use base qw(Wx::Dialog);
 
 sub new {
     my ($class, $parent) = @_;
 
-    my $self = $class->SUPER::new( $parent, -1, "Connect to World",
-       wxDefaultPosition, wxDefaultSize,
-       wxDEFAULT_DIALOG_STYLE | wxSTAY_ON_TOP
+    my $self = $class->SUPER::new( $parent, "Connect to World",
+       style => wxDEFAULT_DIALOG_STYLE | wxSTAY_ON_TOP
     );
 
     $self->{'parent'} = $parent;
 
-    $self->{'host_label'}   = Wx::StaticText->new($self, -1, "Host:", wxDefaultPosition, wxDefaultSize, );
-    $self->{'host_field'}   = Wx::TextCtrl  ->new($self, -1, "",      wxDefaultPosition, wxDefaultSize, );
-    $self->{'port_label'}   = Wx::StaticText->new($self, -1, "Port:", wxDefaultPosition, wxDefaultSize, );
-    $self->{'port_field'}   = Wx::TextCtrl  ->new($self, -1, "",      wxDefaultPosition, wxDefaultSize, );
+    $self->{'host_label'}   = Wx::StaticText->new($self, "Host:");
+    $self->{'host_field'}   = Wx::TextCtrl  ->new($self);
+    $self->{'port_label'}   = Wx::StaticText->new($self, "Port:");
+    $self->{'port_field'}   = Wx::TextCtrl  ->new($self);
 
     $self->{'input_sizer'} = Wx::FlexGridSizer->new(2, 2, 0, 0);
     $self->{'input_sizer'}->AddGrowableCol( 1 );

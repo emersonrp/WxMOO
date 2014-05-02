@@ -116,7 +116,11 @@ sub use_ansi {
     $self->param('use_ansi');
 }
 
-sub save_window_size { 1; }
+sub save_window_size {
+    my ($self, $new) = @_;
+    $self->param('save_window_size', $new) if defined $new;
+    $self->param('save_window_size');
+}
 
 sub window_height {
     my ($self, $new) = @_;
@@ -136,18 +140,19 @@ sub window_width {
     my $defaultFont = Wx::Font->new( 10, wxTELETYPE, wxNORMAL, wxNORMAL );
     my $defaultFontString = $defaultFont->GetNativeFontInfo->ToString;
     my %defaults = (
-        input_font      => $defaultFontString,
-        output_font     => $defaultFontString,
-        output_fgcolour => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
-        output_bgcolour => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
-        input_fgcolour  => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
-        input_bgcolour  => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
-        window_width    => 800,
-        window_height   => 600,
-        theme           => 'solarized',
-        input_height    => 25,
-        use_ansi        => 1,
-        use_mcp         => 1,
+        input_font       => $defaultFontString,
+        output_font      => $defaultFontString,
+        output_fgcolour  => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
+        output_bgcolour  => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
+        input_fgcolour   => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
+        input_bgcolour   => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
+        window_width     => 800,
+        window_height    => 600,
+        theme            => 'solarized',
+        input_height     => 25,
+        use_ansi         => 1,
+        use_mcp          => 1,
+        save_window_size => 1,
     );
 
     sub get_defaults {

@@ -33,7 +33,7 @@ sub new {
 sub _init {
     my ($self) = @_;
     $self->{'watched'} = {};
-    $self->{'watchTimer'} = Wx::Timer->new($self, -1);
+    $self->{'watchTimer'} = Wx::Timer->new($self);
     EVT_TIMER($self, $self->{'watchTimer'}, \&_watch_queue);
 
 }

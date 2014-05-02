@@ -19,7 +19,7 @@ sub new {
     $self->{'world_details_staticbox'} = Wx::StaticBox->new($self, -1, "" );
     $self->{'world_details_box'}       = Wx::StaticBoxSizer->new($self->{'world_details_staticbox'}, wxHORIZONTAL);
 
-    $self->{'world_label'}        = Wx::StaticText->new($self, -1, "World", wxDefaultPosition, wxDefaultSize, );
+    $self->{'world_label'}        = Wx::StaticText->new($self, -1, "World");
     $self->{'world_picker'}       = Wx::Choice    ->new($self, -1, wxDefaultPosition, wxDefaultSize, [], );
     $self->{'world_picker_sizer'} = Wx::BoxSizer->new(wxHORIZONTAL);
     $self->{'world_picker_sizer'}->Add($self->{'world_label'},  0,        wxALIGN_CENTER_VERTICAL, 0);
@@ -69,29 +69,29 @@ sub new {
         # $style,
     );
 
-    $self->{'name_label'}     = Wx::StaticText->new($self, -1, "Name:",     wxDefaultPosition, wxDefaultSize, );
-    $self->{'name_field'}     = Wx::TextCtrl  ->new($self, -1, "",          wxDefaultPosition, wxDefaultSize, );
-    $self->{'host_label'}     = Wx::StaticText->new($self, -1, "Host:",     wxDefaultPosition, wxDefaultSize, );
-    $self->{'host_field'}     = Wx::TextCtrl  ->new($self, -1, "",          wxDefaultPosition, wxDefaultSize, );
-    $self->{'port_label'}     = Wx::StaticText->new($self, -1, "Port:",     wxDefaultPosition, wxDefaultSize, );
-    $self->{'port_field'}     = Wx::SpinCtrl  ->new($self, -1, "",          wxDefaultPosition, wxDefaultSize, );
+    $self->{'name_label'}     = Wx::StaticText->new($self, -1, "Name:");
+    $self->{'name_field'}     = Wx::TextCtrl  ->new($self, -1, "");
+    $self->{'host_label'}     = Wx::StaticText->new($self, -1, "Host:");
+    $self->{'host_field'}     = Wx::TextCtrl  ->new($self, -1, "");
+    $self->{'port_label'}     = Wx::StaticText->new($self, -1, "Port:");
+    $self->{'port_field'}     = Wx::SpinCtrl  ->new($self, -1, "");
     $self->{'port_field'}->SetRange(0, 65535);
     $self->{'port_field'}->SetValue(7777);
-    $self->{'username_label'} = Wx::StaticText->new($self, -1, "Username:", wxDefaultPosition, wxDefaultSize, );
-    $self->{'username_field'} = Wx::TextCtrl  ->new($self, -1, "",          wxDefaultPosition, wxDefaultSize, );
-    $self->{'password_label'} = Wx::StaticText->new($self, -1, "Password:", wxDefaultPosition, wxDefaultSize, );
-    $self->{'password_field'} = Wx::TextCtrl  ->new($self, -1, "",          wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
-    $self->{'type_label'}     = Wx::StaticText->new($self, -1, "Type:", wxDefaultPosition, wxDefaultSize, );
+    $self->{'username_label'} = Wx::StaticText->new($self, -1, "Username:");
+    $self->{'username_field'} = Wx::TextCtrl  ->new($self, -1, "");
+    $self->{'password_label'} = Wx::StaticText->new($self, -1, "Password:");
+    $self->{'password_field'} = Wx::TextCtrl  ->new($self, -1, "", wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+    $self->{'type_label'}     = Wx::StaticText->new($self, -1, "Type:");
     $self->{'type_picker'}    = Wx::Choice    ->new($self, -1, wxDefaultPosition, wxDefaultSize,
                                                         ['Socket','SSL','SSH Forwarding'], );
     $self->{'type_picker'}->SetSelection(0);
 
-    $self->{'ssh_server_label'}   = Wx::StaticText->new($self, -1, "SSH Host:",     wxDefaultPosition, wxDefaultSize, );
-    $self->{'ssh_server_field'}   = Wx::TextCtrl  ->new($self, -1, "",              wxDefaultPosition, wxDefaultSize, );
-    $self->{'ssh_username_label'} = Wx::StaticText->new($self, -1, "SSH Username:", wxDefaultPosition, wxDefaultSize, );
-    $self->{'ssh_username_field'} = Wx::TextCtrl  ->new($self, -1, "",              wxDefaultPosition, wxDefaultSize, );
-    $self->{'local_port_label'}   = Wx::StaticText->new($self, -1, "Local Port:",   wxDefaultPosition, wxDefaultSize, );
-    $self->{'local_port_field'}   = Wx::SpinCtrl  ->new($self, -1, "",              wxDefaultPosition, wxDefaultSize, );
+    $self->{'ssh_server_label'}   = Wx::StaticText->new($self, -1, "SSH Host:");
+    $self->{'ssh_server_field'}   = Wx::TextCtrl  ->new($self, -1, "");
+    $self->{'ssh_username_label'} = Wx::StaticText->new($self, -1, "SSH Username:");
+    $self->{'ssh_username_field'} = Wx::TextCtrl  ->new($self, -1, "");
+    $self->{'local_port_label'}   = Wx::StaticText->new($self, -1, "Local Port:");
+    $self->{'local_port_field'}   = Wx::SpinCtrl  ->new($self, -1, "");
     $self->{'local_port_field'}->SetRange(0, 65535);
     $self->{'local_port_field'}->SetValue(7777);
 
@@ -116,14 +116,14 @@ sub new {
     $self->{'field_sizer'}->Add($self->{'local_port_field'},   0, wxEXPAND, 0);
     $self->{'field_sizer'}->AddGrowableCol(1);
 
-    $self->{'notes_box_staticbox'} = Wx::StaticBox->new($self, -1, "Notes" );
+    $self->{'notes_box_staticbox'} = Wx::StaticBox->new($self, -1, "Notes");
     $self->{'notes_box'}           = Wx::StaticBoxSizer->new($self->{'notes_box_staticbox'}, wxHORIZONTAL);
     $self->{'notes_field'}         = Wx::TextCtrl->new($self, -1, "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
     $self->{'notes_box'}->Add($self->{'notes_field'}, 1, wxEXPAND, 0);
 
-    $self->{'mcp_check'}          = Wx::CheckBox->new($self, -1, "MCP 2.1",          wxDefaultPosition, wxDefaultSize, );
-    $self->{'login_dialog_check'} = Wx::CheckBox->new($self, -1, "Use Login Dialog", wxDefaultPosition, wxDefaultSize, );
-    $self->{'shortlist_check'}    = Wx::CheckBox->new($self, -1, "On Short List",    wxDefaultPosition, wxDefaultSize, );
+    $self->{'mcp_check'}          = Wx::CheckBox->new($self, -1, "MCP 2.1");
+    $self->{'login_dialog_check'} = Wx::CheckBox->new($self, -1, "Use Login Dialog");
+    $self->{'shortlist_check'}    = Wx::CheckBox->new($self, -1, "On Short List");
     $self->{'checkbox_sizer'} = Wx::GridSizer->new(3, 2, 0, 0);
     $self->{'checkbox_sizer'}->Add($self->{'mcp_check'}, 0, wxLEFT|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5);
     $self->{'checkbox_sizer'}->Add($self->{'login_dialog_check'}, 0, wxLEFT|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5);
