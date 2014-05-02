@@ -54,6 +54,10 @@ sub restyle_thyself {
 
 sub display {
     my ($self, $text) = @_;
+
+    my ($from, $to) = $self->GetSelection;
+    $self->SetInsertionPointEnd;
+
     for my $line (split /\n/, $text) {
         if (WxMOO::Prefs->prefs->use_mcp) {
             next unless ($line = WxMOO::MCP21::output_filter($line));
@@ -71,6 +75,10 @@ sub display {
         } else {
             $self->WriteText($line);
         }
+    }
+
+    if ($from != $to) {
+        $self->SetSelection($from, $to);
     }
 }
 
