@@ -30,10 +30,11 @@ sub new {
     if (1 || WxMOO::Prefs->prefs->save_window_size) {
         my $w = WxMOO::Prefs->prefs->window_width  || 800;
         my $h = WxMOO::Prefs->prefs->window_height || 600;
-#        $self->SetSize([$w, $h]);
+        $self->SetSize([$w, $h]);
     }
 
     # TODO - don't connect until we ask for it.
+    # TODO - probably want a tabbed interface for multiple connections
     $self->{'connection'} = WxMOO::Connection->new($self);
 
     $self->{'splitter'} = WxMOO::Window::MainSplitter->new($self);

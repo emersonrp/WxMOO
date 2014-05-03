@@ -5,9 +5,9 @@ use v5.14;
 
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
-use Wx qw( :color :misc :richtextctrl );
+use Wx qw( :color :misc :textctrl );
 use Wx::RichText;
-use Wx::Event qw( EVT_SET_FOCUS );
+use Wx::Event qw( EVT_SET_FOCUS EVT_TEXT_URL );
 
 use WxMOO::Prefs;
 use WxMOO::Utility qw( id );
@@ -20,13 +20,16 @@ use base 'Wx::RichTextCtrl';
 sub new {
     my ($class, $parent) = @_;
     my $self = $class->SUPER::new(
-        $parent, id('OUTPUT_PANE'), "", wxDefaultPosition, wxDefaultSize, wxRE_READONLY );
+        $parent, id('OUTPUT_PANE'), "", wxDefaultPosition, wxDefaultSize,
+            wxTE_AUTO_URL | wxTE_READONLY | wxTE_NOHIDESEL
+        );
 
     $self->{'parent'} = $parent;
 
     $self->restyle_thyself;
 
     EVT_SET_FOCUS($self, \&focus_input);
+    EVT_TEXT_URL($self, $self, sub { say STDERR "URL POOP!"; });
 
     return bless $self, $class;
 }
