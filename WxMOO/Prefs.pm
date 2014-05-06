@@ -8,6 +8,10 @@ use Wx qw( :font :colour );
 use Config::Simple '-strict';
 
 use base qw(Config::Simple);
+use constant SIMPLE_ACCESSORS => qw(
+    use_mcp use_ansi save_window_size
+    window_height window_width input_height
+);
 
 # TODO - cross-platform config file locater
 my $FILENAME = "$ENV{'HOME'}/.wxmoorc";
@@ -58,47 +62,6 @@ sub _colour_param {
     return $colour;
 }
 
-### BOOLEANS - TODO Class::Accessor or something
-sub use_mcp {
-    my ($self, $new) = @_;
-    $self->param('use_mcp', $new) if defined $new;
-    $self->param('use_mcp');
-}
-
-sub use_ansi {
-    my ($self, $new) = @_;
-    $self->param('use_ansi', $new) if defined $new;
-    $self->param('use_ansi');
-}
-
-sub save_window_size {
-    my ($self, $new) = @_;
-    $self->param('save_window_size', $new) if defined $new;
-    $self->param('save_window_size');
-}
-
-sub window_height {
-    my ($self, $new) = @_;
-    $self->param('window_height', $new) if defined $new;
-    $self->param('window_height');
-}
-
-sub window_width {
-    my ($self, $new) = @_;
-    $self->param('window_width', $new) if defined $new;
-    $self->param('window_width');
-}
-
-sub input_height {
-    my ($self, $new) = @_;
-    state $height //= $self->param('input_height'); # TODO - should we determine this based on font size?
-    if ($new) {
-        $height = $new;
-        $self->param('input_height', $new);
-        $self->save;
-    }
-    return $height;
-}
 ### DEFAULTS -- this will set everything to a default value if it's not already set.
 #               This gives us both brand-new-file and add-new-params'-default-values
 {
@@ -126,6 +89,18 @@ sub input_height {
             $self->param($key, $val) unless defined $self->param($key);
         }
     }
+}
+
+# make automagic accessors
+for my $accname (SIMPLE_ACCESSORS) {
+    my $code = sub {
+        my $self = shift;
+        $self->param($accname, @_) if @_;
+        return $self->param($accname);
+    };
+
+    no strict 'refs';
+    *$accname = $code;
 }
 
 1;
