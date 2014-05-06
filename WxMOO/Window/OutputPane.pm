@@ -28,10 +28,17 @@ sub new {
 
     $self->restyle_thyself;
 
-    EVT_SET_FOCUS($self, \&focus_input);
-    EVT_TEXT_URL($self, $self, sub { say STDERR "URL POOP!"; });
+    EVT_SET_FOCUS($self,       \&focus_input);
+    EVT_TEXT_URL($self, $self, \&process_url_click);
 
     return bless $self, $class;
+}
+
+sub process_url_click {
+    my ($self, $event) = @_;
+    my $url = $event->GetString;
+    # TODO - make this whole notion into a platform-agnostic launchy bit;
+    system('xdg-open', $url);
 }
 
 sub WriteText {
@@ -72,7 +79,27 @@ sub display {
                 if (ref $bit) {
                     $self->apply_ansi($bit);
                 } else {
-                    $self->WriteText($bit);
+                    if (WxMOO::Prefs->prefs->highlight_urls and
+                        $bit =~ m[(https?://[^\s]+)]pi) {
+                            my $save_style = my $current_style = $self->GetTextAttrExStyle($self->GetCaretPosition);
+                            $current_style->SetTextColour(Wx::Colour->new(0, 0, 255));
+
+                            $self->WriteText(${^PREMATCH});
+
+                            $self->BeginURL(${^MATCH});
+                            $self->BeginStyle($current_style);
+                            $self->BeginUnderline;
+
+                            $self->WriteText(${^MATCH});
+
+                            $self->EndURL;
+                            $self->EndUnderline;
+                            $self->BeginStyle($save_style);
+
+                            $self->WriteText(${^POSTMATCH});
+                    } else {
+                        $self->WriteText($bit);
+                    }
                 }
             }
         } else {

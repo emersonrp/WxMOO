@@ -9,7 +9,7 @@ use Config::Simple '-strict';
 
 use base qw(Config::Simple);
 use constant SIMPLE_ACCESSORS => qw(
-    use_mcp use_ansi save_window_size
+    use_mcp use_ansi save_window_size highlight_urls
     window_height window_width input_height
 );
 
@@ -81,6 +81,7 @@ sub _colour_param {
         use_ansi         => 1,
         use_mcp          => 1,
         save_window_size => 1,
+        highlight_urls   => 1,
     );
 
     sub get_defaults {
