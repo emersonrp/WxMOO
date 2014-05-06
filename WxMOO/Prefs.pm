@@ -33,77 +33,32 @@ sub prefs {
 sub save { shift->write($FILENAME) or carp "can't write config file: $!"; }
 
 ### Massager-accessors; transform from config-file strings to useful data
-sub input_font {
-    my ($self, $new) = @_;
-    state $font //= Wx::Font->new($self->param('input_font'));
-    if ($new) {
-        $font = $new;
-        $self->param('input_font', $new->GetNativeFontInfoDesc);
-    }
+
+### FONTS
+sub input_font  { shift->_font_param('input_font',  shift); }
+sub output_font { shift->_font_param('output_font', shift); }
+
+sub _font_param {
+    my ($self, $param, $new) = @_;
+    my $font = $new || Wx::Font->new($self->param($param));
+    $self->param($param, $font->GetNativeFontInfoDesc);
     return $font;
 }
 
-sub output_font {
-    my ($self, $new) = @_;
-    state $font //= Wx::Font->new($self->param('output_font'));
-    if ($new) {
-        $font = $new;
-        $self->param('output_font', $new->GetNativeFontInfoDesc);
-    }
-    return $font;
-}
+### COLORS
+sub input_bgcolour  { shift->_colour_param('input_bgcolour',  shift); }
+sub input_fgcolour  { shift->_colour_param('input_fgcolour',  shift); }
+sub output_bgcolour { shift->_colour_param('output_bgcolour', shift); }
+sub output_fgcolour { shift->_colour_param('output_fgcolour', shift); }
 
-sub input_height {
-    my ($self, $new) = @_;
-    state $height //= $self->param('input_height'); # TODO - should we determine this based on font size?
-    if ($new) {
-        $height = $new;
-        $self->param('input_height', $new);
-        $self->save;
-    }
-    return $height;
-}
-
-sub output_fgcolour {
-    my ($self, $new) = @_;
-    state $colour //= Wx::Colour->new($self->param('output_fgcolour'));
-    if ($new) {
-        $colour = $new;
-        $self->param('output_fgcolour', $new->GetAsString(wxC2S_HTML_SYNTAX));
-    }
+sub _colour_param {
+    my ($self, $param, $new) = @_;
+    my $colour = $new || Wx::Colour->new($self->param($param));
+    $self->param($param, $colour->GetAsString(wxC2S_HTML_SYNTAX));
     return $colour;
 }
 
-sub output_bgcolour {
-    my ($self, $new) = @_;
-    state $colour //= Wx::Colour->new($self->param('output_bgcolour'));
-    if ($new) {
-        $colour = $new;
-        $self->param('output_bgcolour', $new->GetAsString(wxC2S_HTML_SYNTAX));
-    }
-    return $colour;
-}
-
-sub input_fgcolour {
-    my ($self, $new) = @_;
-    state $colour //= Wx::Colour->new($self->param('input_fgcolour'));
-    if ($new) {
-        $colour = $new;
-        $self->param('input_fgcolour', $new->GetAsString(wxC2S_HTML_SYNTAX));
-    }
-    return $colour;
-}
-
-sub input_bgcolour {
-    my ($self, $new) = @_;
-    state $colour //= Wx::Colour->new($self->param('input_bgcolour'));
-    if ($new) {
-        $colour = $new;
-        $self->param('input_bgcolour', $new->GetAsString(wxC2S_HTML_SYNTAX));
-    }
-    return $colour;
-}
-
+### BOOLEANS - TODO Class::Accessor or something
 sub use_mcp {
     my ($self, $new) = @_;
     $self->param('use_mcp', $new) if defined $new;
@@ -134,6 +89,16 @@ sub window_width {
     $self->param('window_width');
 }
 
+sub input_height {
+    my ($self, $new) = @_;
+    state $height //= $self->param('input_height'); # TODO - should we determine this based on font size?
+    if ($new) {
+        $height = $new;
+        $self->param('input_height', $new);
+        $self->save;
+    }
+    return $height;
+}
 ### DEFAULTS -- this will set everything to a default value if it's not already set.
 #               This gives us both brand-new-file and add-new-params'-default-values
 {
