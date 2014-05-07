@@ -10,7 +10,7 @@ use Wx::RichText;
 use Wx::Event qw( EVT_SET_FOCUS EVT_TEXT_URL );
 
 use WxMOO::Prefs;
-use WxMOO::Utility qw( id );
+use WxMOO::Utility qw( id URL_REGEX );
 
 # TODO we need a better output_filter scheme, probably?
 use WxMOO::MCP21;
@@ -80,7 +80,7 @@ sub display {
                     $self->apply_ansi($bit);
                 } else {
                     if (WxMOO::Prefs->prefs->highlight_urls and
-                        $bit =~ m[(https?://[^\s]+)]pi) {
+                        $bit =~ URL_REGEX) {
                             my $save_style = my $current_style = $self->GetTextAttrExStyle($self->GetCaretPosition);
                             $current_style->SetTextColour(Wx::Colour->new(0, 0, 255));
 
