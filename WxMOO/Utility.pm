@@ -8,7 +8,15 @@ use Wx;
 
 our @EXPORT_OK = qw( alert id URL_REGEX );
 
-sub alert { }
+# TODO - there's surely some less-intrusive and -hacky way to do this.
+sub alert {
+    my ($text) = @_;
+    my $output = Wx::Window::FindWindowById(id('OUTPUT_PANE'));
+
+    $output->BeginTextColour( Wx::Colour->new(255, 0, 0) );
+    $output->WriteText("WXMOO alert -> $text\n");
+    $output->EndTextColour;
+}
 
 sub id { state %ids; $ids{shift()} ||= Wx::NewId; }
 

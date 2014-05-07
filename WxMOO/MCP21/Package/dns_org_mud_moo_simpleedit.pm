@@ -13,6 +13,8 @@ use File::Slurp 'slurp';
 use Wx qw( :id :execute );
 use Wx::Event qw( EVT_END_PROCESS EVT_TIMER );
 
+use WxMOO::Utility 'alert';
+
 use parent 'WxMOO::MCP21::Package';
 
 # TODO - this'll be a preference
@@ -58,6 +60,8 @@ sub dns_org_mud_moo_simpleedit_content {
     $self->{'msgs_in_progress'}->{$tempfile} = $mcp_msg;
 
     $self->_start_watching($tempfile);
+
+    alert("save-and-quit might not work -- save changes, then quit");
 
     # This is sorta hinky - have to do these sub{} gyrations to get $self right.
     EVT_END_PROCESS( $process, wxID_ANY, sub { $self->_send_and_cleanup(@_) } );
@@ -120,17 +124,19 @@ sub _send_file_if_needed {
 sub _make_tempfile {
     my ($self, $mcp_msg) = @_;
 
-    # if it's moocode, give it an extension so vim et al will syntax-highlight
-    my $extension = $mcp_msg->{'data'}->{'type'} eq 'moo-code' ? '.moo' : '.tmp';
+    # if it's a known type, give it an extension to give the editor a hint
+    my $extension = {
+        'moo-code' => '.moo',
+    }->{$mcp_msg->{'data'}->{'type'}};
 
     my $tempfile = File::Temp->new(
         TEMPLATE => 'wxmoo_XXXXX',
-        SUFFIX   => $extension,
+        SUFFIX   => $extension || '.tmp',
         DIR      => '/tmp',  # TODO - cross-platform pls
     );
 
     for (@{$mcp_msg->{'data'}->{'content'}}) {
-        s///; # ok ew - there's got to be some deterministic way to dtrt here.
+        s///; # TODO ok ew - there's got to be some deterministic way to dtrt here.
         say $tempfile $_;
     }
     $tempfile->flush;
