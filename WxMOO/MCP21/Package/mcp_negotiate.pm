@@ -5,6 +5,7 @@ use v5.14;
 
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
+use WxMOO::MCP21;
 use parent 'WxMOO::MCP21::Package';
 
 sub new {
@@ -48,7 +49,7 @@ sub do_mcp_negotiate_can {
     my $max = $data->{'max-version'};
     my $pkg = $data->{'package'};
     if (my $ver = $WxMOO::MCP21::registry->get_best_version($pkg, $min, $max)) {
-        say STDERR "activating $pkg";
+        WxMOO::MCP21::debug("activating $pkg");
         $WxMOO::MCP21::registry->get_package($pkg)->activated($ver);
     }
 }

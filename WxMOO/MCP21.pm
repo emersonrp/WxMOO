@@ -3,7 +3,11 @@ use strict;
 use warnings;
 use v5.14;
 
+use parent 'Exporter';
+our @EXPORT_OK = qw( debug );
+
 use WxMOO::MCP21::Registry;
+use WxMOO::Window::DebugMCP;
 
 # This module was developed by squinting directly at both the MCP spec
 # at http://www.moo.mud.org/mcp2/mcp2.html and tkMOO-light's plugins/mcp21.tcl
@@ -36,9 +40,13 @@ my $pkg_mcp_negotiate  = WxMOO::MCP21::Package::mcp_negotiate->new;
 my $pkg_mcp_simpleedit = WxMOO::MCP21::Package::dns_org_mud_moo_simpleedit->new;
 my $pkg_mcp_status     = WxMOO::MCP21::Package::dns_com_awns_status->new;
 
+sub debug {
+    # TODO - we might want one debug window per-connection-window
+    WxMOO::Window::DebugMCP->new->display("@_\n");
+}
+
 sub output_filter {
     my ($data) = @_;
-
 
     # MCP spec, 2.1:
     # A received network line that begins with the characters #$# is translated
@@ -56,8 +64,7 @@ sub output_filter {
     ) { return $data; }
 
     # now we have only lines that started with $PREFIX, which has been trimmed
-
-    say STDERR "S->C: #\$#$data";
+    debug("S->C: #\$#$data");
 
     my ($message_name, $rest) = $data =~ /(\S+)\s*(.*)/;
 
@@ -87,7 +94,7 @@ sub output_filter {
         ($message_name ne 'mcp') and
         ($message->{'auth_key'} ne $mcp_auth_key)
     ) {
-        say STDERR "mcp - auth failed";
+        debug("mcp - auth failed");
         return;
     }
 
@@ -151,6 +158,7 @@ sub dispatch {
 sub server_notify {
     my ($msg, $args) = @_;
 
+
     my $key = $WxMOO::MCP21::mcp_auth_key;
 
     my $out = "#\$#$msg $key ";
@@ -167,17 +175,17 @@ sub server_notify {
             $out .= "$k: $v ";
         }
     }
-    say STDERR "C->S: $out";
+    debug("C->S: $out");
     $connection->Write("$out\n");
 
     if ($multiline) {
         while (my ($k, $l) = each %$multiline) {
             for my $line (@$l) {
                 $connection->Write("#\$#* $datatag $k: $line\n");
-                say STDERR "#\$#* $datatag $k: $line";
+                debug("#\$#* $datatag $k: $line");
             }
             $connection->Write("#\$#: $datatag\n");
-            say STDERR "#\$#: $datatag";
+            debug("#\$#: $datatag");
         }
     }
 }

@@ -18,6 +18,7 @@ Done:
 To do:
 * Add proper prefs and world/connection handling
 * Start making sure it works on Windows and MacOS.  Currently, almost surely it doesn't.
+* Start rolling binary packages for all platforms once it's remotely useful to anyone but me.
 * Basic quality of life things like keyboard shortcuts.
 * Complete the MCP 2.1 implementation.  It does the version dance with the server (both the MCP version, and mcp-negotiate package-version), but ignores whatever it sees.  Also mcp-cord isn't implemented at all.
 * Proper list of 'worlds' / accounts, MOOs, what-have-you.  Pondering schemes to scrape online MOO lists to offer suggestions.

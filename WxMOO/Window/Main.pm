@@ -11,6 +11,7 @@ use WxMOO::Prefs;
 use WxMOO::Utility qw(id);
 
 use WxMOO::Window::ConnectDialog;
+use WxMOO::Window::DebugMCP;
 use WxMOO::Window::InputPane;
 use WxMOO::Window::MainSplitter;
 use WxMOO::Window::OutputPane;
@@ -77,6 +78,9 @@ sub buildMenu {
     my $PrefsMenu = Wx::Menu->new;
     $PrefsMenu->Append(id('MENUITEM_PREFS'),    "Edit Preferences", "");
 
+    my $ToolsMenu = Wx::Menu->new;
+    $ToolsMenu->Append(id('MENUITEM_DEBUGMCP'),  "Debug MCP",       "");
+
     my $HelpMenu = Wx::Menu->new;
     $HelpMenu->Append(id('MENUITEM_HELP'),      "Help Topics",      "");
     $HelpMenu->Append(id('MENUITEM_ABOUT'),     "About WxMOO",      "");
@@ -85,6 +89,7 @@ sub buildMenu {
     $MenuBar->Append($WorldsMenu, "Worlds");
     $MenuBar->Append($EditMenu, "Edit");
     $MenuBar->Append($PrefsMenu, "Preferences");
+    $MenuBar->Append($ToolsMenu, "Tools");
     $MenuBar->Append($HelpMenu, "Help");
 
     $self->SetMenuBar($MenuBar);
@@ -101,6 +106,8 @@ sub buildMenu {
     EVT_MENU( $self, id('MENUITEM_CLEAR'),   sub {1} );
 
     EVT_MENU( $self, id('MENUITEM_PREFS'),   \&showPrefsEditor );
+
+    EVT_MENU( $self, id('MENUITEM_DEBUGMCP'),\&showDebugMCP );
 
     EVT_MENU( $self, id('MENUITEM_HELP'),    sub {1} );
     EVT_MENU( $self, id('MENUITEM_ABOUT'),   \&showAboutBox );
@@ -148,6 +155,12 @@ sub showPrefsEditor {
     my ($self) = @_;
     $self->{'prefs_editor'} ||= WxMOO::Window::PrefsEditor->new($self);
     $self->{'prefs_editor'}->Show;
+}
+
+sub showDebugMCP {
+    my ($self) = @_;
+    $self->{'debug_mcp'} ||= WxMOO::Window::DebugMCP->new($self);
+    $self->{'debug_mcp'}->Show;
 }
 
 # TODO - WxMOO::Window::About

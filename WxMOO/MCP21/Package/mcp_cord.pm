@@ -5,6 +5,7 @@ use v5.14;
 
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
+use WxMOO::MCP21;
 use parent 'WxMOO::MCP21::Package';
 
 sub new {
@@ -26,8 +27,8 @@ sub dispatch {
     }
 }
 
-sub do_mcp_cord        { say STDERR "do_mcp_cord called with @_"; }
-sub do_mcp_cord_open   { say STDERR "do_mcp_cord_open called with @_"; }
-sub do_mcp_cord_closed { say STDERR "do_mcp_cord_closed called with @_"; }
+sub do_mcp_cord        { WxMOO::MCP21::debug("do_mcp_cord called with @_"        ) }
+sub do_mcp_cord_open   { WxMOO::MCP21::debug("do_mcp_cord_open called with @_"   ) }
+sub do_mcp_cord_closed { WxMOO::MCP21::debug("do_mcp_cord_closed called with @_" ) }
 
 1;

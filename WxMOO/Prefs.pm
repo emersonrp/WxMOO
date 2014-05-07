@@ -9,8 +9,9 @@ use Config::Simple '-strict';
 
 use base qw(Config::Simple);
 use constant SIMPLE_ACCESSORS => qw(
-    use_mcp use_ansi save_window_size highlight_urls
-    window_height window_width input_height
+    use_mcp use_ansi highlight_urls
+    save_window_size window_height window_width input_height
+    save_mcp_window_size mcp_window_height mcp_window_width
 );
 
 # TODO - cross-platform config file locater
@@ -68,20 +69,27 @@ sub _colour_param {
     my $defaultFont = Wx::Font->new( 10, wxTELETYPE, wxNORMAL, wxNORMAL );
     my $defaultFontString = $defaultFont->GetNativeFontInfo->ToString;
     my %defaults = (
-        input_font       => $defaultFontString,
-        output_font      => $defaultFontString,
-        output_fgcolour  => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
-        output_bgcolour  => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
-        input_fgcolour   => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
-        input_bgcolour   => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
-        window_width     => 800,
-        window_height    => 600,
-        theme            => 'solarized',
-        input_height     => 25,
-        use_ansi         => 1,
-        use_mcp          => 1,
-        save_window_size => 1,
-        highlight_urls   => 1,
+        input_font           => $defaultFontString,
+        output_font          => $defaultFontString,
+        output_fgcolour      => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
+        output_bgcolour      => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
+        input_fgcolour       => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
+        input_bgcolour       => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
+
+        save_window_size     => 1,
+        window_width         => 800,
+        window_height        => 600,
+        input_height         => 25,
+
+        theme                => 'solarized',
+        use_ansi             => 1,
+        use_mcp              => 1,
+        highlight_urls       => 1,
+
+        save_mcp_window_size => 1,
+        mcp_window_width     => 600,
+        mcp_window_height    => 400,
+
     );
 
     sub get_defaults {

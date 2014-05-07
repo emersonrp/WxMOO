@@ -4,9 +4,10 @@ use warnings;
 use v5.14;
 
 use parent 'Exporter';
+our @EXPORT_OK = qw( alert id URL_REGEX );
+
 use Wx;
 
-our @EXPORT_OK = qw( alert id URL_REGEX );
 
 # TODO - there's surely some less-intrusive and -hacky way to do this.
 sub alert {
