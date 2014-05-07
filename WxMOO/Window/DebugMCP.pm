@@ -34,13 +34,13 @@ sub new {
     return $self;
 }
 
-sub Show  {
+sub toggle_visible  {
     my $self = shift;
     if ($self->IsShown) {
-        $self->SUPER::Hide->();
+        $self->Hide->();
         $self->active(0);
     } else {
-        $self->SUPER::Show->();
+        $self->Show->();
         $self->active(1);
     }
 }

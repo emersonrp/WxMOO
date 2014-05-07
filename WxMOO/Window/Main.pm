@@ -9,6 +9,7 @@ use Wx::Event qw( EVT_MENU EVT_SIZE );
 use WxMOO::Connection;  # Might go away later
 use WxMOO::Prefs;
 use WxMOO::Utility qw(id);
+use WxMOO::Editor;
 
 use WxMOO::Window::ConnectDialog;
 use WxMOO::Window::DebugMCP;
@@ -78,8 +79,8 @@ sub buildMenu {
     my $PrefsMenu = Wx::Menu->new;
     $PrefsMenu->Append(id('MENUITEM_PREFS'),    "Edit Preferences", "");
 
-    my $ToolsMenu = Wx::Menu->new;
-    $ToolsMenu->Append(id('MENUITEM_DEBUGMCP'),  "Debug MCP",       "");
+    my $WindowMenu = Wx::Menu->new;
+    $WindowMenu->Append(id('MENUITEM_DEBUGMCP'),  "Debug MCP",       "");
 
     my $HelpMenu = Wx::Menu->new;
     $HelpMenu->Append(id('MENUITEM_HELP'),      "Help Topics",      "");
@@ -89,7 +90,7 @@ sub buildMenu {
     $MenuBar->Append($WorldsMenu, "Worlds");
     $MenuBar->Append($EditMenu, "Edit");
     $MenuBar->Append($PrefsMenu, "Preferences");
-    $MenuBar->Append($ToolsMenu, "Tools");
+    $MenuBar->Append($WindowMenu, "Windows");
     $MenuBar->Append($HelpMenu, "Help");
 
     $self->SetMenuBar($MenuBar);
@@ -160,7 +161,7 @@ sub showPrefsEditor {
 sub showDebugMCP {
     my ($self) = @_;
     $self->{'debug_mcp'} ||= WxMOO::Window::DebugMCP->new($self);
-    $self->{'debug_mcp'}->Show;
+    $self->{'debug_mcp'}->toggle_visible;
 }
 
 # TODO - WxMOO::Window::About

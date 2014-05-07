@@ -13,6 +13,7 @@ use File::Slurp 'slurp';
 use Wx qw( :id :execute );
 use Wx::Event qw( EVT_END_PROCESS EVT_TIMER );
 
+use WxMOO::Editor;
 use WxMOO::Utility 'alert';
 
 use parent 'WxMOO::MCP21::Package';
@@ -28,17 +29,11 @@ sub new {
         max     => '1.0',
     });
 
+    $self->{'in_progress'} = {};
+
     $WxMOO::MCP21::registry->register($self, qw( dns-org-mud-moo-simpleedit-content ));
-    $self->_init;
 }
 
-sub _init {
-    my ($self) = @_;
-    $self->{'watched'} = {};
-    $self->{'watchTimer'} = Wx::Timer->new($self);
-    EVT_TIMER($self, $self->{'watchTimer'}, \&_watch_queue);
-
-}
 sub dispatch {
     my ($self, $message) = @_;
     given ($message->{'message'}) {
@@ -51,97 +46,25 @@ sub dispatch {
 sub dns_org_mud_moo_simpleedit_content {
     my ($self, $mcp_msg) = @_;
 
-    my $tempfile = $self->_make_tempfile($mcp_msg);
-
-    my $process = Wx::Process->new;
-    $process->{'_file'} = $tempfile;
-    Wx::ExecuteCommand(EDITOR . " -f $tempfile", wxEXEC_NODISABLE, $process );
-
-    $self->{'msgs_in_progress'}->{$tempfile} = $mcp_msg;
-
-    $self->_start_watching($tempfile);
-
-    alert("save-and-quit might not work -- save changes, then quit");
-
-    # This is sorta hinky - have to do these sub{} gyrations to get $self right.
-    EVT_END_PROCESS( $process, wxID_ANY, sub { $self->_send_and_cleanup(@_) } );
-}
-
-
-sub _send_and_cleanup {
-    my ($self, $proc, $evt) = @_;
-    my $file = $proc->{'_file'};
-    $self->_send_file_if_needed($file);
-    $self->_stop_watching($file);
-    delete $self->{'msgs_in_progress'}->{$file};
-    unlink $file;
-}
-
-# our queue of known tempfiles with editors sitting open.
-# we want "save" to send the data to the MOO, so we'll
-# stat() the queue every once in a while.
-sub _start_watching {
-    my ($self, $file) = @_;
-    $self->{'watched'}->{$file} = (stat $file)[9];
-    unless ($self->{'watchTimer'}->IsRunning) {
-        $self->{'watchTimer'}->Start(250, 0);
-    }
-}
-
-sub _stop_watching {
-    my ($self, $file) = @_;
-    delete $self->{'watched'}->{$file};
-    unless (keys %{$self->{'watched'}}) {
-        $self->{'watchTimer'}->Stop;
-    }
-}
-
-sub _watch_queue {
-    my ($self) = @_;
-    for my $file (keys %{$self->{'watched'}}) {
-        $self->_send_file_if_needed($file);
-    }
+    my $id = WxMOO::Editor::launch_editor({
+        type     => $mcp_msg->{'data'}->{'type'},
+        content  => $mcp_msg->{'data'}->{'content'},
+        callback => sub { $self->_send_file_if_needed(@_) },
+    });
+    $self->{'in_progress'}->{$id} = $mcp_msg;
 }
 
 sub _send_file_if_needed {
-    my ($self, $file) = @_;
-    my $mtime = (stat $file)[9] or carp "wtf is wrong with $file?!?";
-    if ($mtime > $self->{'watched'}->{$file}) {
-        # shipit!
-        my $mcp_msg = $self->{'msgs_in_progress'}->{$file};
-        my @content = slurp($file) or return;
-        WxMOO::MCP21::server_notify(
-            'dns-org-mud-moo-simpleedit-set', {
-                reference => $mcp_msg->{'data'}->{'reference'},
-                type      => $mcp_msg->{'data'}->{'type'},
-                content   => \@content,
-            }
-        );
-        $self->{'watched'}->{$file} = $mtime;
-    }
-}
-
-sub _make_tempfile {
-    my ($self, $mcp_msg) = @_;
-
-    # if it's a known type, give it an extension to give the editor a hint
-    my $extension = {
-        'moo-code' => '.moo',
-    }->{$mcp_msg->{'data'}->{'type'}};
-
-    my $tempfile = File::Temp->new(
-        TEMPLATE => 'wxmoo_XXXXX',
-        SUFFIX   => $extension || '.tmp',
-        DIR      => '/tmp',  # TODO - cross-platform pls
+    my ($self, $id, $content) = @_;
+    # shipit!
+    my $mcp_msg = $self->{'in_progress'}->{$id};
+    WxMOO::MCP21::server_notify(
+        'dns-org-mud-moo-simpleedit-set', {
+            reference => $mcp_msg->{'data'}->{'reference'},
+            type      => $mcp_msg->{'data'}->{'type'},
+            content   => $content,
+        }
     );
-
-    for (@{$mcp_msg->{'data'}->{'content'}}) {
-        s///; # TODO ok ew - there's got to be some deterministic way to dtrt here.
-        say $tempfile $_;
-    }
-    $tempfile->flush;
-
-    return $tempfile;
 }
 
 1;
