@@ -41,44 +41,44 @@ Dependencies
 
 In addition to perl, wx, and the requisite "use Wx" glue, Module::ScanDeps (not itself a dependency) reports the following:
 
-'Carp'                  => '1.26',
-'Class::Accessor'       => '0.34',
-'Config::Simple'        => '4.59',
-'constant'              => '1.27',
-'Cwd'                   => '3.40',
-'Data::Dumper'          => '2.151',
-'Exporter'              => '5.68',
-'Exporter::Heavy'       => '5.68',
-'File::Path'            => '2.09',
-'File::Slurp'           => '9999.19',
-'File::Spec'            => '3.40',
-'File::Spec::Unix'      => '3.40',
-'File::Temp'            => '0.2301',
-'List::Util'            => '1.31',
-'parent'                => '0.228',
-'Scalar::Util'          => '1.31',
-'Socket'                => '2.013',
-'Text::ParseWords'      => '3.29',
-'threads'               => '1.92',
-'Wx'                    => '0.9921',
-'Wx::App'               => 'undef',
-'Wx::Event'             => 'undef',
-'Wx::Locale'            => 'undef',
-'Wx::Menu'              => 'undef',
-'Wx::Mini'              => '0.9921',
-'Wx::Print'             => '0.01',
-'Wx::RadioBox'          => 'undef',
-'Wx::RichText'          => '0.01',
-'Wx::Socket'            => '0.01',
-'Wx::Timer'             => 'undef',
-'Wx::Wx_Exp'            => 'undef',
+    'Carp'                  => '1.26',
+    'Class::Accessor'       => '0.34',
+    'Config::Simple'        => '4.59',
+    'constant'              => '1.27',
+    'Cwd'                   => '3.40',
+    'Data::Dumper'          => '2.151',
+    'Exporter'              => '5.68',
+    'Exporter::Heavy'       => '5.68',
+    'File::Path'            => '2.09',
+    'File::Slurp'           => '9999.19',
+    'File::Spec'            => '3.40',
+    'File::Spec::Unix'      => '3.40',
+    'File::Temp'            => '0.2301',
+    'List::Util'            => '1.31',
+    'parent'                => '0.228',
+    'Scalar::Util'          => '1.31',
+    'Socket'                => '2.013',
+    'Text::ParseWords'      => '3.29',
+    'threads'               => '1.92',
+    'Wx'                    => '0.9921',
+    'Wx::App'               => 'undef',
+    'Wx::Event'             => 'undef',
+    'Wx::Locale'            => 'undef',
+    'Wx::Menu'              => 'undef',
+    'Wx::Mini'              => '0.9921',
+    'Wx::Print'             => '0.01',
+    'Wx::RadioBox'          => 'undef',
+    'Wx::RichText'          => '0.01',
+    'Wx::Socket'            => '0.01',
+    'Wx::Timer'             => 'undef',
+    'Wx::Wx_Exp'            => 'undef',
 
 Acknowledgements
 ----------------
 
-* wxmoo is inspired by (and occasionally directly borrows from) [Andrew Wilson][http://www.awns.com]'s [tkMOO-light][http://www.awns.com/tkMOO-light], which is still probably the most-capable and -advanced MOO client around.
-* [PADRE][http://padre.perlide.org] is not something I use, being a [vim][http://www.vim.org] junkie, but their generously-licensed code for a production wxperl application has been an invaluable reference.
-* [Daring Fireball][http://www.daringfireball.net]'s blog graciously supplied to the public domain the [URL-detecting regex][http://daringfireball.net/2010/07/improved_regex_for_matching_urls] that I adapted.
+* wxmoo is inspired by (and occasionally directly borrows from) [Andrew Wilson](http://www.awns.com)'s [tkMOO-light](http://www.awns.com/tkMOO-light), which is still probably the most-capable and -advanced MOO client around.
+* [PADRE](http://padre.perlide.org) is not something I use, being a [vim](http://www.vim.org) junkie, but their generously-licensed code for a production wxperl application has been an invaluable reference.
+* [Daring Fireball](http://www.daringfireball.net)'s blog graciously supplied to the public domain the [URL-detecting regex](http://daringfireball.net/2010/07/improved_regex_for_matching_urls) that I adapted.
 
 
 
