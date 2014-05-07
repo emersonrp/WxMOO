@@ -73,3 +73,12 @@ In addition to perl, wx, and the requisite "use Wx" glue, Module::ScanDeps (not 
 'Wx::Timer'             => 'undef',
 'Wx::Wx_Exp'            => 'undef',
 
+Acknowledgements
+----------------
+
+* wxmoo is inspired by (and occasionally directly borrows from) [Andrew Wilson][http://www.awns.com]'s [tkMOO-light][http://www.awns.com/tkMOO-light], which is still probably the most-capable and -advanced MOO client around.
+* [PADRE][http://padre.perlide.org] is not something I use, being a [vim][http://www.vim.org] junkie, but their generously-licensed code for a production wxperl application has been an invaluable reference.
+* [Daring Fireball][http://www.daringfireball.net]'s blog graciously supplied to the public domain the [URL-detecting regex][http://daringfireball.net/2010/07/improved_regex_for_matching_urls] that I adapted.
+
+
+

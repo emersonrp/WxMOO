@@ -81,20 +81,17 @@ sub display {
                 } else {
                     if (WxMOO::Prefs->prefs->highlight_urls and
                         $bit =~ URL_REGEX) {
-                            my $save_style = my $current_style = $self->GetTextAttrExStyle($self->GetCaretPosition);
-                            $current_style->SetTextColour(Wx::Colour->new(0, 0, 255));
-
                             $self->WriteText(${^PREMATCH});
 
                             $self->BeginURL(${^MATCH});
-                            $self->BeginStyle($current_style);
                             $self->BeginUnderline;
+                            $self->BeginTextColour( Wx::Colour->new(0, 0, 255) );
 
                             $self->WriteText(${^MATCH});
 
-                            $self->EndURL;
+                            $self->EndTextColour;
                             $self->EndUnderline;
-                            $self->BeginStyle($save_style);
+                            $self->EndURL;
 
                             $self->WriteText(${^POSTMATCH});
                     } else {
