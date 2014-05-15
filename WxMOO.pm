@@ -6,6 +6,7 @@ use warnings;
 
 require 5.014;
 
+use Wx::Perl::Packager;
 use Wx;
 use parent 'Wx::App';
 

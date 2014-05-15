@@ -9,7 +9,6 @@ no if $] >= 5.018, warnings => "experimental::smartmatch";
 # this code is already in dire need of a rework, but it's starting work at all, at least.
 
 use File::Temp;
-use File::Slurp 'slurp';
 use Wx qw( :id :execute );
 use Wx::Event qw( EVT_END_PROCESS EVT_TIMER );
 

@@ -97,7 +97,6 @@ sub onSize {
         my ($w, $h) = $self->GetSizeWH;
         WxMOO::Prefs->prefs->mcp_window_width($w);
         WxMOO::Prefs->prefs->mcp_window_height($h);
-        WxMOO::Prefs->prefs->save;
     }
     $evt->Skip;
 }

@@ -133,7 +133,6 @@ sub onSize {
         my ($w, $h) = $self->GetSizeWH;
         WxMOO::Prefs->prefs->window_width($w);
         WxMOO::Prefs->prefs->window_height($h);
-        WxMOO::Prefs->prefs->save;
     }
     $evt->Skip;
 }
@@ -182,7 +181,6 @@ sub showAboutBox {
 
 sub quitApplication {
     my ($self) = @_;
-    WxMOO::Prefs->prefs->save;
     $self->closeConnection;
     $self->Close(1);
 }

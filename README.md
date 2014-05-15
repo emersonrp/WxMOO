@@ -47,7 +47,6 @@ As far as further perl dependencies, Module::ScanDeps (not itself a dependency) 
 
     Carp
     Class::Accessor
-    Config::Simple
     constant
     Cwd
     Data::Dumper

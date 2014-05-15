@@ -62,8 +62,6 @@ sub update_prefs {
 
     WxMOO::Prefs->prefs->use_ansi( $fc_page->{'ansi_checkbox'}->GetValue + 0 );
 
-    WxMOO::Prefs->prefs->save;
-
     $self->{'parent'}->{'output_pane'}->restyle_thyself;
     $self->{'parent'}->{'input_pane'}->restyle_thyself;
     $evt->Skip;
