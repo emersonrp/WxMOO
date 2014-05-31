@@ -6,7 +6,6 @@ use warnings;
 
 require 5.014;
 
-use Wx::Perl::Packager;
 use Wx;
 use parent 'Wx::App';
 
@@ -20,10 +19,7 @@ sub OnInit {
     return 1;
 }
 
-__PACKAGE__->run( @ARGV ) unless caller();
-
-sub run { WxMOO->new->MainLoop; }
+WxMOO->new->MainLoop;
 
 1;
 
-__END__
