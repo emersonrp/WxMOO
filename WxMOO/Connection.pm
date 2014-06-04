@@ -7,14 +7,14 @@ use Carp;
 
 use Wx qw( :socket );
 use Wx::Socket;
-use Wx::Event qw( EVT_SOCKET_INPUT EVT_SOCKET_LOST EVT_SOCKET_CONNECTION );
+use Wx::Event qw( EVT_SOCKET_INPUT EVT_SOCKET_LOST EVT_SOCKET_CONNECTION EVT_TIMER );
 use WxMOO::Utility qw( id );
 use WxMOO::MCP21;  # this is icky
 
 use parent -norequire, 'Wx::SocketClient';
 use parent 'Class::Accessor';
 
-WxMOO::Connection->mk_accessors(qw( host port ));
+WxMOO::Connection->mk_accessors(qw( host port keepalive ));
 
 sub new {
     my ($class, $parent) = @_;
@@ -36,7 +36,9 @@ sub onInput {
     $output->display($poop);
 }
 
-sub onClose { }
+sub onClose {
+    shift->keepalive->Stop;
+}
 
 sub output { shift->Write(@_); }
 
@@ -49,7 +51,44 @@ sub connect {
 
     WxMOO::MCP21::new_connection($self);
 
+    # TODO - 'if prefs->keepalive'
+    $self->init_keepalive;
+
     carp "Can't connect to host/port" unless $self->IsConnected;
+}
+
+use constant KEEPALIVE_TIME => 60_000;  # 1 minute
+sub init_keepalive {
+    my $self = shift;
+    $self->keepalive( WxMOO::Connection::Keepalive->new($self) );
+    $self->keepalive->Start(KEEPALIVE_TIME, 0);
+}
+
+
+######################
+# This is a stupid brute-force keepalive that periodically tickles the
+# connection by sending a single space.  Not magical or brilliant.
+
+package WxMOO::Connection::Keepalive;
+
+use parent 'Wx::Timer';
+use Wx::Event qw( EVT_TIMER );
+
+sub new {
+    my ($class, $connection) = @_;
+    my $self = $class->SUPER::new;
+    $self->{'connection'} = $connection;
+
+    EVT_TIMER($self, -1, \&on_keepalive);
+
+    bless $self, $class;
+}
+
+# TODO - this is pretty brute-force, innit?
+# This'll likely break on worlds that actually
+# are character-based instead of line-based.
+sub on_keepalive {
+    shift->{'connection'}->Write(" ");
 }
 
 1;
