@@ -56,8 +56,9 @@ sub ScrollIfAppropriate {
 sub restyle_thyself {
     my ($self) = @_;
     my $basic_style = Wx::RichTextAttr->new;
-    $basic_style->SetTextColour(WxMOO::Prefs->prefs->output_fgcolour);
+    $basic_style->SetTextColour      (WxMOO::Prefs->prefs->output_fgcolour);
     $basic_style->SetBackgroundColour(WxMOO::Prefs->prefs->output_bgcolour);
+    $self->SetBackgroundColour(WxMOO::Prefs->prefs->output_bgcolour);
     $self->SetBasicStyle($basic_style);
     $self->SetFont(WxMOO::Prefs->prefs->output_font);
 }

@@ -34,6 +34,8 @@ sub new {
     $self->SetFocus;
     $self->Clear;
 
+    $self->restyle_thyself;
+
     bless $self, $class;
 }
 
