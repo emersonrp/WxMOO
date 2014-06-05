@@ -6,16 +6,17 @@ use v5.14;
 use Wx qw( :misc :dialog :sizer );
 
 use WxMOO::Prefs;
+use WxMOO::Worlds;
 
 use base qw(Wx::Dialog);
 
 sub new {
     my ($class, $parent) = @_;
 
-    my $self = $class->SUPER::new(
-        $parent, -1, 'Worlds List',
-        wxDefaultPosition, wxDefaultSize,
-    );
+    WxMOO::Worlds->init;
+
+    my $self = $class->SUPER::new( $parent, -1, 'Worlds List');
+
     $self->{'world_details_staticbox'} = Wx::StaticBox->new($self, -1, "" );
     $self->{'world_details_box'}       = Wx::StaticBoxSizer->new($self->{'world_details_staticbox'}, wxHORIZONTAL);
 
@@ -24,6 +25,11 @@ sub new {
     $self->{'world_picker_sizer'} = Wx::BoxSizer->new(wxHORIZONTAL);
     $self->{'world_picker_sizer'}->Add($self->{'world_label'},  0,        wxALIGN_CENTER_VERTICAL, 0);
     $self->{'world_picker_sizer'}->Add($self->{'world_picker'}, 1, wxLEFT|wxALIGN_CENTER_VERTICAL, 5);
+    #
+    # TODO
+    # "for my $world (@worlds_from_config_file) { ...
+    #   $self->{'world_picker'}->Add_An_Option_Kthx
+    # }
 
     $self->{'world_details_panel'} = WxMOO::Window::WorldPanel->new($self);
     $self->{'world_details_box'}->Add($self->{'world_details_panel'}, 1, wxEXPAND, 0);
@@ -129,11 +135,13 @@ sub new {
     $self->{'checkbox_sizer'}->Add($self->{'login_dialog_check'}, 0, wxLEFT|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5);
     $self->{'checkbox_sizer'}->Add($self->{'shortlist_check'}, 0, wxLEFT|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5);
 
+    $self->{'new_button'} = Wx::Button->new($self, -1, "New");
     $self->{'reset_button'} = Wx::Button->new($self, -1, "Reset");
-    $self->{'apply_button'} = Wx::Button->new($self, -1, "Apply");
-    $self->{'button_sizer'} = Wx::FlexGridSizer->new(1, 2, 0, 0);
-    $self->{'button_sizer'}->Add($self->{'reset_button'}, 0, wxALL|wxALIGN_RIGHT, 5);
-    $self->{'button_sizer'}->Add($self->{'apply_button'}, 0, wxALL, 5);
+    $self->{'save_button'} = Wx::Button->new($self, -1, "Save");
+    $self->{'button_sizer'} = Wx::FlexGridSizer->new(1, 3, 0, 0);
+    $self->{'button_sizer'}->Add($self->{'new_button'}, 0, wxALL|wxALIGN_RIGHT, 5);
+    $self->{'button_sizer'}->Add($self->{'reset_button'}, 0, wxALL, 5);
+    $self->{'button_sizer'}->Add($self->{'save_button'}, 0, wxALL, 5);
     $self->{'button_sizer'}->AddGrowableCol(0);
 
     $self->{'panel_sizer'} = Wx::BoxSizer->new(wxVERTICAL);
