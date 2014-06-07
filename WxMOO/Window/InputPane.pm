@@ -29,7 +29,7 @@ sub new {
 
     EVT_TEXT_ENTER( $self, -1, \&send_to_connection );
     EVT_TEXT      ( $self, -1, \&update_command_history );
-    EVT_CHAR      ( $self,     \&check_command_history );
+    EVT_CHAR      ( $self,     \&check_for_interesting_keystrokes );
 
     $self->SetFocus;
     $self->Clear;
@@ -57,18 +57,27 @@ sub send_to_connection {
 sub update_command_history {
     my ($self, $evt) = @_; $self->cmd_history->update($self->GetValue) }
 
-sub check_command_history {
+sub check_for_interesting_keystrokes {
     my ($self, $evt) = @_;
     my $k = $evt->GetKeyCode;
     if ($k == WXK_UP) {
         $self->SetValue($self->cmd_history->prev);
     } elsif ($k == WXK_DOWN) {
         $self->SetValue($self->cmd_history->next);
-    } else {
-        if ($self->GetValue =~ /^con?n?e?c?t? +\w+ +/) {
-            # it's a connection attempt, style the passwd to come out as *****
-        }
-        $evt->Skip; return;
+    } elsif ($k == 23) { # Ctrl-W.  Is this right?
+        my $end = $self->GetInsertionPoint;
+
+        $self->GetValue =~ /(\s*[[:graph:]]+\s*)$/;
+
+        return unless $1;
+
+        my $start = $end - (length $1);
+        $self->Remove($start, $end);
+     } else {
+#         if ($self->GetValue =~ /^con?n?e?c?t? +\w+ +/) {
+#             # it's a connection attempt, style the passwd to come out as *****
+#         }
+         $evt->Skip; return;
     }
     $self->SetInsertionPointEnd;
 }
