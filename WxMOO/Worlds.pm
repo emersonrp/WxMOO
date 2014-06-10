@@ -31,10 +31,15 @@ sub worlds {
     $config->SetPath('/worlds');
 
     if (my $groupcount = $config->GetNumberOfGroups) {
-        for my $k (1 .. $groupcount) {
-            my (undef, $world, undef) = $config->GetNextGroup($k-1);
+        for my $i (1 .. $groupcount) {
+            my (undef, $world, undef) = $config->GetNextGroup($i-1);
             $config->SetPath($world);
-# TODO - for each entry in this group, populate $self->{'worlds'}
+            if (my $datacount = $config->GetNumberOfEntries) {
+                for my $j (1 .. $datacount) {
+                    my (undef, $dataname, undef) = $config->GetNextEntry($j-1);
+                    $self->{'worlds'}->{$world}->{$dataname} = $config->Read($dataname);
+                }
+            }
             $config->SetPath('/worlds');
         }
     } else {

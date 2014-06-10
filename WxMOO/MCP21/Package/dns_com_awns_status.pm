@@ -29,7 +29,8 @@ sub dispatch {
 }
 
 sub do_status {
-    say STDERR @_;
+    use Data::Dumper;
+    print STDERR Data::Dumper::Dumper [@_];
 }
 
 1;

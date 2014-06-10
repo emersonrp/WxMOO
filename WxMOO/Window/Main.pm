@@ -3,12 +3,11 @@ use strict;
 use warnings;
 use v5.14;
 
-use Wx qw( :misc :sizer );
+use Wx qw( :frame :misc :sizer );
 use Wx::Event qw( EVT_MENU EVT_SIZE );
 
 use WxMOO::Connection;  # Might go away later
 use WxMOO::Prefs;
-use WxMOO::Utility qw(id);
 use WxMOO::Editor;
 
 use WxMOO::Window::ConnectDialog;
@@ -23,21 +22,19 @@ use base 'Wx::Frame';
 
 sub new {
     my ($class) = @_;
-    my $self = $class->SUPER::new( undef, -1, 'WxMOO');
+    my $self = $class->SUPER::new( undef, -1, 'WxMOO',
+        wxDefaultPosition, wxDefaultSize,
+        wxDEFAULT_FRAME_STYLE);
 
     $self->buildMenu;
 
     $self->addEvents;
 
-    if (1 || WxMOO::Prefs->prefs->save_window_size) {
+    if ( WxMOO::Prefs->prefs->save_window_size) {
         my $w = WxMOO::Prefs->prefs->window_width  || 800;
         my $h = WxMOO::Prefs->prefs->window_height || 600;
         $self->SetSize([$w, $h]);
     }
-
-    # TODO - don't connect until we ask for it.
-    # TODO - probably want a tabbed interface for multiple connections
-    $self->{'connection'} = WxMOO::Connection->new($self);
 
     $self->{'splitter'} = WxMOO::Window::MainSplitter->new($self);
 
@@ -48,8 +45,12 @@ sub new {
     $self->{'splitter'}->SetMinimumPaneSize(20); # TODO - set to "one line of input field"
 
     $self->{'sizer'} = Wx::BoxSizer->new( wxVERTICAL );
-    $self->{'sizer'}->Add($self->{'splitter'}, 1, wxALL|wxGROW, 5);
+    $self->{'sizer'}->Add($self->{'splitter'}, 1, wxALL|wxGROW);
     $self->SetSizer($self->{'sizer'});
+
+    # TODO - don't connect until we ask for it.
+    # TODO - probably want a tabbed interface for multiple connections
+    $self->{'connection'} = WxMOO::Connection->new($self);
 
     return $self;
 }
@@ -64,27 +65,27 @@ sub Initialize {
 sub buildMenu {
     my ($self) = @_;
     my $WorldsMenu = Wx::Menu->new;
-    $WorldsMenu->Append(id('MENUITEM_WORLDS'),  "Worlds...",        "");
-    $WorldsMenu->Append(id('MENUITEM_CONNECT'), "Connect...",       "");
-    $WorldsMenu->Append(id('MENUITEM_CLOSE'),   "Close",            "");
+    my $Worlds_worlds  = $WorldsMenu->Append(-1, "Worlds...",  "");
+    my $Worlds_connect = $WorldsMenu->Append(-1, "Connect...", "");
+    my $Worlds_close   = $WorldsMenu->Append(-1, "Close",      "");
     $WorldsMenu->AppendSeparator;
-    $WorldsMenu->Append(id('MENUITEM_QUIT'),    "Quit",             "");
+    my $Worlds_quit    = $WorldsMenu->Append(-1, "Quit",       "");
 
     my $EditMenu = Wx::Menu->new;
-    $EditMenu->Append(id('MENUITEM_CUT'),       "Cut",              "");
-    $EditMenu->Append(id('MENUITEM_COPY'),      "Copy",             "");
-    $EditMenu->Append(id('MENUITEM_PASTE'),     "Paste",            "");
-    $EditMenu->Append(id('MENUITEM_CLEAR'),     "Clear",            "");
+    my $Edit_cut   = $EditMenu->Append(-1, "Cut",   "");
+    my $Edit_copy  = $EditMenu->Append(-1, "Copy",  "");
+    my $Edit_paste = $EditMenu->Append(-1, "Paste", "");
+    my $Edit_clear = $EditMenu->Append(-1, "Clear", "");
 
     my $PrefsMenu = Wx::Menu->new;
-    $PrefsMenu->Append(id('MENUITEM_PREFS'),    "Edit Preferences", "");
+    my $Prefs_prefs = $PrefsMenu->Append(-1, "Edit Preferences", "");
 
     my $WindowMenu = Wx::Menu->new;
-    $WindowMenu->Append(id('MENUITEM_DEBUGMCP'),  "Debug MCP",       "");
+    my $Window_debugmcp = $WindowMenu->Append(-1, "Debug MCP", "");
 
     my $HelpMenu = Wx::Menu->new;
-    $HelpMenu->Append(id('MENUITEM_HELP'),      "Help Topics",      "");
-    $HelpMenu->Append(id('MENUITEM_ABOUT'),     "About WxMOO",      "");
+    my $Help_help  = $HelpMenu->Append(-1, "Help Topics", "");
+    my $Help_about = $HelpMenu->Append(-1, "About WxMOO", "");
 
     my $MenuBar = Wx::MenuBar->new;
     $MenuBar->Append($WorldsMenu, "Worlds");
@@ -96,22 +97,22 @@ sub buildMenu {
     $self->SetMenuBar($MenuBar);
 
     # MENUBAR EVENTS
-    EVT_MENU( $self, id('MENUITEM_WORLDS'),  \&showWorldsList    );
-    EVT_MENU( $self, id('MENUITEM_CONNECT'), \&showConnectDialog );
-    EVT_MENU( $self, id('MENUITEM_CLOSE'),   \&closeConnection   );
-    EVT_MENU( $self, id('MENUITEM_QUIT'),    \&quitApplication   );
+    EVT_MENU( $self, $Worlds_worlds,  \&showWorldsList    );
+    EVT_MENU( $self, $Worlds_connect, \&showConnectDialog );
+    EVT_MENU( $self, $Worlds_close,   \&closeConnection   );
+    EVT_MENU( $self, $Worlds_quit,    \&quitApplication   );
 
-    EVT_MENU( $self, id('MENUITEM_CUT'),     sub {1} );
-    EVT_MENU( $self, id('MENUITEM_COPY'),    sub {1} );
-    EVT_MENU( $self, id('MENUITEM_PASTE'),   sub {1} );
-    EVT_MENU( $self, id('MENUITEM_CLEAR'),   sub {1} );
+    EVT_MENU( $self, $Edit_cut,     sub {1} );
+    EVT_MENU( $self, $Edit_copy,    sub {1} );
+    EVT_MENU( $self, $Edit_paste,   sub {1} );
+    EVT_MENU( $self, $Edit_clear,   sub {1} );
 
-    EVT_MENU( $self, id('MENUITEM_PREFS'),   \&showPrefsEditor );
+    EVT_MENU( $self, $Prefs_prefs, \&showPrefsEditor );
 
-    EVT_MENU( $self, id('MENUITEM_DEBUGMCP'),\&showDebugMCP );
+    EVT_MENU( $self, $Window_debugmcp, \&showDebugMCP );
 
-    EVT_MENU( $self, id('MENUITEM_HELP'),    sub {1} );
-    EVT_MENU( $self, id('MENUITEM_ABOUT'),   \&showAboutBox );
+    EVT_MENU( $self, $Help_help,  sub {1} );
+    EVT_MENU( $self, $Help_about, \&showAboutBox );
 }
 
 sub addEvents {
@@ -129,7 +130,7 @@ sub closeConnection {
 sub onSize {
     my ($self, $evt) = @_;
 
-    if (1 || WxMOO::Prefs->prefs->save_window_size) {
+    if (WxMOO::Prefs->prefs->save_window_size) {
         my ($w, $h) = $self->GetSizeWH;
         WxMOO::Prefs->prefs->window_width($w);
         WxMOO::Prefs->prefs->window_height($h);

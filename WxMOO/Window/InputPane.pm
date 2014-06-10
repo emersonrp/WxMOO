@@ -6,7 +6,6 @@ use v5.14;
 use Wx qw( :misc :textctrl :font WXK_UP WXK_DOWN );
 use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_CHAR );
 use WxMOO::Prefs;
-use WxMOO::Utility qw( id );
 
 use base qw( Wx::TextCtrl Class::Accessor );
 WxMOO::Window::InputPane->mk_accessors(qw( parent connection cmd_history ));
@@ -14,7 +13,7 @@ WxMOO::Window::InputPane->mk_accessors(qw( parent connection cmd_history ));
 sub new {
     my ($class, $parent, $connection) = @_;
 
-    my $self = $class->SUPER::new( $parent, id('INPUT_PANE'), "",
+    my $self = $class->SUPER::new( $parent, -1, "",
         wxDefaultPosition, wxDefaultSize,
         wxTE_PROCESS_ENTER | wxTE_MULTILINE
     );

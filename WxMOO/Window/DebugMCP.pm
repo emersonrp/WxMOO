@@ -7,7 +7,6 @@ use Wx qw( :misc :sizer );
 use Wx::Event qw( EVT_SIZE );
 
 use WxMOO::Prefs;
-use WxMOO::Utility qw(id);
 
 use base 'Wx::Frame';
 
@@ -15,7 +14,7 @@ sub new {
     my ($class) = @_;
     state $self;
     unless ($self) {
-        $self = $class->SUPER::new( undef, id('DEBUG_MCP'), 'Debug MCP');
+        $self = $class->SUPER::new( undef, -1, 'Debug MCP');
 
         $self->addEvents;
 
@@ -109,14 +108,12 @@ use v5.14;
 use Wx qw( :misc :textctrl );
 use Wx::RichText;
 
-use WxMOO::Utility 'id';
-
 use base 'Wx::RichTextCtrl';
 
 sub new {
     my ($class, $parent) = @_;
     my $self = $class->SUPER::new(
-        $parent, id('MCP_OUTPUT_PANE'), "", wxDefaultPosition, wxDefaultSize,
+        $parent, -1, "", wxDefaultPosition, wxDefaultSize,
             wxTE_READONLY | wxTE_NOHIDESEL
         );
 

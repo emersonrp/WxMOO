@@ -4,10 +4,9 @@ use warnings;
 use v5.14;
 
 use parent 'Exporter';
-our @EXPORT_OK = qw( alert id URL_REGEX );
+our @EXPORT_OK = qw( alert URL_REGEX );
 
 use Wx;
-
 
 # TODO - there's surely some less-intrusive and -hacky way to do this.
 sub alert {
@@ -19,7 +18,6 @@ sub alert {
     $output->EndTextColour;
 }
 
-sub id { state %ids; $ids{shift()} ||= Wx::NewId; }
 
 # This regex adapted from one found at
 # http://daringfireball.net/2010/07/improved_regex_for_matching_urls

@@ -7,15 +7,14 @@ use Wx qw( :misc :splitterwindow );
 use Wx::Event qw( EVT_SIZE EVT_SPLITTER_SASH_POS_CHANGED );
 
 use WxMOO::Prefs;
-use WxMOO::Utility qw(id);
 
 use base "Wx::SplitterWindow";
 
 sub new {
     my ($class, $parent) = @_;
-    my $self = $class->SUPER::new($parent, id('SPLITTER'),
+    my $self = $class->SUPER::new($parent, -1,
         wxDefaultPosition, wxDefaultSize,
-        wxSP_3D | wxSP_LIVE_UPDATE
+        wxSP_LIVE_UPDATE
     );
     EVT_SPLITTER_SASH_POS_CHANGED( $self, $self, \&saveSplitterSize );
     EVT_SIZE( $self, \&HandleResize );

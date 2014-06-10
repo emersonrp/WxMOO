@@ -8,18 +8,21 @@ use Carp;
 use Wx qw( :socket );
 use Wx::Socket;
 use Wx::Event qw( EVT_SOCKET_INPUT EVT_SOCKET_LOST EVT_SOCKET_CONNECTION EVT_TIMER );
-use WxMOO::Utility qw( id );
 use WxMOO::MCP21;  # this is icky
 
 use parent -norequire, 'Wx::SocketClient';
 use parent 'Class::Accessor';
 
-WxMOO::Connection->mk_accessors(qw( host port keepalive ));
+# TODO - should an output_pane own a connection, or vice-versa?
+# This is related to the answer to "do we want multiple worlds to be
+# open in like tabs or something?"
+WxMOO::Connection->mk_accessors(qw( output_pane host port keepalive ));
 
 sub new {
     my ($class, $parent) = @_;
     my $self = $class->SUPER::new;
 
+    $self->output_pane($parent->{'output_pane'});
     EVT_SOCKET_INPUT($parent, $self, \&onInput);
     EVT_SOCKET_LOST ($parent, $self, \&onClose);
 
@@ -28,16 +31,17 @@ sub new {
 
 sub onInput {
     my ($self) = @_;
-    state $output //= Wx::Window::FindWindowById(id('OUTPUT_PANE'));
     my $poop = '';
     while ($self->Read($poop, 1, length $poop)) {
         last if $poop =~ /\n$/s;
     }
-    $output->display($poop);
+    $self->output_pane->display($poop);
 }
 
 sub onClose {
-    shift->keepalive->Stop;
+    my $self = shift;
+    $self->keepalive->Stop;
+    $self->output_pane->display('WxMOO: Connection closed.');
 }
 
 sub output { shift->Write(@_); }

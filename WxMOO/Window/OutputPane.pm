@@ -10,21 +10,22 @@ use Wx::RichText;
 use Wx::Event qw( EVT_SET_FOCUS EVT_TEXT_URL );
 
 use WxMOO::Prefs;
-use WxMOO::Utility qw( id URL_REGEX );
+use WxMOO::Utility qw( URL_REGEX );
 
 # TODO we need a better output_filter scheme, probably?
 use WxMOO::MCP21;
 
-use base 'Wx::RichTextCtrl';
+use base qw( Wx::RichTextCtrl Class::Accessor );
+WxMOO::Window::OutputPane->mk_accessors(qw( input_pane ));
 
 sub new {
     my ($class, $parent) = @_;
     my $self = $class->SUPER::new(
-        $parent, id('OUTPUT_PANE'), "", wxDefaultPosition, wxDefaultSize,
+        $parent, -1, "", wxDefaultPosition, wxDefaultSize,
             wxTE_AUTO_URL | wxTE_READONLY | wxTE_NOHIDESEL
         );
 
-    $self->{'parent'} = $parent;
+    $self->input_pane($parent->{'input_pane'});
 
     $self->restyle_thyself;
 
@@ -110,12 +111,7 @@ sub display {
     }
 }
 
-sub focus_input {
-    my ($self) = @_;
-    # TODO - make this a little less intrusive
-    my $input_field = Wx::Window::FindWindowById(id('INPUT_PANE'));
-    $input_field->SetFocus if $input_field;
-}
+sub focus_input { shift->input_pane->SetFocus; }
 
 my %ansi_colors = (
     black   => [ Wx::Colour->new(  0,  0,  0), Wx::Colour->new(127,127,127) ],
