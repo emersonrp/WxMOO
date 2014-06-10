@@ -22,6 +22,9 @@ sub new {
     return $self;
 }
 
+sub output_pane { shift->GetWindow1 }
+sub input_pane  { shift->GetWindow2 }
+
 sub saveSplitterSize {
     my ($self, $evt) = @_;
     my ($w, $h)  = $self->GetSizeWH;

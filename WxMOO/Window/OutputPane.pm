@@ -16,7 +16,7 @@ use WxMOO::Utility qw( URL_REGEX );
 use WxMOO::MCP21;
 
 use base qw( Wx::RichTextCtrl Class::Accessor );
-WxMOO::Window::OutputPane->mk_accessors(qw( input_pane ));
+WxMOO::Window::OutputPane->mk_accessors(qw( parent ));
 
 sub new {
     my ($class, $parent) = @_;
@@ -25,7 +25,7 @@ sub new {
             wxTE_AUTO_URL | wxTE_READONLY | wxTE_NOHIDESEL
         );
 
-    $self->input_pane($parent->{'input_pane'});
+    $self->parent($parent);
 
     $self->restyle_thyself;
 
@@ -35,12 +35,14 @@ sub new {
     return bless $self, $class;
 }
 
+sub input_pane { shift->parent->input_pane; }
+
 sub process_url_click {
     my ($self, $event) = @_;
     my $url = $event->GetString;
     # TODO - make this whole notion into a platform-agnostic launchy bit;
     system('xdg-open', $url);
-}
+    }
 
 sub WriteText {
     my ($self, @rest) = @_;
