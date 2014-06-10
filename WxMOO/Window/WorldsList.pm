@@ -42,6 +42,14 @@ sub new {
         $world_details_box->Add($self->world_details_panel, 1, wxEXPAND, 0);
 
         my $button_sizer = $self->CreateButtonSizer( wxOK | wxCANCEL );
+        # Hax: change the "OK" button to "Connect"
+        # This is a hoop-jumping exercise to use the platform-specific locations
+        # of "OK" and "Cancel" instead of the hoop-jumping exercise of making my
+        # own buttons.  There's almost certainly a better way to do this.
+        for my $b ($button_sizer->GetChildren) {
+            next unless ($b->GetWindow and $b->GetWindow->GetLabel eq '&OK');
+            $b->GetWindow->SetLabel('&Connect');
+        }
 
         my $main_sizer = Wx::BoxSizer->new(wxVERTICAL);
         $main_sizer->Add($world_picker_sizer, 0, wxEXPAND | wxALL,            10);
