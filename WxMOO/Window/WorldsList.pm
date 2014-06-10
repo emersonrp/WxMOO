@@ -3,14 +3,14 @@ use strict;
 use warnings;
 use v5.14;
 
-use Wx qw( :combobox :misc :dialog :sizer );
-use Wx::Event qw(EVT_CHOICE);
+use Wx qw( :combobox :misc :dialog :sizer :id );
+use Wx::Event qw(EVT_CHOICE EVT_BUTTON);
 
 use WxMOO::Prefs;
 use WxMOO::Worlds;
 
 use base qw( Wx::Dialog Class::Accessor );
-WxMOO::Window::WorldsList->mk_accessors(qw( world_details_panel ));
+WxMOO::Window::WorldsList->mk_accessors(qw( connection world_details_panel ));
 
 sub new {
     state $self;
@@ -21,6 +21,8 @@ sub new {
         WxMOO::Worlds->init;
 
         $self = $class->SUPER::new( $parent, -1, 'Worlds List');
+
+        $self->connection($parent->connection);
 
         my $worlds = WxMOO::Worlds->init->worlds;
 
@@ -67,12 +69,25 @@ sub new {
         $self->Centre(wxBOTH);
 
         EVT_CHOICE($self, $world_picker, \&select_world);
+        EVT_BUTTON($self, wxID_OK,       \&on_connect);
+
+        bless $self, $class;
     }
 
     return $self;
 }
 
 sub select_world { shift->world_details_panel->fill_thyself(shift->GetClientData); }
+
+# TODO - make WxMOO::World have a notion of "connect to yourself"
+# Also therefore merge WxMOO::World and WxMOO::Window::WorldPanel
+sub on_connect {
+    my $self = shift;
+    $self->connection->connect(
+        $self->world_details_panel->world->host,
+        $self->world_details_panel->world->port);
+    $self->Hide;
+}
 
 
 #################################
@@ -87,7 +102,8 @@ use Wx::Event qw(EVT_CHOICE);
 use WxMOO::Prefs;
 
 use base qw( Wx::Panel Class::Accessor );
-WxMOO::Window::WorldPanel->mk_accessors(qw( name host port user pass type note
+WxMOO::Window::WorldPanel->mk_accessors(qw( world
+                                            name host port user pass type note
                                             ssh_user
                                             ssh_loc_host ssh_loc_port
                                             ssh_rem_host ssh_rem_port ));
@@ -215,6 +231,8 @@ sub on_new {
 
 sub fill_thyself {
     my ($self, $world) = @_;
+
+    $self->world($world);
 
     no warnings 'uninitialized';
     $self->name->SetValue($world->name);
