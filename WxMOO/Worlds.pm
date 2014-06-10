@@ -6,7 +6,9 @@ use warnings;
 use v5.14;
 
 use Carp;
-use Wx qw( :font :colour );
+use WxMOO::Prefs;
+use base qw( Class::Accessor );
+WxMOO::Worlds->mk_accessors(qw( config ));
 
 sub init {
     my ($class) = @_;
@@ -15,30 +17,32 @@ sub init {
     unless ($self) {
         $self = {
             'config' => WxMOO::Prefs->prefs->config,
-            'worlds' => {},
         };
         bless $self, $class;
     };
-    $self->worlds;
+    $self->load_worlds;
     return $self;
 }
 
-sub worlds {
+sub load_worlds {
     my ($self) = @_;
 
     my $config = $self->{'config'};
 
     $config->SetPath('/worlds');
+    my $worlds = {};
 
     if (my $groupcount = $config->GetNumberOfGroups) {
         for my $i (1 .. $groupcount) {
-            my (undef, $world, undef) = $config->GetNextGroup($i-1);
-            $config->SetPath($world);
+            my (undef, $worldname, undef) = $config->GetNextGroup($i-1);
+            $config->SetPath($worldname);
+            my $worlddata = {};
             if (my $datacount = $config->GetNumberOfEntries) {
                 for my $j (1 .. $datacount) {
                     my (undef, $dataname, undef) = $config->GetNextEntry($j-1);
-                    $self->{'worlds'}->{$world}->{$dataname} = $config->Read($dataname);
+                    $worlddata->{$dataname} = $config->Read($dataname);
                 }
+                $worlds->{$worldname} = WxMOO::World->new($worlddata);
             }
             $config->SetPath('/worlds');
         }
@@ -46,16 +50,21 @@ sub worlds {
         # populate the worlds with the default list, and save it.
         say STDERR "populating empty list";
         my $worlds = initial_worlds();
-        while (my ($world, $data) = each %$worlds) {
-            $self->{'worlds'}->{$world} = $data;
-            $config->SetPath($world);
+        while (my ($worldname, $data) = each %$worlds) {
+            $worlds->{$worldname} = WxMOO::World->new($data);
+            $config->SetPath($worldname);
             while (my ($k, $v) = each %$data) {
                 $config->Write($k, $v);
             }
             $config->SetPath('/worlds');
         }
     }
-    return $self->{'worlds'};
+    return $worlds;
+}
+
+sub worlds {
+    my $self = shift;
+    $self->{'worlds'} //= $self->load_worlds;
 }
 
 ### Massager-accessors; transform from config-file strings to useful data
@@ -85,42 +94,45 @@ package WxMOO::World;
 use strict;
 use warnings;
 use v5.14;
+use Class::Accessor;
 
-sub new {
-}
+use base qw( Class::Accessor );
 
-use constant SIMPLE_ACCESSORS => qw(
-    name host port username password type
-    ssh_server ssh_username local_port
+my @fields = qw(
+    name host port user pass note type
+    ssh_server ssh_user ssh_loc_host ssh_loc_port
+    ssh_rem_host ssh_rem_port
+);
+WxMOO::World->mk_accessors(@fields);
+
+my %defaults = (
+    port       => 7777,
+    type       => 0,   # Socket
 );
 
+sub new {
+    my ($class, $init) = @_;
+    unless (%$init) { $init = \%defaults; }
+    bless $init, $class;
 
-{
-    my %defaults = (
-        port       => 7777,
-        type       => 0,   # Socket
-        local_port => 7777,
-    );
+}
 
-    sub get_defaults {
-        my ($self) = @_;
-        while (my ($key,$val) = each %defaults) {
-            $self->param($key, $val) unless defined $self->param($key);
-        }
+sub save {
+    my $self = shift;
+    my $config = $self->config;
+
+    (my $keyname = $self->name) =~ s/\W/_/g;
+    $config->SetPath("/worlds/$keyname");
+    for my $f (@fields) {
+        $config->Write($f, $self->{$f});
     }
+    return $self;
 }
 
-# make automagic accessors
-for my $accname (SIMPLE_ACCESSORS) {
-    my $code = sub {
-        my $self = shift;
-        $self->param($accname, @_) if @_;
-        return $self->param($accname);
-    };
-
-    no strict 'refs';
-    *$accname = $code;
+sub create {
+    my $self = shift;
+    my $newworld = $self->new;
+    $newworld->save;
 }
-
 
 1;

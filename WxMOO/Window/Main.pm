@@ -18,7 +18,8 @@ use WxMOO::Window::OutputPane;
 use WxMOO::Window::PrefsEditor;
 use WxMOO::Window::WorldsList;
 
-use base 'Wx::Frame';
+use base qw( Wx::Frame Class::Accessor );
+WxMOO::Window::Main->mk_accessors(qw( connection input_pane output_pane ));
 
 sub new {
     my ($class) = @_;
@@ -36,21 +37,21 @@ sub new {
         $self->SetSize([$w, $h]);
     }
 
-    $self->{'splitter'} = WxMOO::Window::MainSplitter->new($self);
+    my $splitter = WxMOO::Window::MainSplitter->new($self);
 
-    $self->{'input_pane'}  = WxMOO::Window::InputPane ->new($self->{'splitter'}, $self->{'connection'});
-    $self->{'output_pane'} = WxMOO::Window::OutputPane->new($self->{'splitter'});
+    $self->input_pane (WxMOO::Window::InputPane ->new($splitter));
+    $self->output_pane(WxMOO::Window::OutputPane->new($splitter));
 
-    $self->{'splitter'}->SplitHorizontally($self->{'output_pane'}, $self->{'input_pane'});
-    $self->{'splitter'}->SetMinimumPaneSize(20); # TODO - set to "one line of input field"
+    $splitter->SplitHorizontally($self->output_pane, $self->input_pane);
+    $splitter->SetMinimumPaneSize(20); # TODO - set to "one line of input field"
 
-    $self->{'sizer'} = Wx::BoxSizer->new( wxVERTICAL );
-    $self->{'sizer'}->Add($self->{'splitter'}, 1, wxALL|wxGROW);
-    $self->SetSizer($self->{'sizer'});
+    my $sizer = Wx::BoxSizer->new( wxVERTICAL );
+    $sizer->Add($splitter, 1, wxALL|wxGROW);
+    $self->SetSizer($sizer);
 
     # TODO - don't connect until we ask for it.
     # TODO - probably want a tabbed interface for multiple connections
-    $self->{'connection'} = WxMOO::Connection->new($self);
+    $self->connection(WxMOO::Connection->new($self));
 
     return $self;
 }
@@ -59,7 +60,7 @@ sub new {
 sub Initialize {
     my ($self) = @_;
     # TODO - don't connect until we ask for it.
-    $self->{'connection'}->connect('hayseed.net',7777);
+    $self->connection->connect('hayseed.net',7777);
 }
 
 sub buildMenu {
@@ -123,8 +124,8 @@ sub addEvents {
 
 sub closeConnection {
     my ($self) = @_;
-    $self->{'connection'}->Destroy;
-    $self->{'connection'} = undef;
+    $self->connection->Destroy;
+    $self->connection(undef);
 }
 
 sub onSize {

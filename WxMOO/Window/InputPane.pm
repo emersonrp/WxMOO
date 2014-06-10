@@ -11,7 +11,7 @@ use base qw( Wx::TextCtrl Class::Accessor );
 WxMOO::Window::InputPane->mk_accessors(qw( parent connection cmd_history ));
 
 sub new {
-    my ($class, $parent, $connection) = @_;
+    my ($class, $parent) = @_;
 
     my $self = $class->SUPER::new( $parent, -1, "",
         wxDefaultPosition, wxDefaultSize,
@@ -19,7 +19,6 @@ sub new {
     );
 
     $self->parent($parent);
-    $self->connection($connection);
 
     my $font = WxMOO::Prefs->prefs->input_font;
     $self->SetFont($font);
@@ -47,10 +46,12 @@ sub restyle_thyself {
 
 sub send_to_connection {
     my ($self, $evt) = @_;
-    my $stuff = $self->GetValue;
-    $self->cmd_history->add($stuff);
-    $self->connection->output("$stuff\n");
-    $self->Clear;
+    if ($self->connection) {
+        my $stuff = $self->GetValue;
+        $self->cmd_history->add($stuff);
+        $self->connection->output("$stuff\n");
+        $self->Clear;
+    }
 }
 
 sub update_command_history {

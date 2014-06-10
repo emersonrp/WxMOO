@@ -56,6 +56,7 @@ sub new {
         $main_sizer->Add($world_details_box,  1, wxEXPAND | wxLEFT | wxRIGHT, 10);
         $main_sizer->Add($button_sizer,       0, wxEXPAND | wxALL,            10);
 
+        # TODO - keep track of the last one we picked and restore it as the selection
         $world_picker->SetSelection(0);
         $self->world_details_panel->fill_thyself($world_picker->GetClientData(0));
 
@@ -113,11 +114,11 @@ sub new {
     my $type_label = Wx::StaticText->new($self, -1, "Type:");
     $self->user(Wx::TextCtrl->new($self, -1, ""));
     $self->pass(Wx::TextCtrl->new($self, -1, "", wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD));
-    $self->type(Wx::Choice  ->new($self, -1, wxDefaultPosition, wxDefaultSize,
+    $self->type(Wx::Choice  ->new($self, -1,     wxDefaultPosition, wxDefaultSize,
                                  ['Socket','SSL','SSH Forwarding'], ));
     $self->type->SetSelection(0);
 
-    $self->{'ssh_user_label'} = Wx::StaticText->new($self, -1, "SSH Username:");
+    $self->{'ssh_user_label'}     = Wx::StaticText->new($self, -1, "SSH Username:");
     $self->{'ssh_loc_host_label'} = Wx::StaticText->new($self, -1, "SSH Host:");
     $self->{'ssh_loc_port_label'} = Wx::StaticText->new($self, -1, "Local Port:");
     $self->{'ssh_rem_host_label'} = Wx::StaticText->new($self, -1, "Remote Host:");
@@ -190,34 +191,44 @@ sub new {
     EVT_CHOICE($self, $self->type, \&show_hide_ssh_controls);
 
     $self->{'ssh_user_label'}->Hide;
-    $self->ssh_user->Hide;
     $self->{'ssh_loc_host_label'}->Hide;
-    $self->ssh_loc_host->Hide;
     $self->{'ssh_loc_port_label'}->Hide;
-    $self->ssh_loc_port->Hide;
     $self->{'ssh_rem_host_label'}->Hide;
-    $self->ssh_rem_host->Hide;
     $self->{'ssh_rem_port_label'}->Hide;
+    $self->ssh_user->Hide;
+    $self->ssh_loc_host->Hide;
+    $self->ssh_loc_port->Hide;
+    $self->ssh_rem_host->Hide;
     $self->ssh_rem_port->Hide;
 
     return $self;
+}
+
+sub on_save {
+}
+
+sub on_reset {
+}
+
+sub on_new {
 }
 
 sub fill_thyself {
     my ($self, $world) = @_;
 
     no warnings 'uninitialized';
-    $self->name->SetValue($world->{'name'});
-    $self->host->SetValue($world->{'host'});
-    $self->port->SetValue($world->{'port'});
-    $self->user->SetValue($world->{'user'});
-    $self->pass->SetValue($world->{'pass'});
-    $self->type->SetSelection($world->{'type'});
-    $self->ssh_user->SetValue($world->{'ssh_user'});
-    $self->ssh_loc_host->SetValue($world->{'ssh_loc_host'});
-    $self->ssh_loc_port->SetValue($world->{'ssh_loc_port'});
-    $self->ssh_rem_host->SetValue($world->{'ssh_rem_host'});
-    $self->ssh_rem_port->SetValue($world->{'ssh_rem_port'});
+    $self->name->SetValue($world->name);
+    $self->host->SetValue($world->host);
+    $self->port->SetValue($world->port);
+    $self->user->SetValue($world->user);
+    $self->pass->SetValue($world->pass);
+    $self->note->SetValue($world->note);
+    $self->type->SetSelection($world->type);
+    $self->ssh_user->SetValue($world->ssh_user);
+    $self->ssh_loc_host->SetValue($world->ssh_loc_host);
+    $self->ssh_loc_port->SetValue($world->ssh_loc_port);
+    $self->ssh_rem_host->SetValue($world->ssh_rem_host);
+    $self->ssh_rem_port->SetValue($world->ssh_rem_port);
 
     $self->show_hide_ssh_controls($self->type->GetSelection == 2);
 }

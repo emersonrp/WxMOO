@@ -9,13 +9,15 @@ use Wx qw( :dialog :sizer :id :misc :notebook :font :colour :textctrl
 );
 use Wx::Event qw( EVT_BUTTON EVT_FONTPICKER_CHANGED EVT_COLOURPICKER_CHANGED );
 use parent -norequire, 'Wx::PropertySheetDialog';
+use base qw( Class::Accessor );
+WxMOO::Window::PrefsEditor->mk_accessors(qw( parent ));
 
 sub new {
     my ($class, $parent) = @_;
 
     my $self = $class->SUPER::new( $parent, -1, '', wxDefaultPosition, wxDefaultSize, );
 
-    $self->{'parent'} = $parent;
+    $self->parent($parent);
 
     my $book = $self->GetBookCtrl;
 
@@ -23,20 +25,20 @@ sub new {
     $self->{'page_2'} = Wx::Panel->new($book);
     $self->{'page_3'} = Wx::Panel->new($book);
 
-    $self->{'sizer'}        = Wx::BoxSizer->new(wxVERTICAL);
-    $self->{'button_sizer'} = $self->CreateButtonSizer( wxOK | wxCANCEL );
+    my $sizer        = Wx::BoxSizer->new(wxVERTICAL);
+    my $button_sizer = $self->CreateButtonSizer( wxOK | wxCANCEL );
 
     $book->AddPage($self->{'page_1'}, "General");
     $book->AddPage($self->{'page_2'}, "Fonts and Colors");
     $book->AddPage($self->{'page_3'}, "Paths and Dirs");
 
-    $self->populateGeneralPanel;
-    $self->populateFontPanel;
+    $self->populateGeneralPanel($self->{'page_1'});
+    $self->populateFontPanel(   $self->{'page_2'});
 
-    $self->{'sizer'}->Add($book, 1, wxEXPAND | wxFIXED_MINSIZE | wxALL , 5 );
-    $self->{'sizer'}->Add($self->{'button_sizer'}, 0, wxALIGN_CENTER_HORIZONTAL|wxBOTTOM, 5);
+    $sizer->Add($book, 1, wxEXPAND | wxFIXED_MINSIZE | wxALL , 5 );
+    $sizer->Add($button_sizer, 0, wxALIGN_CENTER_HORIZONTAL|wxBOTTOM, 5);
 
-    $self->SetSizer($self->{'sizer'});
+    $self->SetSizer($sizer);
 
     $self->Centre(wxBOTH);
 
@@ -62,15 +64,13 @@ sub update_prefs {
 
     WxMOO::Prefs->prefs->use_ansi( $fc_page->{'ansi_checkbox'}->GetValue + 0 );
 
-    $self->{'parent'}->{'output_pane'}->restyle_thyself;
-    $self->{'parent'}->{'input_pane'}->restyle_thyself;
+    $self->parent->output_pane->restyle_thyself;
+    $self->parent->input_pane->restyle_thyself;
     $evt->Skip;
 }
 
 sub populateGeneralPanel {
-    my ($self) = @_;
-    # general prefs
-    my $gp = $self->{'page_1'};
+    my ($self, $gp) = @_;
 
     $gp->{'save_size_checkbox'} = Wx::CheckBox->new($gp, -1, 'Save Window Size');
     $gp->{'save_size_checkbox'}->SetValue( WxMOO::Prefs->prefs->save_window_size );
@@ -83,9 +83,7 @@ sub populateGeneralPanel {
 }
 
 sub populateFontPanel {
-    my ($self) = @_;
-    # fonts and colors
-    my $fcp = $self->{'page_2'};
+    my ($self, $fcp) = @_;
 
     my $ofont = WxMOO::Prefs->prefs->output_font || wxNullFont;
     my $ifont = WxMOO::Prefs->prefs->input_font  || wxNullFont;
@@ -123,32 +121,32 @@ sub populateFontPanel {
     $fcp->{'ansi_checkbox'} = Wx::CheckBox->new($fcp, -1, 'Use ANSI colors');
     $fcp->{'ansi_checkbox'}->SetValue( WxMOO::Prefs->prefs->use_ansi );
 
-    $fcp->{'output_sizer'} = Wx::FlexGridSizer->new(1, 3, 5, 10);
-    $fcp->{'output_sizer'}->Add($fcp->{'ofont_ctrl'      }, 0, wxEXPAND, 0);
-    $fcp->{'output_sizer'}->Add($fcp->{'o_fgcolour_ctrl' }, 0);
-    $fcp->{'output_sizer'}->Add($fcp->{'o_bgcolour_ctrl' }, 0);
-    $fcp->{'output_sizer'}->AddGrowableCol(0);
-    $fcp->{'output_sizer'}->Fit($fcp);
+    my $output_sizer = Wx::FlexGridSizer->new(1, 3, 5, 10);
+    $output_sizer->Add($fcp->{'ofont_ctrl'      }, 0, wxEXPAND, 0);
+    $output_sizer->Add($fcp->{'o_fgcolour_ctrl' }, 0);
+    $output_sizer->Add($fcp->{'o_bgcolour_ctrl' }, 0);
+    $output_sizer->AddGrowableCol(0);
+    $output_sizer->Fit($fcp);
 
-    $fcp->{'input_sizer'} = Wx::FlexGridSizer->new(1, 3, 5, 10);
-    $fcp->{'input_sizer'}->Add($fcp->{'ifont_ctrl'      }, 0, wxEXPAND, 0);
-    $fcp->{'input_sizer'}->Add($fcp->{'i_fgcolour_ctrl' }, 0);
-    $fcp->{'input_sizer'}->Add($fcp->{'i_bgcolour_ctrl' }, 0);
-    $fcp->{'input_sizer'}->AddGrowableCol(0);
-    $fcp->{'input_sizer'}->Fit($fcp);
+    my $input_sizer = Wx::FlexGridSizer->new(1, 3, 5, 10);
+    $input_sizer->Add($fcp->{'ifont_ctrl'      }, 0, wxEXPAND, 0);
+    $input_sizer->Add($fcp->{'i_fgcolour_ctrl' }, 0);
+    $input_sizer->Add($fcp->{'i_bgcolour_ctrl' }, 0);
+    $input_sizer->AddGrowableCol(0);
+    $input_sizer->Fit($fcp);
 
-    $fcp->{'ansi_sizer'} = Wx::BoxSizer->new(wxVERTICAL);
-    $fcp->{'ansi_sizer'}->Add($fcp->{'ansi_checkbox'});
-    $fcp->{'ansi_sizer'}->Fit($fcp);
+    my $ansi_sizer = Wx::BoxSizer->new(wxVERTICAL);
+    $ansi_sizer->Add($fcp->{'ansi_checkbox'});
+    $ansi_sizer->Fit($fcp);
 
-    $fcp->{'panel_sizer'} = Wx::BoxSizer->new(wxVERTICAL);
-    $fcp->{'panel_sizer'}->Add($fcp->{'o_sample'}, 1, wxRIGHT|wxLEFT|wxTOP|wxEXPAND, 10);
-    $fcp->{'panel_sizer'}->Add($fcp->{'output_sizer'},  0, wxRIGHT|wxLEFT|wxEXPAND, 10);
-    $fcp->{'panel_sizer'}->AddSpacer($bsize);
-    $fcp->{'panel_sizer'}->Add($fcp->{'i_sample'},  1, wxRIGHT|wxLEFT|wxBOTTOM|wxEXPAND, 10);
-    $fcp->{'panel_sizer'}->Add($fcp->{'input_sizer'},   0, wxRIGHT|wxLEFT|wxEXPAND, 10);
-    $fcp->{'panel_sizer'}->AddSpacer($bsize);
-    $fcp->{'panel_sizer'}->Add($fcp->{'ansi_sizer'});
+    my $panel_sizer = Wx::BoxSizer->new(wxVERTICAL);
+    $panel_sizer->Add($fcp->{'o_sample'}, 1, wxRIGHT|wxLEFT|wxTOP|wxEXPAND, 10);
+    $panel_sizer->Add($output_sizer,  0, wxRIGHT|wxLEFT|wxEXPAND, 10);
+    $panel_sizer->AddSpacer($bsize);
+    $panel_sizer->Add($fcp->{'i_sample'},  1, wxRIGHT|wxLEFT|wxBOTTOM|wxEXPAND, 10);
+    $panel_sizer->Add($input_sizer,   0, wxRIGHT|wxLEFT|wxEXPAND, 10);
+    $panel_sizer->AddSpacer($bsize);
+    $panel_sizer->Add($ansi_sizer);
 
     EVT_FONTPICKER_CHANGED  ($fcp, $fcp->{'ofont_ctrl'}, \&update_sample_text);
     EVT_FONTPICKER_CHANGED  ($fcp, $fcp->{'ifont_ctrl'}, \&update_sample_text);
@@ -157,7 +155,7 @@ sub populateFontPanel {
     EVT_COLOURPICKER_CHANGED($fcp, $fcp->{'o_fgcolour_ctrl'}, \&update_sample_text);
     EVT_COLOURPICKER_CHANGED($fcp, $fcp->{'o_bgcolour_ctrl'}, \&update_sample_text);
 
-    $fcp->SetSizer($fcp->{'panel_sizer'});
+    $fcp->SetSizer($panel_sizer);
 }
 
 sub update_sample_text {

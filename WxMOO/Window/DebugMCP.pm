@@ -8,7 +8,8 @@ use Wx::Event qw( EVT_SIZE );
 
 use WxMOO::Prefs;
 
-use base 'Wx::Frame';
+use base qw( Wx::Frame Class::Accessor );
+WxMOO::Window::DebugMCP->mk_accessors(qw( active output_pane ));
 
 sub new {
     my ($class) = @_;
@@ -19,15 +20,15 @@ sub new {
         $self->addEvents;
 
         if (1 || WxMOO::Prefs->prefs->save_mcp_window_size) {
-            my $w = WxMOO::Prefs->prefs->window_width  || 600;
-            my $h = WxMOO::Prefs->prefs->window_height || 400;
+            my $w = WxMOO::Prefs->prefs->mcp_window_width  || 600;
+            my $h = WxMOO::Prefs->prefs->mcp_window_height || 400;
             $self->SetSize([$w, $h]);
         }
 
-        $self->{'output_pane'} = WxMOO::Window::DebugMCP::Pane->new($self);
-        $self->{'sizer'} = Wx::BoxSizer->new( wxVERTICAL );
-        $self->{'sizer'}->Add($self->{'output_pane'}, 1, wxALL|wxGROW, 5);
-        $self->SetSizer($self->{'sizer'});
+        $self->output_pane(WxMOO::Window::DebugMCP::Pane->new($self));
+        my $sizer = Wx::BoxSizer->new( wxVERTICAL );
+        $sizer->Add($self->output_pane, 1, wxALL|wxGROW, 5);
+        $self->SetSizer($sizer);
     }
 
     return $self;
@@ -49,13 +50,6 @@ sub Close {
     $self->active(0);
 }
 
-sub active {
-    my ($self, $new) = @_;
-    state $active;
-    $active = $new if defined $new;
-    return $active;
-}
-
 SCOPE: {
     my $serverMsgColour = Wx::Colour->new(128, 0, 0);
     my $clientMsgColour = Wx::Colour->new(0,   0, 128);
@@ -63,7 +57,7 @@ SCOPE: {
         my ($self, @data) = @_;
         return unless $self->active;
 
-        my $op = $self->{'output_pane'};
+        my $op = $self->output_pane;
 
         for my $line (@data) {
             unless ($line =~ /\n$/) { $line = "$line\n"; }
@@ -116,8 +110,6 @@ sub new {
         $parent, -1, "", wxDefaultPosition, wxDefaultSize,
             wxTE_READONLY | wxTE_NOHIDESEL
         );
-
-    $self->{'parent'} = $parent;
 
     return bless $self, $class;
 }

@@ -5,7 +5,8 @@ use v5.14;
 
 use Wx qw( :id :misc :dialog :sizer );
 use Wx::Event qw( EVT_BUTTON );
-use base qw(Wx::Dialog);
+use base qw( Wx::Dialog Class::Accessor );
+WxMOO::Window::ConnectDialog->mk_accessors(qw( parent host port ));
 
 sub new {
     my ($class, $parent) = @_;
@@ -15,28 +16,28 @@ sub new {
        wxDEFAULT_DIALOG_STYLE | wxSTAY_ON_TOP
     );
 
-    $self->{'parent'} = $parent;
+    $self->parent($parent);
 
-    $self->{'host_label'}   = Wx::StaticText->new($self, -1, "Host:");
-    $self->{'host_field'}   = Wx::TextCtrl  ->new($self, -1, "");
-    $self->{'port_label'}   = Wx::StaticText->new($self, -1, "Port:");
-    $self->{'port_field'}   = Wx::TextCtrl  ->new($self, -1, "");
+    my $host_label = Wx::StaticText->new($self, -1, "Host:");
+    my $port_label = Wx::StaticText->new($self, -1, "Port:");
+    $self->host(Wx::TextCtrl->new($self, -1, ""));
+    $self->port(Wx::TextCtrl->new($self, -1, ""));
 
-    $self->{'input_sizer'} = Wx::FlexGridSizer->new(2, 2, 0, 0);
-    $self->{'input_sizer'}->AddGrowableCol( 1 );
-    $self->{'input_sizer'}->Add($self->{'host_label'}, 0, wxLEFT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 10);
-    $self->{'input_sizer'}->Add($self->{'host_field'}, 0, wxEXPAND | wxALL, 5);
-    $self->{'input_sizer'}->Add($self->{'port_label'}, 0, wxLEFT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 10);
-    $self->{'input_sizer'}->Add($self->{'port_field'}, 0, wxEXPAND | wxALL, 5);
+    my $input_sizer = Wx::FlexGridSizer->new(2, 2, 0, 0);
+    $input_sizer->AddGrowableCol( 1 );
+    $input_sizer->Add($host_label, 0, wxLEFT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 10);
+    $input_sizer->Add($self->host, 0, wxEXPAND | wxALL, 5);
+    $input_sizer->Add($port_label, 0, wxLEFT | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 10);
+    $input_sizer->Add($self->port, 0, wxEXPAND | wxALL, 5);
 
 
-    $self->{'button_sizer'} = $self->CreateButtonSizer( wxOK | wxCANCEL );
+    my $button_sizer = $self->CreateButtonSizer( wxOK | wxCANCEL );
 
-    $self->{'sizer'} = Wx::BoxSizer->new(wxVERTICAL);
-    $self->{'sizer'}->Add($self->{'input_sizer'},  1, wxALL | wxEXPAND, 10);
-    $self->{'sizer'}->Add($self->{'button_sizer'}, 0, wxALL, 10);
-    $self->SetSizer($self->{'sizer'});
-    $self->{'sizer'}->Fit($self);
+    my $sizer = Wx::BoxSizer->new(wxVERTICAL);
+    $sizer->Add($input_sizer,  1, wxALL | wxEXPAND, 10);
+    $sizer->Add($button_sizer, 0, wxALL, 10);
+    $self->SetSizer($sizer);
+    $sizer->Fit($self);
     $self->Layout();
     $self->Centre(wxBOTH);
 
@@ -47,13 +48,13 @@ sub new {
 
 sub connect_please {
     my ($self, $evt) = @_;
-    my $host = $self->{'host_field'}->GetValue;
-    my $port = $self->{'port_field'}->GetValue;
+    my $host = $self->host->GetValue;
+    my $port = $self->port->GetValue;
 
-    $self->{'host_field'}->Clear;
-    $self->{'port_field'}->Clear;
+    $self->host->Clear;
+    $self->port->Clear;
 
-    $self->{'parent'}->{'connection'}->connect($host, $port);
+    $self->parent->connection->connect($host, $port);
     $evt->Skip;
 }
 

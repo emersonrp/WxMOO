@@ -16,13 +16,14 @@ use parent 'Class::Accessor';
 # TODO - should an output_pane own a connection, or vice-versa?
 # This is related to the answer to "do we want multiple worlds to be
 # open in like tabs or something?"
-WxMOO::Connection->mk_accessors(qw( output_pane host port keepalive ));
+WxMOO::Connection->mk_accessors(qw( input_pane output_pane host port keepalive ));
 
 sub new {
     my ($class, $parent) = @_;
     my $self = $class->SUPER::new;
 
     $self->output_pane($parent->{'output_pane'});
+    $self->input_pane ($parent->{'input_pane'});
     EVT_SOCKET_INPUT($parent, $self, \&onInput);
     EVT_SOCKET_LOST ($parent, $self, \&onClose);
 
@@ -48,17 +49,20 @@ sub output { shift->Write(@_); }
 
 sub connect {
     my ($self, $host, $port) = @_;
-    $self->host( $host );
-    $self->port( $port );
+    $self->host($host);
+    $self->port($port);
 
     $self->Connect($self->host, $self->port);
+    if ($self->IsConnected) {
+        $self->input_pane->connection($self);
 
-    WxMOO::MCP21::new_connection($self);
+        WxMOO::MCP21::new_connection($self);
 
-    # TODO - 'if prefs->keepalive'
-    $self->init_keepalive;
-
-    carp "Can't connect to host/port" unless $self->IsConnected;
+        # TODO - 'if prefs->keepalive'
+        $self->init_keepalive;
+    } else {
+        carp "Can't connect to host/port";
+    }
 }
 
 use constant KEEPALIVE_TIME => 60_000;  # 1 minute
