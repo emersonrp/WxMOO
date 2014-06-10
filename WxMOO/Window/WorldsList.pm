@@ -3,57 +3,70 @@ use strict;
 use warnings;
 use v5.14;
 
-use Wx qw( :misc :dialog :sizer );
+use Wx qw( :combobox :misc :dialog :sizer );
+use Wx::Event qw(EVT_CHOICE);
 
 use WxMOO::Prefs;
 use WxMOO::Worlds;
 
-use base qw(Wx::Dialog);
+use base qw( Wx::Dialog Class::Accessor );
+WxMOO::Window::WorldsList->mk_accessors(qw( world_details_panel ));
 
 sub new {
-    my ($class, $parent) = @_;
+    state $self;
 
-    WxMOO::Worlds->init;
+    unless ($self) {
+        my ($class, $parent) = @_;
 
-    my $self = $class->SUPER::new( $parent, -1, 'Worlds List');
+        WxMOO::Worlds->init;
 
-    $self->{'world_details_staticbox'} = Wx::StaticBox->new($self, -1, "" );
-    $self->{'world_details_box'}       = Wx::StaticBoxSizer->new($self->{'world_details_staticbox'}, wxHORIZONTAL);
+        $self = $class->SUPER::new( $parent, -1, 'Worlds List');
 
-    $self->{'world_label'}        = Wx::StaticText->new($self, -1, "World");
-    $self->{'world_picker'}       = Wx::Choice    ->new($self, -1, wxDefaultPosition, wxDefaultSize, [], );
-    $self->{'world_picker_sizer'} = Wx::BoxSizer->new(wxHORIZONTAL);
-    $self->{'world_picker_sizer'}->Add($self->{'world_label'},  0,        wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'world_picker_sizer'}->Add($self->{'world_picker'}, 1, wxLEFT|wxALIGN_CENTER_VERTICAL, 5);
-    #
-    # TODO
-    # "for my $world (@worlds_from_config_file) { ...
-    #   $self->{'world_picker'}->Add_An_Option_Kthx
-    # }
+        my $worlds = WxMOO::Worlds->init->worlds;
 
-    $self->{'world_details_panel'} = WxMOO::Window::WorldPanel->new($self);
-    $self->{'world_details_box'}->Add($self->{'world_details_panel'}, 1, wxEXPAND, 0);
+        my $world_details_staticbox = Wx::StaticBox->new($self, -1, "" );
+        my $world_details_box       = Wx::StaticBoxSizer->new($world_details_staticbox, wxHORIZONTAL);
 
-    $self->{'button_sizer'} = $self->CreateButtonSizer( wxOK | wxCANCEL );
+        my $world_label  = Wx::StaticText->new($self, -1, "World");
+        my $world_picker = Wx::Choice    ->new($self, -1, wxDefaultPosition, wxDefaultSize, [], wxCB_SORT );
 
-    $self->{'main_sizer'} = Wx::BoxSizer->new(wxVERTICAL);
-    $self->{'main_sizer'}->Add($self->{'world_picker_sizer'}, 0, wxEXPAND | wxALL,            10);
-    $self->{'main_sizer'}->Add($self->{'world_details_box'},  1, wxEXPAND | wxLEFT | wxRIGHT, 10);
-    $self->{'main_sizer'}->Add($self->{'button_sizer'},       0, wxEXPAND | wxALL,            10);
+        for my $world (values $worlds) {
+            $world_picker->Append($world->{'name'}, $world);
+        }
 
-    $self->SetSizer($self->{'main_sizer'});
-    $self->{'main_sizer'}->Fit($self);
-    $self->Layout();
+        my $world_picker_sizer = Wx::BoxSizer->new(wxHORIZONTAL);
+        $world_picker_sizer->Add($world_label,  0,        wxALIGN_CENTER_VERTICAL, 0);
+        $world_picker_sizer->Add($world_picker, 1, wxLEFT|wxALIGN_CENTER_VERTICAL, 5);
 
-    $self->Centre(wxBOTH);
+        $self->world_details_panel(WxMOO::Window::WorldPanel->new($self));
+        $world_details_box->Add($self->world_details_panel, 1, wxEXPAND, 0);
+
+        my $button_sizer = $self->CreateButtonSizer( wxOK | wxCANCEL );
+
+        my $main_sizer = Wx::BoxSizer->new(wxVERTICAL);
+        $main_sizer->Add($world_picker_sizer, 0, wxEXPAND | wxALL,            10);
+        $main_sizer->Add($world_details_box,  1, wxEXPAND | wxLEFT | wxRIGHT, 10);
+        $main_sizer->Add($button_sizer,       0, wxEXPAND | wxALL,            10);
+
+        $world_picker->SetSelection(0);
+        $self->world_details_panel->fill_thyself($world_picker->GetClientData(0));
+
+        $self->SetSizer($main_sizer);
+        $main_sizer->Fit($self);
+        $self->Layout;
+
+        $self->Centre(wxBOTH);
+
+        EVT_CHOICE($self, $world_picker, \&select_world);
+    }
 
     return $self;
 }
 
+sub select_world { shift->world_details_panel->fill_thyself(shift->GetClientData); }
 
 
-
-
+#################################
 package WxMOO::Window::WorldPanel;
 use strict;
 use warnings;
@@ -63,9 +76,12 @@ use Wx qw( :misc :sizer :textctrl );
 use Wx::Event qw(EVT_CHOICE);
 
 use WxMOO::Prefs;
-# use WxMOO::Prefs::World;
 
-use base qw(Wx::Panel);
+use base qw( Wx::Panel Class::Accessor );
+WxMOO::Window::WorldPanel->mk_accessors(qw( name host port user pass type note
+                                            ssh_user
+                                            ssh_loc_host ssh_loc_port
+                                            ssh_rem_host ssh_rem_port ));
 
 sub new {
     my ($class, $parent) = @_;
@@ -75,104 +91,142 @@ sub new {
         # $style,
     );
 
-    $self->{'name_label'}     = Wx::StaticText->new($self, -1, "Name:");
-    $self->{'name_field'}     = Wx::TextCtrl  ->new($self, -1, "");
-    $self->{'host_label'}     = Wx::StaticText->new($self, -1, "Host:");
-    $self->{'host_field'}     = Wx::TextCtrl  ->new($self, -1, "");
-    $self->{'port_label'}     = Wx::StaticText->new($self, -1, "Port:");
-    $self->{'port_field'}     = Wx::SpinCtrl  ->new($self, -1, "");
-    $self->{'port_field'}->SetRange(0, 65535);
-    $self->{'port_field'}->SetValue(7777);
-    $self->{'username_label'} = Wx::StaticText->new($self, -1, "Username:");
-    $self->{'username_field'} = Wx::TextCtrl  ->new($self, -1, "");
-    $self->{'password_label'} = Wx::StaticText->new($self, -1, "Password:");
-    $self->{'password_field'} = Wx::TextCtrl  ->new($self, -1, "", wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
-    $self->{'type_label'}     = Wx::StaticText->new($self, -1, "Type:");
-    $self->{'type_picker'}    = Wx::Choice    ->new($self, -1, wxDefaultPosition, wxDefaultSize,
-                                                        ['Socket','SSL','SSH Forwarding'], );
-    $self->{'type_picker'}->SetSelection(0);
+    my $name_label = Wx::StaticText->new($self, -1, "Name:");
+    my $host_label = Wx::StaticText->new($self, -1, "Host:");
+    my $port_label = Wx::StaticText->new($self, -1, "Port:");
+    $self->name(Wx::TextCtrl->new($self, -1, ""));
+    $self->host(Wx::TextCtrl->new($self, -1, ""));
+    $self->port(Wx::SpinCtrl->new($self, -1, ""));
+    $self->port->SetRange(0, 65535);
+    $self->port->SetValue(7777);
 
-    $self->{'ssh_server_label'}   = Wx::StaticText->new($self, -1, "SSH Host:");
-    $self->{'ssh_server_field'}   = Wx::TextCtrl  ->new($self, -1, "");
-    $self->{'ssh_username_label'} = Wx::StaticText->new($self, -1, "SSH Username:");
-    $self->{'ssh_username_field'} = Wx::TextCtrl  ->new($self, -1, "");
-    $self->{'local_port_label'}   = Wx::StaticText->new($self, -1, "Local Port:");
-    $self->{'local_port_field'}   = Wx::SpinCtrl  ->new($self, -1, "");
-    $self->{'local_port_field'}->SetRange(0, 65535);
-    $self->{'local_port_field'}->SetValue(7777);
+    my $user_label = Wx::StaticText->new($self, -1, "Username:");
+    my $pass_label = Wx::StaticText->new($self, -1, "Password:");
+    my $type_label = Wx::StaticText->new($self, -1, "Type:");
+    $self->user(Wx::TextCtrl->new($self, -1, ""));
+    $self->pass(Wx::TextCtrl->new($self, -1, "", wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD));
+    $self->type(Wx::Choice  ->new($self, -1, wxDefaultPosition, wxDefaultSize,
+                                 ['Socket','SSL','SSH Forwarding'], ));
+    $self->type->SetSelection(0);
 
-    $self->{'field_sizer'} = Wx::FlexGridSizer->new(5, 2, 5, 10);
-    $self->{'field_sizer'}->Add($self->{'name_label'},         0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'name_field'},         0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'host_label'},         0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'host_field'},         0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'port_label'},         0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'port_field'},         0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'username_label'},     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'username_field'},     0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'password_label'},     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'password_field'},     0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'type_label'},         0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'type_picker'},        0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'ssh_server_label'},   0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'ssh_server_field'},   0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'ssh_username_label'}, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'ssh_username_field'}, 0, wxEXPAND, 0);
-    $self->{'field_sizer'}->Add($self->{'local_port_label'},   0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-    $self->{'field_sizer'}->Add($self->{'local_port_field'},   0, wxEXPAND, 0);
-    $self->{'field_sizer'}->AddGrowableCol(1);
+    $self->{'ssh_user_label'} = Wx::StaticText->new($self, -1, "SSH Username:");
+    $self->{'ssh_loc_host_label'} = Wx::StaticText->new($self, -1, "SSH Host:");
+    $self->{'ssh_loc_port_label'} = Wx::StaticText->new($self, -1, "Local Port:");
+    $self->{'ssh_rem_host_label'} = Wx::StaticText->new($self, -1, "Remote Host:");
+    $self->{'ssh_rem_port_label'} = Wx::StaticText->new($self, -1, "Remote Port:");
+    $self->ssh_user    (Wx::TextCtrl->new($self, -1, ""));
+    $self->ssh_loc_host(Wx::TextCtrl->new($self, -1, ""));
+    $self->ssh_loc_port(Wx::SpinCtrl->new($self, -1, ""));
+    $self->ssh_loc_port->SetRange(0, 65535);
+    $self->ssh_loc_port->SetValue(7777);
+    $self->ssh_rem_host(Wx::TextCtrl->new($self, -1, ""));
+    $self->ssh_rem_port(Wx::SpinCtrl->new($self, -1, ""));
+    $self->ssh_rem_port->SetRange(0, 65535);
+    $self->ssh_rem_port->SetValue(7777);
 
-    $self->{'notes_box_staticbox'} = Wx::StaticBox->new($self, -1, "Notes");
-    $self->{'notes_box'}           = Wx::StaticBoxSizer->new($self->{'notes_box_staticbox'}, wxHORIZONTAL);
-    $self->{'notes_field'}         = Wx::TextCtrl->new($self, -1, "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
-    $self->{'notes_box'}->Add($self->{'notes_field'}, 1, wxEXPAND, 0);
+    my $field_sizer = Wx::FlexGridSizer->new(5, 2, 5, 10);
+    $field_sizer->Add($name_label, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->name, 0, wxEXPAND, 0);
+    $field_sizer->Add($host_label, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->host, 0, wxEXPAND, 0);
+    $field_sizer->Add($port_label, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->port, 0, wxEXPAND, 0);
+    $field_sizer->Add($user_label, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->user, 0, wxEXPAND, 0);
+    $field_sizer->Add($pass_label, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->pass, 0, wxEXPAND, 0);
+    $field_sizer->Add($type_label, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->type, 0, wxEXPAND, 0);
+    $field_sizer->Add($self->{'ssh_user_label'}, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->ssh_user, 0, wxEXPAND, 0);
+    $field_sizer->Add($self->{'ssh_loc_host_label'}, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->ssh_loc_host, 0, wxEXPAND, 0);
+    $field_sizer->Add($self->{'ssh_loc_port_label'}, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->ssh_loc_port, 0, wxEXPAND, 0);
+    $field_sizer->Add($self->{'ssh_rem_host_label'}, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->ssh_rem_host, 0, wxEXPAND, 0);
+    $field_sizer->Add($self->{'ssh_rem_port_label'}, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $field_sizer->Add($self->ssh_rem_port, 0, wxEXPAND, 0);
+    $field_sizer->AddGrowableCol(1);
 
-    $self->{'mcp_check'}          = Wx::CheckBox->new($self, -1, "MCP 2.1");
-    $self->{'login_dialog_check'} = Wx::CheckBox->new($self, -1, "Use Login Dialog");
-    $self->{'shortlist_check'}    = Wx::CheckBox->new($self, -1, "On Short List");
-    $self->{'checkbox_sizer'} = Wx::GridSizer->new(3, 2, 0, 0);
-    $self->{'checkbox_sizer'}->Add($self->{'mcp_check'}, 0, wxLEFT|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    $self->{'checkbox_sizer'}->Add($self->{'login_dialog_check'}, 0, wxLEFT|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    $self->{'checkbox_sizer'}->Add($self->{'shortlist_check'}, 0, wxLEFT|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5);
+    my $note_box = Wx::StaticBoxSizer->new(Wx::StaticBox->new($self, -1, "note"), wxHORIZONTAL);
+    $self->note(Wx::TextCtrl->new($self, -1, "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE));
+    $note_box->Add($self->note, 1, wxEXPAND, 0);
 
-    $self->{'new_button'} = Wx::Button->new($self, -1, "New");
-    $self->{'reset_button'} = Wx::Button->new($self, -1, "Reset");
-    $self->{'save_button'} = Wx::Button->new($self, -1, "Save");
-    $self->{'button_sizer'} = Wx::FlexGridSizer->new(1, 3, 0, 0);
-    $self->{'button_sizer'}->Add($self->{'new_button'}, 0, wxALL|wxALIGN_RIGHT, 5);
-    $self->{'button_sizer'}->Add($self->{'reset_button'}, 0, wxALL, 5);
-    $self->{'button_sizer'}->Add($self->{'save_button'}, 0, wxALL, 5);
-    $self->{'button_sizer'}->AddGrowableCol(0);
+    my $mcp_check          = Wx::CheckBox->new($self, -1, "MCP 2.1");
+    my $login_dialog_check = Wx::CheckBox->new($self, -1, "Use Login Dialog");
+    my $shortlist_check    = Wx::CheckBox->new($self, -1, "On Short List");
+    my $checkbox_sizer = Wx::GridSizer->new(3, 2, 0, 0);
+    $checkbox_sizer->Add($mcp_check, 0, wxLEFT|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5);
+    $checkbox_sizer->Add($login_dialog_check, 0, wxLEFT|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5);
+    $checkbox_sizer->Add($shortlist_check, 0, wxLEFT|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5);
 
-    $self->{'panel_sizer'} = Wx::BoxSizer->new(wxVERTICAL);
-    $self->{'panel_sizer'}->Add($self->{'field_sizer'}, 0, wxALL|wxEXPAND, 10);
-    $self->{'panel_sizer'}->Add($self->{'notes_box'}, 1, wxEXPAND, 0);
-    $self->{'panel_sizer'}->Add($self->{'checkbox_sizer'}, 0, wxEXPAND, 0);
-    $self->{'panel_sizer'}->Add($self->{'button_sizer'}, 0, wxEXPAND, 0);
+    my $new_button = Wx::Button->new($self, -1, "New");
+    my $reset_button = Wx::Button->new($self, -1, "Reset");
+    my $save_button = Wx::Button->new($self, -1, "Save");
+    my $button_sizer = Wx::FlexGridSizer->new(1, 3, 0, 0);
+    $button_sizer->Add($new_button, 0, wxALL|wxALIGN_RIGHT, 5);
+    $button_sizer->Add($reset_button, 0, wxALL, 5);
+    $button_sizer->Add($save_button, 0, wxALL, 5);
+    $button_sizer->AddGrowableCol(0);
 
-    $self->SetSizerAndFit($self->{'panel_sizer'});
+    my $panel_sizer = Wx::BoxSizer->new(wxVERTICAL);
+    $panel_sizer->Add($field_sizer, 0, wxALL|wxEXPAND, 10);
+    $panel_sizer->Add($note_box, 1, wxEXPAND, 0);
+    $panel_sizer->Add($checkbox_sizer, 0, wxEXPAND, 0);
+    $panel_sizer->Add($button_sizer, 0, wxEXPAND, 0);
+    $self->{'panel_sizer'} = $panel_sizer;
 
-    EVT_CHOICE($self, $self->{'type_picker'}, \&show_hide_ssh_controls);
+    $self->SetSizerAndFit($panel_sizer);
 
-    $self->{'ssh_server_label'}->Hide;
-    $self->{'ssh_server_field'}->Hide;
-    $self->{'ssh_username_label'}->Hide;
-    $self->{'ssh_username_field'}->Hide;
-    $self->{'local_port_label'}->Hide;
-    $self->{'local_port_field'}->Hide;
+    EVT_CHOICE($self, $self->type, \&show_hide_ssh_controls);
+
+    $self->{'ssh_user_label'}->Hide;
+    $self->ssh_user->Hide;
+    $self->{'ssh_loc_host_label'}->Hide;
+    $self->ssh_loc_host->Hide;
+    $self->{'ssh_loc_port_label'}->Hide;
+    $self->ssh_loc_port->Hide;
+    $self->{'ssh_rem_host_label'}->Hide;
+    $self->ssh_rem_host->Hide;
+    $self->{'ssh_rem_port_label'}->Hide;
+    $self->ssh_rem_port->Hide;
 
     return $self;
 }
 
+sub fill_thyself {
+    my ($self, $world) = @_;
+
+    no warnings 'uninitialized';
+    $self->name->SetValue($world->{'name'});
+    $self->host->SetValue($world->{'host'});
+    $self->port->SetValue($world->{'port'});
+    $self->user->SetValue($world->{'user'});
+    $self->pass->SetValue($world->{'pass'});
+    $self->type->SetSelection($world->{'type'});
+    $self->ssh_user->SetValue($world->{'ssh_user'});
+    $self->ssh_loc_host->SetValue($world->{'ssh_loc_host'});
+    $self->ssh_loc_port->SetValue($world->{'ssh_loc_port'});
+    $self->ssh_rem_host->SetValue($world->{'ssh_rem_host'});
+    $self->ssh_rem_port->SetValue($world->{'ssh_rem_port'});
+
+    $self->show_hide_ssh_controls($self->type->GetSelection == 2);
+}
+
 sub show_hide_ssh_controls{
-    my ($self) = @_;
-    my $to_show = $self->{'type_picker'}->GetSelection == 2;
-    $self->{'ssh_server_label'}->Show($to_show);
-    $self->{'ssh_server_field'}->Show($to_show);
-    $self->{'ssh_username_label'}->Show($to_show);
-    $self->{'ssh_username_field'}->Show($to_show);
-    $self->{'local_port_label'}->Show($to_show);
-    $self->{'local_port_field'}->Show($to_show);
+    my ($self, $to_show) = @_;
+    $to_show //= $self->type->GetSelection == 2;
+    $self->{'ssh_user_label'}->Show($to_show);
+    $self->{'ssh_loc_host_label'}->Show($to_show);
+    $self->{'ssh_loc_port_label'}->Show($to_show);
+    $self->{'ssh_rem_port_label'}->Show($to_show);
+    $self->{'ssh_rem_host_label'}->Show($to_show);
+    $self->ssh_user->Show($to_show);
+    $self->ssh_loc_host->Show($to_show);
+    $self->ssh_loc_port->Show($to_show);
+    $self->ssh_rem_host->Show($to_show);
+    $self->ssh_rem_port->Show($to_show);
 
     $self->{'panel_sizer'}->Layout;
 }

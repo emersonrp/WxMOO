@@ -23,7 +23,7 @@ sub new {
     my $self = $class->SUPER::new(
         $parent, -1, "", wxDefaultPosition, wxDefaultSize,
             wxTE_AUTO_URL | wxTE_READONLY | wxTE_NOHIDESEL
-        );
+    );
 
     $self->parent($parent);
 
