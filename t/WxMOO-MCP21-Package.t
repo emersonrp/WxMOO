@@ -1,5 +1,5 @@
 use strict;
-use Test::Most;
+use Test::More;
 
 BEGIN { use WxMOO::MCP21::Package; }
 

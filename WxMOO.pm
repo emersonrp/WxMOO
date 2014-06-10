@@ -19,7 +19,11 @@ sub OnInit {
     return 1;
 }
 
-WxMOO->new->MainLoop;
+# don't start the app if we're just doing 'use WxMOO'
+# This is for testing
+__PACKAGE__->run( @ARGV ) unless caller();
+
+sub run { WxMOO->new->MainLoop; }
 
 1;
 

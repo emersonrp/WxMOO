@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 use strict;
-use Test::Most;
+use Test::More;
 
 BEGIN { use_ok "WxMOO::Window::InputPane"; }
 
