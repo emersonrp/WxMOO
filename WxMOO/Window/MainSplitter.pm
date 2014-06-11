@@ -34,7 +34,7 @@ sub saveSplitterSize {
 sub HandleResize {
     my ($self, $evt) = @_;
     my ($w, $h)  = $self->GetSizeWH;
-    my $InputHeight = WxMOO::Prefs->prefs->input_height;
+    my $InputHeight = WxMOO::Prefs->prefs->input_height || 25;
     $self->SetSashPosition($h - $InputHeight, 'resize');
     $self->GetWindow1->ScrollIfAppropriate;
 }

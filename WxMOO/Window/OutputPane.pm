@@ -76,7 +76,7 @@ sub display {
         if (WxMOO::Prefs->prefs->use_mcp) {
             next unless ($line = WxMOO::MCP21::output_filter($line));
         }
-        if (WxMOO::Prefs->prefs->use_ansi) {
+        if (1 || WxMOO::Prefs->prefs->use_ansi) {
             my $stuff = $self->ansi_parse($line);
             $line = '';
             for my $bit (@$stuff) {
