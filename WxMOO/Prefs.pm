@@ -6,11 +6,12 @@ use v5.14;
 use Carp;
 use Wx qw( :font :colour );
 
-use constant SIMPLE_ACCESSORS => qw(
+use parent 'Class::Accessor';
+WxMOO::Prefs->mk_accessors(qw(
     use_mcp use_ansi highlight_urls
     save_window_size window_height window_width input_height
     save_mcp_window_size mcp_window_height mcp_window_width
-);
+));
 
 sub prefs {
     my ($class) = @_;
@@ -28,6 +29,13 @@ sub prefs {
 
 sub config { shift->{'config'} }
 
+sub Read { shift->config->Read(@_); }
+sub Write {
+    my $self = shift;
+    $self->config->Write(@_);
+    $self->config->Flush;
+}
+
 ### Massager-accessors; transform from config-file strings to useful data
 
 ### FONTS
@@ -37,7 +45,7 @@ sub output_font { shift->_font_param('output_font', shift); }
 sub _font_param {
     my ($self, $param, $new) = @_;
     my $font = $new || Wx::Font->new($self->config->Read($param));
-    $self->config->Write($param, $font->GetNativeFontInfoDesc);
+    $self->Write($param, $font->GetNativeFontInfoDesc);
     return $font;
 }
 
@@ -50,7 +58,7 @@ sub output_fgcolour { shift->_colour_param('output_fgcolour', shift); }
 sub _colour_param {
     my ($self, $param, $new) = @_;
     my $colour = $new || Wx::Colour->new($self->config->Read($param));
-    $self->config->Write($param, $colour->GetAsString(wxC2S_HTML_SYNTAX));
+    $self->Write($param, $colour->GetAsString(wxC2S_HTML_SYNTAX));
     return $colour;
 }
 
@@ -86,21 +94,9 @@ sub _colour_param {
     sub get_defaults {
         my ($self) = @_;
         while (my ($key,$val) = each %defaults) {
-            $self->config->Write($key, $val) unless defined $self->config->Read($key);
+            $self->Write($key, $val) unless defined $self->config->Read($key);
         }
     }
-}
-
-# make automagic accessors
-for my $accname (SIMPLE_ACCESSORS) {
-    my $code = sub {
-        my $self = shift;
-        $self->config->Write($accname, @_) if @_;
-        return $self->config->Read($accname);
-    };
-
-    no strict 'refs';
-    *$accname = $code;
 }
 
 1;

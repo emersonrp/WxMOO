@@ -18,7 +18,7 @@ sub init {
 
     unless ($self) {
         $self = {
-            'config' => WxMOO::Prefs->prefs->config,
+            'prefs' => WxMOO::Prefs->prefs,
         };
         bless $self, $class;
     };
@@ -28,24 +28,24 @@ sub init {
 sub load_worlds {
     my ($self) = @_;
 
-    my $config = $self->{'config'};
+    my $prefs = $self->{'prefs'};
 
-    $config->SetPath('/worlds');
+    $prefs->config->SetPath('/worlds');
     my $worlds = [];
 
-    if (my $groupcount = $config->GetNumberOfGroups) {
+    if (my $groupcount = $prefs->config->GetNumberOfGroups) {
         for my $i (1 .. $groupcount) {
-            my (undef, $worldname, undef) = $config->GetNextGroup($i-1);
-            $config->SetPath($worldname);
+            my (undef, $worldname, undef) = $prefs->config->GetNextGroup($i-1);
+            $prefs->config->SetPath($worldname);
             my $worlddata = {};
-            if (my $datacount = $config->GetNumberOfEntries) {
+            if (my $datacount = $prefs->config->GetNumberOfEntries) {
                 for my $j (1 .. $datacount) {
-                    my (undef, $dataname, undef) = $config->GetNextEntry($j-1);
-                    $worlddata->{$dataname} = $config->Read($dataname);
+                    my (undef, $dataname, undef) = $prefs->config->GetNextEntry($j-1);
+                    $worlddata->{$dataname} = $prefs->config->Read($dataname);
                 }
                 push @$worlds, WxMOO::World->new($worlddata);
             }
-            $config->SetPath('/worlds');
+            $prefs->config->SetPath('/worlds');
         }
     } else {
         # populate the worlds with the default list, and save it.
@@ -53,11 +53,11 @@ sub load_worlds {
         my $init_worlds = initial_worlds();
         for my $data (@$init_worlds) {
             push @$worlds, WxMOO::World->new($data);
-            $config->SetPath($data->{'name'});
+            $prefs->config->SetPath($data->{'name'});
             while (my ($k, $v) = each %$data) {
-                $config->Write($k, $v);
+                $prefs->Write($k, $v);
             }
-            $config->SetPath('/worlds');
+            $prefs->config->SetPath('/worlds');
         }
     }
     return $worlds;
@@ -104,12 +104,12 @@ sub new {
 
 sub save {
     my $self = shift;
-    my $config = $self->config;
+    my $prefs = WxMOO::Prefs->prefs;
 
     (my $keyname = $self->name) =~ s/\W/_/g;
-    $config->SetPath("/worlds/$keyname");
+    $prefs->config->SetPath("/worlds/$keyname");
     for my $f (@fields) {
-        $config->Write($f, $self->{$f});
+        $prefs->Write($f, $self->{$f});
     }
     return $self;
 }
