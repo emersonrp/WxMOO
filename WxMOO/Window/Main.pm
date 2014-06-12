@@ -21,6 +21,8 @@ use WxMOO::Window::WorldsList;
 use base qw( Wx::Frame Class::Accessor );
 WxMOO::Window::Main->mk_accessors(qw( connection input_pane output_pane ));
 
+my $prefs = WxMOO::Prefs->prefs;
+
 sub new {
     my ($class) = @_;
     my $self = $class->SUPER::new( undef, -1, 'WxMOO',
@@ -31,11 +33,12 @@ sub new {
 
     $self->addEvents;
 
-    if ( WxMOO::Prefs->prefs->save_window_size) {
-        my $w = WxMOO::Prefs->prefs->window_width  || 800;
-        my $h = WxMOO::Prefs->prefs->window_height || 600;
-        $self->SetSize([$w, $h]);
+    my $h = 600;  my $w = 800;
+    if ( $prefs->save_window_size) {
+        $w = $prefs->window_width if $prefs->window_width;
+        $h = $prefs->window_height if $prefs->window_height;
     }
+    $self->SetSize([$w, $h]);
 
     my $splitter = WxMOO::Window::MainSplitter->new($self);
 
@@ -131,10 +134,10 @@ sub closeConnection {
 sub onSize {
     my ($self, $evt) = @_;
 
-    if (WxMOO::Prefs->prefs->save_window_size) {
+    if ($prefs->save_window_size) {
         my ($w, $h) = $self->GetSizeWH;
-        WxMOO::Prefs->prefs->window_width($w);
-        WxMOO::Prefs->prefs->window_height($h);
+        $prefs->window_width($w);
+        $prefs->window_height($h);
     }
     $evt->Skip;
 }

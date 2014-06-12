@@ -32,7 +32,9 @@ sub new {
         my $world_label  = Wx::StaticText->new($self, -1, "World");
         my $world_picker = Wx::Choice    ->new($self, -1, wxDefaultPosition, wxDefaultSize, [], wxCB_SORT );
 
-        for my $world (values $worlds) {
+        # This 'reverse' is necessary for ->GetClientData(0) to get filled.
+        # There is no clue as to why this is.
+        for my $world (reverse @$worlds) {
             $world_picker->Append($world->{'name'}, $world);
         }
 
@@ -58,7 +60,6 @@ sub new {
         $main_sizer->Add($world_details_box,  1, wxEXPAND | wxLEFT | wxRIGHT, 10);
         $main_sizer->Add($button_sizer,       0, wxEXPAND | wxALL,            10);
 
-        # TODO - keep track of the last one we picked and restore it as the selection
         $world_picker->SetSelection(0);
         $self->world_details_panel->fill_thyself($world_picker->GetClientData(0));
 
@@ -231,6 +232,12 @@ sub on_new {
 
 sub fill_thyself {
     my ($self, $world) = @_;
+
+    unless (ref $world) {
+        say STDERR "got a bad world in fill_thyself:";
+        say STDERR Data::Dumper::Dumper $world;
+        return;
+    }
 
     $self->world($world);
 
