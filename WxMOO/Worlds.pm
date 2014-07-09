@@ -53,6 +53,8 @@ sub load_worlds {
         my $init_worlds = initial_worlds();
         for my $data (@$init_worlds) {
             push @$worlds, WxMOO::World->new($data);
+use Data::Dumper;
+print STDERR Data::Dumper::Dumper $data unless $data->{'name'};
             $prefs->config->SetPath($data->{'name'});
             while (my ($k, $v) = each %$data) {
                 $prefs->Write($k, $v);
@@ -69,7 +71,7 @@ sub worlds {
 }
 
 sub initial_worlds {
-    return decode_json do { local $/; read_file 'worldlist.json' };
+    return decode_json do { local $/; read_file 'moolist.json' };
 }
 
 #####################
