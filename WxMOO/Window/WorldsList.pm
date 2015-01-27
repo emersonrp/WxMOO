@@ -53,6 +53,7 @@ sub new {
         for my $b ($button_sizer->GetChildren) {
             next unless ($b->GetWindow and $b->GetWindow->GetLabel eq '&OK');
             $b->GetWindow->SetLabel('&Connect');
+            last;
         }
 
         my $main_sizer = Wx::BoxSizer->new(wxVERTICAL);

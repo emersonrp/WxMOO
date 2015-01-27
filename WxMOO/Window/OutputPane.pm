@@ -42,7 +42,7 @@ sub process_url_click {
     my $url = $event->GetString;
     # TODO - make this whole notion into a platform-agnostic launchy bit;
     system('xdg-open', $url);
-    }
+}
 
 sub WriteText {
     my ($self, @rest) = @_;
@@ -127,7 +127,7 @@ my %ansi_colors = (
 );
 sub lookup_color {
     my ($self, $color) = @_;
-    return $self->{'bright'} ? $ansi_colors{$color}->[1] : $ansi_colors{$color}->[0];
+    return $ansi_colors{$color}->[$self->{'bright'} ? 1 : 0];
 }
 
 sub apply_ansi {

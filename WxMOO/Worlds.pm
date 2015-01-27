@@ -71,7 +71,8 @@ sub worlds {
 }
 
 sub initial_worlds {
-    return decode_json do { local $/; read_file 'moolist.json' };
+    my $moolist = read_file('moolist.json');
+    return decode_json $moolist;
 }
 
 #####################

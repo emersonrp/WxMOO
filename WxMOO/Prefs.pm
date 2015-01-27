@@ -29,8 +29,9 @@ sub prefs {
 
 sub config { shift->{'config'} }
 
-sub Read { shift->config->Read(@_); }
-sub Write {
+# these are 'get' and 'set' so Class::Accessor will automagically use them
+sub get { shift->config->Read(@_); }
+sub set {
     my $self = shift;
     $self->config->Write(@_);
     $self->config->Flush;
@@ -44,8 +45,8 @@ sub output_font { shift->_font_param('output_font', shift); }
 
 sub _font_param {
     my ($self, $param, $new) = @_;
-    my $font = $new || Wx::Font->new($self->config->Read($param));
-    $self->Write($param, $font->GetNativeFontInfoDesc);
+    my $font = $new || Wx::Font->new($self->get($param));
+    $self->set($param, $font->GetNativeFontInfoDesc);
     return $font;
 }
 
@@ -57,15 +58,15 @@ sub output_fgcolour { shift->_colour_param('output_fgcolour', shift); }
 
 sub _colour_param {
     my ($self, $param, $new) = @_;
-    my $colour = $new || Wx::Colour->new($self->config->Read($param));
-    $self->Write($param, $colour->GetAsString(wxC2S_HTML_SYNTAX));
+    my $colour = $new || Wx::Colour->new($self->get($param));
+    $self->set($param, $colour->GetAsString(wxC2S_HTML_SYNTAX));
     return $colour;
 }
 
 ### DEFAULTS -- this will set everything to a default value if it's not already set.
 #               This gives us both brand-new-file and add-new-params'-default-values
 {
-    my $defaultFont = Wx::Font->new( 10, wxTELETYPE, wxNORMAL, wxNORMAL );
+    my $defaultFont = Wx::Font->new( 12, wxTELETYPE, wxNORMAL, wxNORMAL );
     my $defaultFontString = $defaultFont->GetNativeFontInfo->ToString;
     my %defaults = (
         input_font           => $defaultFontString,
@@ -94,7 +95,7 @@ sub _colour_param {
     sub get_defaults {
         my ($self) = @_;
         while (my ($key,$val) = each %defaults) {
-            $self->Write($key, $val) unless defined $self->config->Read($key);
+            $self->set($key, $val) unless defined $self->get($key);
         }
     }
 }

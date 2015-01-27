@@ -10,6 +10,7 @@ use Wx;
 
 # TODO - there's surely some less-intrusive and -hacky way to do this.
 sub alert {
+return;
     my ($text) = @_;
     my $output = Wx::Window::FindWindowById(id('OUTPUT_PANE'));
 
