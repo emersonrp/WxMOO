@@ -1,7 +1,7 @@
 package WxMOO::Theme;
 use strict;
 use warnings;
-use v.5.14;
+use v5.14;
 
 sub new {
     my ($class, %args) = @_;
@@ -22,6 +22,7 @@ sub new {
         d_cyan    => '93a1a1',
         b_white   => 'eee8d5',
         d_white   => 'fdf6e3',
+        %args,
     }, $class;
 }
 

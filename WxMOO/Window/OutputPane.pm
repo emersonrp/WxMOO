@@ -50,10 +50,12 @@ sub WriteText {
     $self->ScrollIfAppropriate;
 }
 
+sub is_at_bottom { 1; } # are we already scrolled all the way down?
 sub ScrollIfAppropriate {
     my ($self) = @_;
-    # TODO:  "if we want scroll-on-output or are already at the bottom..."
-    $self->ShowPosition($self->GetCaretPosition);
+    if (1 || $self->is_at_bottom || WxMOO::Prefs->prefs->scroll_on_output) {
+        $self->ShowPosition($self->GetCaretPosition);
+    }
 }
 
 sub restyle_thyself {
