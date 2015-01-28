@@ -73,7 +73,8 @@ sub buildMenu {
     my $Worlds_connect = $WorldsMenu->Append(-1, "Connect...", "");
     my $Worlds_close   = $WorldsMenu->Append(-1, "Close",      "");
     $WorldsMenu->AppendSeparator;
-    my $Worlds_quit    = $WorldsMenu->Append(-1, "Quit",       "");
+    my $Worlds_reconnect = $WorldsMenu->Append(-1, "Reconnect",      "");
+    my $Worlds_quit      = $WorldsMenu->Append(-1, "Quit",       "");
 
     my $EditMenu = Wx::Menu->new;
     my $Edit_cut   = $EditMenu->Append(-1, "Cut",   "");
@@ -101,10 +102,11 @@ sub buildMenu {
     $self->SetMenuBar($MenuBar);
 
     # MENUBAR EVENTS
-    EVT_MENU( $self, $Worlds_worlds,  \&showWorldsList    );
-    EVT_MENU( $self, $Worlds_connect, \&showConnectDialog );
-    EVT_MENU( $self, $Worlds_close,   \&closeConnection   );
-    EVT_MENU( $self, $Worlds_quit,    \&quitApplication   );
+    EVT_MENU( $self, $Worlds_worlds,    \&showWorldsList      );
+    EVT_MENU( $self, $Worlds_connect,   \&showConnectDialog   );
+    EVT_MENU( $self, $Worlds_close,     \&closeConnection     );
+    EVT_MENU( $self, $Worlds_reconnect, \&reconnectConnection );
+    EVT_MENU( $self, $Worlds_quit,      \&quitApplication     );
 
     EVT_MENU( $self, $Edit_cut,     sub {1} );
     EVT_MENU( $self, $Edit_copy,    sub {1} );
@@ -129,6 +131,12 @@ sub closeConnection {
     my ($self) = @_;
     $self->connection->Destroy;
     $self->connection(undef);
+}
+
+sub reconnectConnection {
+    my ($self) = shift;
+    $self->connection->Close;
+    $self->connection->connect;
 }
 
 sub onSize {
@@ -174,7 +182,7 @@ sub showAboutBox {
     $self->{'about_info'} ||= eval {
         my $info = Wx::AboutDialogInfo->new;
         $info->AddDeveloper('R Pickett (emerson@hayseed.net)');
-        $info->SetCopyright('(c) 2013, 2014');
+        $info->SetCopyright('(c) 2013, 2014, 2015');
         $info->SetWebSite('http://github.com/emersonrp/WxMOO');
         $info->SetName('WxMOO');
         $info->SetVersion('0.0.1');

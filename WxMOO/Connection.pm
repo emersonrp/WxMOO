@@ -49,8 +49,8 @@ sub output { shift->Write(@_); }
 
 sub connect {
     my ($self, $host, $port) = @_;
-    $self->host($host);
-    $self->port($port);
+    $self->host($host) if $host;
+    $self->port($port) if $port;
 
     $self->Connect($self->host, $self->port);
     if ($self->IsConnected) {
@@ -58,7 +58,7 @@ sub connect {
 
         WxMOO::MCP21::new_connection($self);
 
-        # TODO - 'if prefs->keepalive'
+        # TODO - 'if world->connection->keepalive'
         $self->init_keepalive;
     } else {
         carp "Can't connect to host/port";
