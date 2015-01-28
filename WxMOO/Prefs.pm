@@ -32,8 +32,8 @@ sub config { shift->{'config'} }
 # these are 'get' and 'set' so Class::Accessor will automagically use them
 sub get { shift->config->Read(@_); }
 sub set {
-    my $self = shift;
-    $self->config->Write(@_);
+    my ($self, $param, $val) = @_;
+    $self->config->Write($param, $val);
     $self->config->Flush;
 }
 
@@ -45,8 +45,13 @@ sub output_font { shift->_font_param('output_font', shift); }
 
 sub _font_param {
     my ($self, $param, $new) = @_;
-    my $font = $new || Wx::Font->new($self->get($param));
-    $self->set($param, $font->GetNativeFontInfoDesc);
+    my $font;
+    if (my $fontname = $new || $self->get($param)) {
+        $font = Wx::Font->new( $fontname );
+    }
+    if ($font) {
+        $self->set($param, $font->GetNativeFontInfo->ToString);
+    }
     return $font;
 }
 
@@ -58,8 +63,13 @@ sub output_fgcolour { shift->_colour_param('output_fgcolour', shift); }
 
 sub _colour_param {
     my ($self, $param, $new) = @_;
-    my $colour = $new || Wx::Colour->new($self->get($param));
-    $self->set($param, $colour->GetAsString(wxC2S_HTML_SYNTAX));
+    my $colour;
+    if (my $colourname = $new || $self->get($param)) {
+        $colour = Wx::Colour->new( $colourname );
+    }
+    if ($colour) {
+        $self->set($param, $colour->GetAsString(wxC2S_HTML_SYNTAX));
+    }
     return $colour;
 }
 
@@ -68,34 +78,34 @@ sub _colour_param {
 {
     my $defaultFont = Wx::Font->new( 12, wxTELETYPE, wxNORMAL, wxNORMAL );
     my $defaultFontString = $defaultFont->GetNativeFontInfo->ToString;
+
     my %defaults = (
-        input_font           => $defaultFontString,
-        output_font          => $defaultFontString,
-        output_fgcolour      => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
-        output_bgcolour      => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
-        input_fgcolour       => wxBLACK->GetAsString(wxC2S_HTML_SYNTAX),
-        input_bgcolour       => wxWHITE->GetAsString(wxC2S_HTML_SYNTAX),
+        input_font      => $defaultFontString,
+        output_font     => $defaultFontString,
+        output_fgcolour => '#839496',
+        output_bgcolour => '#002b36',
+        input_fgcolour  => '#839496',
+        input_bgcolour  => '#002b36',
 
-        save_window_size     => 1,
-        window_width         => 800,
-        window_height        => 600,
-        input_height         => 25,
+        save_window_size => 1,
+        window_width     => 800,
+        window_height    => 600,
+        input_height     => 25,
 
-        theme                => 'solarized',
-        use_ansi             => 1,
-        use_mcp              => 1,
-        highlight_urls       => 1,
+        # theme          => 'solarized',
+        use_ansi       => 1,
+        use_mcp        => 1,
+        highlight_urls => 1,
 
         save_mcp_window_size => 1,
         mcp_window_width     => 600,
         mcp_window_height    => 400,
-
     );
 
     sub get_defaults {
         my ($self) = @_;
         while (my ($key,$val) = each %defaults) {
-            $self->set($key, $val) unless defined $self->get($key);
+            $self->$key($val) unless $self->$key;
         }
     }
 }
