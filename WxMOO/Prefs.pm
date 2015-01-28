@@ -4,6 +4,7 @@ use warnings;
 use v5.14;
 
 use Carp;
+use Scalar::Util 'blessed';
 use Wx qw( :font :colour );
 
 use parent 'Class::Accessor';
@@ -46,7 +47,10 @@ sub output_font { shift->_font_param('output_font', shift); }
 sub _font_param {
     my ($self, $param, $new) = @_;
     my $font;
-    if (my $fontname = $new || $self->get($param)) {
+
+    if (blessed $new and $new->isa('Wx::Font')) {
+        $font = $new;
+    } elsif (my $fontname = $new || $self->get($param)) {
         $font = Wx::Font->new( $fontname );
     }
     if ($font) {
@@ -64,7 +68,10 @@ sub output_fgcolour { shift->_colour_param('output_fgcolour', shift); }
 sub _colour_param {
     my ($self, $param, $new) = @_;
     my $colour;
-    if (my $colourname = $new || $self->get($param)) {
+
+    if (blessed $new and $new->isa('Wx::Colour')) {
+        $colour = $new;
+    } elsif (my $colourname = $new || $self->get($param)) {
         $colour = Wx::Colour->new( $colourname );
     }
     if ($colour) {
