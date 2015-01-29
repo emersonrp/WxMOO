@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use v5.14;
 
-use Wx qw( :frame :misc :sizer );
+use Wx qw( :id :frame :misc :sizer );
 use Wx::Event qw( EVT_MENU EVT_SIZE );
 
 use WxMOO::Connection;  # Might go away later
@@ -19,7 +19,7 @@ use WxMOO::Window::PrefsEditor;
 use WxMOO::Window::WorldsList;
 
 use base qw( Wx::Frame Class::Accessor );
-WxMOO::Window::Main->mk_accessors(qw( connection input_pane output_pane ));
+WxMOO::Window::Main->mk_accessors(qw( connection input_pane output_pane status_bar ));
 
 my $prefs = WxMOO::Prefs->prefs;
 
@@ -28,6 +28,9 @@ sub new {
     my $self = $class->SUPER::new( undef, -1, 'WxMOO',
         wxDefaultPosition, wxDefaultSize,
         wxDEFAULT_FRAME_STYLE);
+
+    # TODO - status bar is so biig but it would be nice to have it.
+    # $self->status_bar($self->CreateStatusBar);
 
     $self->buildMenu;
 
@@ -69,35 +72,35 @@ sub Initialize {
 sub buildMenu {
     my ($self) = @_;
     my $WorldsMenu = Wx::Menu->new;
-    my $Worlds_worlds  = $WorldsMenu->Append(-1, "Worlds...",  "");
-    my $Worlds_connect = $WorldsMenu->Append(-1, "Connect...", "");
-    my $Worlds_close   = $WorldsMenu->Append(-1, "Close",      "");
+    my $Worlds_worlds  = $WorldsMenu->Append(-1, "&Worlds...",  "Browse list of worlds");
+    my $Worlds_connect = $WorldsMenu->Append(-1, "&Connect...", "Connect to a host and port");
+    my $Worlds_close   = $WorldsMenu->Append(Wx::MenuItem->new($WorldsMenu, wxID_CLOSE));
     $WorldsMenu->AppendSeparator;
-    my $Worlds_reconnect = $WorldsMenu->Append(-1, "Reconnect",      "");
-    my $Worlds_quit      = $WorldsMenu->Append(-1, "Quit",       "");
+    my $Worlds_reconnect = $WorldsMenu->Append(-1, "&Reconnect", "Close and re-open the current connection");
+    my $Worlds_quit      = $WorldsMenu->Append(Wx::MenuItem->new($WorldsMenu, wxID_EXIT));
 
     my $EditMenu = Wx::Menu->new;
-    my $Edit_cut   = $EditMenu->Append(-1, "Cut",   "");
-    my $Edit_copy  = $EditMenu->Append(-1, "Copy",  "");
-    my $Edit_paste = $EditMenu->Append(-1, "Paste", "");
-    my $Edit_clear = $EditMenu->Append(-1, "Clear", "");
+    my $Edit_cut   = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_CUT));
+    my $Edit_copy  = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_COPY));
+    my $Edit_paste = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_PASTE));
+    my $Edit_clear = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_CLEAR));
 
     my $PrefsMenu = Wx::Menu->new;
-    my $Prefs_prefs = $PrefsMenu->Append(-1, "Edit Preferences", "");
+    my $Prefs_prefs = $PrefsMenu->Append(Wx::MenuItem->new($PrefsMenu, wxID_PREFERENCES));
 
     my $WindowMenu = Wx::Menu->new;
-    my $Window_debugmcp = $WindowMenu->Append(-1, "Debug MCP", "");
+    my $Window_debugmcp = $WindowMenu->Append(-1, "&Debug MCP", "");
 
     my $HelpMenu = Wx::Menu->new;
-    my $Help_help  = $HelpMenu->Append(-1, "Help Topics", "");
-    my $Help_about = $HelpMenu->Append(-1, "About WxMOO", "");
+    my $Help_help  = $HelpMenu->Append(-1, "&Help Topics", "");
+    my $Help_about = $HelpMenu->Append(Wx::MenuItem->new($HelpMenu, wxID_ABOUT));
 
     my $MenuBar = Wx::MenuBar->new;
-    $MenuBar->Append($WorldsMenu, "Worlds");
-    $MenuBar->Append($EditMenu, "Edit");
-    $MenuBar->Append($PrefsMenu, "Preferences");
+    $MenuBar->Append($WorldsMenu, "&Worlds");
+    $MenuBar->Append($EditMenu, "&Edit");
+    $MenuBar->Append($PrefsMenu, "&Preferences");
     $MenuBar->Append($WindowMenu, "Windows");
-    $MenuBar->Append($HelpMenu, "Help");
+    $MenuBar->Append($HelpMenu, "&Help");
 
     $self->SetMenuBar($MenuBar);
 
