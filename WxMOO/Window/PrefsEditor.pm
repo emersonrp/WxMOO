@@ -93,9 +93,11 @@ sub populateFontPanel {
     my $i_fgcolour = WxMOO::Prefs->prefs->input_fgcolour  || wxBLACK;
     my $i_bgcolour = WxMOO::Prefs->prefs->input_bgcolour  || wxWHITE;
 
+    # output sample/controls
     $fcp->{'o_sample'}    = Wx::TextCtrl      ->new($fcp, -1, "",     wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     $fcp->{'ofont_ctrl' } = Wx::FontPickerCtrl->new($fcp, -1, $ofont, wxDefaultPosition, wxDefaultSize,
-                                                                            wxFNTP_FONTDESC_AS_LABEL|wxFNTP_USEFONT_FOR_LABEL);
+                                                                      wxFNTP_FONTDESC_AS_LABEL|wxFNTP_USEFONT_FOR_LABEL);
+
     my $bsize = $fcp->{'ofont_ctrl'}->GetSize->GetHeight;
     my $button_size = [$bsize, $bsize];
 
@@ -107,6 +109,7 @@ sub populateFontPanel {
     $fcp->{'o_sample'}->SetForegroundColour($o_fgcolour);
     $fcp->{'o_sample'}->SetValue(qq|Haakon says, "This is the output window."|);
 
+    # input sample/controls
     $fcp->{'i_sample'}    = Wx::TextCtrl      ->new($fcp, -1, "",     wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     $fcp->{'ifont_ctrl' } = Wx::FontPickerCtrl->new($fcp, -1, $ifont, wxDefaultPosition, wxDefaultSize,
                                                                             wxFNTP_FONTDESC_AS_LABEL|wxFNTP_USEFONT_FOR_LABEL);
@@ -140,10 +143,10 @@ sub populateFontPanel {
     $ansi_sizer->Fit($fcp);
 
     my $panel_sizer = Wx::BoxSizer->new(wxVERTICAL);
-    $panel_sizer->Add($fcp->{'o_sample'}, 1, wxRIGHT|wxLEFT|wxTOP|wxEXPAND, 10);
+    $panel_sizer->Add($fcp->{'o_sample'}, 0, wxRIGHT|wxLEFT|wxTOP|wxEXPAND, 10);
     $panel_sizer->Add($output_sizer,  0, wxRIGHT|wxLEFT|wxEXPAND, 10);
     $panel_sizer->AddSpacer($bsize);
-    $panel_sizer->Add($fcp->{'i_sample'},  1, wxRIGHT|wxLEFT|wxBOTTOM|wxEXPAND, 10);
+    $panel_sizer->Add($fcp->{'i_sample'}, 0, wxRIGHT|wxLEFT|wxTOP|wxEXPAND, 10);
     $panel_sizer->Add($input_sizer,   0, wxRIGHT|wxLEFT|wxEXPAND, 10);
     $panel_sizer->AddSpacer($bsize);
     $panel_sizer->Add($ansi_sizer);
