@@ -29,13 +29,13 @@ our $multiline_messages = {};
 
 # We'd like to enumerate this automatically.
 use WxMOO::MCP21::Package::mcp;
-use WxMOO::MCP21::Package::mcp_cord;
+#use WxMOO::MCP21::Package::mcp_cord;
 use WxMOO::MCP21::Package::mcp_negotiate;
 use WxMOO::MCP21::Package::dns_org_mud_moo_simpleedit;
 use WxMOO::MCP21::Package::dns_com_awns_status;
 
 my $pkg_mcp            = WxMOO::MCP21::Package::mcp          ->new;
-my $pkg_mcp_cord       = WxMOO::MCP21::Package::mcp_cord     ->new;
+#my $pkg_mcp_cord       = WxMOO::MCP21::Package::mcp_cord     ->new;
 my $pkg_mcp_negotiate  = WxMOO::MCP21::Package::mcp_negotiate->new;
 my $pkg_mcp_simpleedit = WxMOO::MCP21::Package::dns_org_mud_moo_simpleedit->new;
 my $pkg_mcp_status     = WxMOO::MCP21::Package::dns_com_awns_status->new;
