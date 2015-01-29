@@ -10,6 +10,7 @@ use Wx::RichText;
 use Wx::Event qw( EVT_SET_FOCUS EVT_TEXT_URL );
 
 use WxMOO::Prefs;
+use WxMOO::Theme;
 use WxMOO::Utility qw( URL_REGEX );
 
 # TODO we need a better output_filter scheme, probably?
@@ -117,19 +118,10 @@ sub display {
 
 sub focus_input { shift->input_pane->SetFocus; }
 
-my %ansi_colors = (
-    black   => [ Wx::Colour->new(  0,  0,  0), Wx::Colour->new(127,127,127) ],
-    red     => [ Wx::Colour->new(205,  0,  0), Wx::Colour->new(255,  0,  0) ],
-    green   => [ Wx::Colour->new(  0,205,  0), Wx::Colour->new(  0,255,  0) ],
-    yellow  => [ Wx::Colour->new(205,205,  0), Wx::Colour->new(255,255,  0) ],
-    blue    => [ Wx::Colour->new(  0,  0,238), Wx::Colour->new( 92, 92,255) ],
-    magenta => [ Wx::Colour->new(205,  0,205), Wx::Colour->new(255,  0,255) ],
-    cyan    => [ Wx::Colour->new(  0,205,205), Wx::Colour->new(  0,255,255) ],
-    white   => [ Wx::Colour->new(229,229,229), Wx::Colour->new(255,255,255) ],
-);
+my $theme = WxMOO::Theme->new; # TODO yes I know
 sub lookup_color {
     my ($self, $color) = @_;
-    return $ansi_colors{$color}->[$self->{'bright'} ? 1 : 0];
+    return $theme->Colour($color, $self->{'bright'} ? 1 : 0);
 }
 
 sub apply_ansi {
