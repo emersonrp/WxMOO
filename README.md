@@ -10,21 +10,31 @@ Done:
 * It takes input, and shows output.  Almost pleasantly, even.
 * The input field has a super-basic but functional command history.
 * ANSI color/style codes are, for the most part honored.
-* Incomplete MCP/2.1 implementation -- mcp-notify is implemented, but mcp-cord is not, though the client lies and says it is.
-* Starting in on MCP packages: dns-org-mud-moo-simpleedit -- currently it's hard-coded to launch gvim, but that'll be a preference later;  also dns-com-awns-status, which goes to STDERR.
+* Incomplete MCP/2.1 implementation -- mcp-notify is implemented, but mcp-cord is not.
+* Starting in on MCP packages: dns-org-mud-moo-simpleedit done, external editor configurable
 * Saving prefs now works, for the small set of prefs it honors.
+
+0.1 Milestone:
+* fix output pane scroll-to-bottom behavior to dwym
+* Finish keyboard accelerators;  page-up/down etc
 
 
 To do:
-* Add proper prefs and world/connection handling
+* Add proper prefs and world/connection handling (75% done!)
 * Start making sure it works on Windows and MacOS.  Currently, almost surely it doesn't.
 * Start rolling binary packages for all platforms once it's remotely useful to anyone but me.
-* Basic quality of life things like keyboard shortcuts.
+* Basic quality of life things like keyboard shortcuts. (50% done!)
+* Customizable colors / themes
+* Per-world settings?  Colors, fonts?j
 * Complete the MCP 2.1 implementation.  It does the version dance with the server (both the MCP version, and mcp-negotiate package-version), but ignores whatever it sees.  Also mcp-cord isn't implemented at all.
 * Proper list of 'worlds' / accounts, MOOs, what-have-you.  Pondering schemes to scrape online MOO lists to offer suggestions.
 * object browser, like MacMOOSE but hopefully nicer.
 * inline MOO syntax highlighting?  Like, detect the output of "@list $player:tell" and auto-highlight it?
 * Connections will hopefully have a 'connection type' -- currently thinking in terms of plain'ol TCP port, SSL, and SSH port forwarding (automagic at connection time).
+
+Blue-sky:
+* HTML help, using jtext?
+* MIME-based external apps, ie mplayer for audio/flac etc?  MCP package to accept MIME+data?
 
 Things that aren't currently on the rader:
 * tkMOO-light has a whole plugin architecture, and all sorts of third-party additions (I even wrote one, years ago).  I'm not delusional enough to think that there'll be a flourishing ecosystem of developers around **this** MOO client, so I'm not actually desigining with that in mind.
@@ -46,10 +56,16 @@ WxMOO requires perl 5.14 or newer, and WxWidgets 2.8 or newer.  I desperately wa
 As far as further perl dependencies, Module::ScanDeps (not itself a dependency) reports the following:
 
     Carp
+    Carp::Heavy
     Class::Accessor
     constant
     Cwd
     Data::Dumper
+    Encode
+    Encode::Alias
+    Encode::Config
+    Encode::Encoding
+    Encode::MIME::Name
     Exporter
     Exporter::Heavy
     File::Path
@@ -57,15 +73,20 @@ As far as further perl dependencies, Module::ScanDeps (not itself a dependency) 
     File::Spec
     File::Spec::Unix
     File::Temp
+    JSON
+    JSON::PP
+    JSON::PP::Boolean
     List::Util
     parent
     Scalar::Util
     Socket
-    Text::ParseWords
+    Storable
+    Sub::Util
     threads
     Wx
     Wx::App
     Wx::Event
+    Wx::Loader::Custom
     Wx::Locale
     Wx::Menu
     Wx::Mini
