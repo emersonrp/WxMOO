@@ -12,6 +12,7 @@ WxMOO::Prefs->mk_accessors(qw(
     use_mcp use_ansi highlight_urls
     save_window_size window_height window_width input_height
     save_mcp_window_size mcp_window_height mcp_window_width
+    external_editor
 ));
 
 sub prefs {
@@ -107,6 +108,8 @@ sub _colour_param {
         save_mcp_window_size => 1,
         mcp_window_width     => 600,
         mcp_window_height    => 400,
+
+        external_editor => 'gvim -f',
     );
 
     sub get_defaults {

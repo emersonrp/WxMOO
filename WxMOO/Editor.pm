@@ -12,10 +12,8 @@ use File::Temp;
 use Wx qw( :id :execute );
 use Wx::Event qw( EVT_END_PROCESS EVT_TIMER );
 
+use WxMOO::Prefs;
 use WxMOO::Utility 'alert';
-
-# TODO - this'll be a preference
-use constant EDITOR => '/usr/bin/gvim';
 
 my $collection = WxMOO::Editor::Collection->new;
 
@@ -35,7 +33,7 @@ sub launch_editor {
     $process->{'_filename'} = $tempfile;
 
     $process->{'_last_sent'} = 0;
-    Wx::ExecuteCommand(EDITOR . " -f $tempfile", wxEXEC_NODISABLE, $process );
+    Wx::ExecuteCommand(WxMOO::Prefs->prefs->external_editor . " $tempfile", wxEXEC_NODISABLE, $process );
 
     $collection->in_progress($process->{'_id'}, $process);
 

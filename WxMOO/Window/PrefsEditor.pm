@@ -34,6 +34,7 @@ sub new {
 
     $self->populateGeneralPanel($self->{'page_1'});
     $self->populateFontPanel(   $self->{'page_2'});
+    $self->populatePathsPanel(  $self->{'page_3'});
 
     $sizer->Add($book, 1, wxEXPAND | wxFIXED_MINSIZE | wxALL , 5 );
     $sizer->Add($button_sizer, 0, wxALIGN_CENTER_HORIZONTAL|wxBOTTOM, 5);
@@ -51,6 +52,7 @@ sub update_prefs {
     my ($self, $evt) = @_;
     my $g_page  = $self->{'page_1'};
     my $fc_page = $self->{'page_2'};
+    my $p_page  = $self->{'page_3'};
 
     WxMOO::Prefs->prefs->save_window_size( $g_page->{'save_size_checkbox'}->GetValue + 0 );
 
@@ -63,6 +65,8 @@ sub update_prefs {
     WxMOO::Prefs->prefs->input_bgcolour( $fc_page->{'i_bgcolour_ctrl'}->GetColour);
 
     WxMOO::Prefs->prefs->use_ansi( $fc_page->{'ansi_checkbox'}->GetValue + 0 );
+
+    WxMOO::Prefs->prefs->external_editor( $p_page->{'external_editor'}->GetValue );
 
     $self->parent->output_pane->restyle_thyself;
     $self->parent->input_pane->restyle_thyself;
@@ -144,10 +148,10 @@ sub populateFontPanel {
 
     my $panel_sizer = Wx::BoxSizer->new(wxVERTICAL);
     $panel_sizer->Add($fcp->{'o_sample'}, 0, wxRIGHT|wxLEFT|wxTOP|wxEXPAND, 10);
-    $panel_sizer->Add($output_sizer,  0, wxRIGHT|wxLEFT|wxEXPAND, 10);
+    $panel_sizer->Add($output_sizer,      0, wxRIGHT|wxLEFT|wxEXPAND, 10);
     $panel_sizer->AddSpacer($bsize);
     $panel_sizer->Add($fcp->{'i_sample'}, 0, wxRIGHT|wxLEFT|wxTOP|wxEXPAND, 10);
-    $panel_sizer->Add($input_sizer,   0, wxRIGHT|wxLEFT|wxEXPAND, 10);
+    $panel_sizer->Add($input_sizer,       0, wxRIGHT|wxLEFT|wxEXPAND, 10);
     $panel_sizer->AddSpacer($bsize);
     $panel_sizer->Add($ansi_sizer);
 
@@ -159,6 +163,25 @@ sub populateFontPanel {
     EVT_COLOURPICKER_CHANGED($fcp, $fcp->{'o_bgcolour_ctrl'}, \&update_sample_text);
 
     $fcp->SetSizer($panel_sizer);
+}
+
+sub populatePathsPanel {
+    my ($self, $pp) = @_;
+
+    my $editor_label  = Wx::StaticText->new($pp, -1, "External Editor");
+    $pp->{'external_editor'} = Wx::TextCtrl->new($pp, -1, "");
+    $pp->{'external_editor'}->SetValue( WxMOO::Prefs->prefs->external_editor );
+    $pp->{'external_editor'}->Fit;
+
+    my $editor_sizer = Wx::FlexGridSizer->new(1,2,5,10);
+    $editor_sizer->Add($editor_label,            0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+    $editor_sizer->Add($pp->{'external_editor'}, 1, wxEXPAND, 0);
+    $editor_sizer->AddGrowableCol(1);
+
+    $pp->{'panel_sizer'} = Wx::BoxSizer->new(wxVERTICAL);
+    $pp->{'panel_sizer'}->Add($editor_sizer, 0, wxEXPAND|wxALL, 10);
+
+    $pp->SetSizer($pp->{'panel_sizer'});
 }
 
 sub update_sample_text {
