@@ -92,7 +92,7 @@ sub display {
 
                             $self->BeginURL(${^MATCH});
                             $self->BeginUnderline;
-                            $self->BeginTextColour( Wx::Colour->new(0, 0, 255) );
+                            $self->BeginTextColour( $self->lookup_color('blue', 1) );
 
                             $self->WriteText(${^MATCH});
 
