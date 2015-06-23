@@ -4,21 +4,9 @@ use warnings;
 use v5.14;
 
 use parent 'Exporter';
-our @EXPORT_OK = qw( alert URL_REGEX );
+our @EXPORT_OK = qw( URL_REGEX );
 
 use Wx;
-
-# TODO - there's surely some less-intrusive and -hacky way to do this.
-sub alert {
-return;
-    my ($text) = @_;
-    my $output = Wx::Window::FindWindowById(id('OUTPUT_PANE'));
-
-    $output->BeginTextColour( Wx::Colour->new(255, 0, 0) );
-    $output->WriteText("WXMOO alert -> $text\n");
-    $output->EndTextColour;
-}
-
 
 # This regex adapted from one found at
 # http://daringfireball.net/2010/07/improved_regex_for_matching_urls

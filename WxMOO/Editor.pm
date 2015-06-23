@@ -13,7 +13,6 @@ use Wx qw( :id :execute );
 use Wx::Event qw( EVT_END_PROCESS EVT_TIMER );
 
 use WxMOO::Prefs;
-use WxMOO::Utility 'alert';
 
 my $collection = WxMOO::Editor::Collection->new;
 
@@ -38,8 +37,6 @@ sub launch_editor {
     $collection->in_progress($process->{'_id'}, $process);
 
     _start_watching($process);
-
-    alert("save-and-quit might not work -- save changes, then quit");
 
     EVT_END_PROCESS( $process, wxID_ANY, \&_send_and_cleanup );
 
@@ -113,9 +110,11 @@ sub _make_tempfile {
         DIR      => '/tmp',  # TODO - cross-platform pls
     );
 
-    for (@$content) {
-        s///; # TODO ok ew - there's got to be some deterministic way to dtrt here.
-        say $tempfile $_;
+    if (ref $content eq 'ARRAY') {
+        for (@$content) {
+            s///; # TODO ok ew - there's got to be some deterministic way to dtrt here.
+            say $tempfile $_;
+        }
     }
     $tempfile->flush;
 

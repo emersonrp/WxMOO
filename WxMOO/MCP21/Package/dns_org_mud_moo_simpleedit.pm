@@ -13,12 +13,8 @@ use Wx qw( :id :execute );
 use Wx::Event qw( EVT_END_PROCESS EVT_TIMER );
 
 use WxMOO::Editor;
-use WxMOO::Utility 'alert';
 
 use parent 'WxMOO::MCP21::Package';
-
-# TODO - this'll be a preference
-use constant EDITOR => '/usr/bin/gvim';
 
 sub new {
     my ($class) = @_;
