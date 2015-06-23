@@ -9,7 +9,7 @@ use Wx qw( :font :colour );
 
 use parent 'Class::Accessor';
 WxMOO::Prefs->mk_accessors(qw(
-    use_mcp use_ansi highlight_urls
+    use_mcp use_ansi highlight_urls theme
     save_window_size window_height window_width input_height
     save_mcp_window_size mcp_window_height mcp_window_width
     external_editor
@@ -24,7 +24,7 @@ sub prefs {
 
         bless $self, $class;
 
-        $self->get_defaults;
+        $self->load_config_or_defaults;
     };
     return $self;
 }
@@ -88,22 +88,22 @@ sub _colour_param {
     my $defaultFontString = $defaultFont->GetNativeFontInfo->ToString;
 
     my %defaults = (
-        input_font      => $defaultFontString,
-        output_font     => $defaultFontString,
+        input_font           => $defaultFontString,
+        output_font          => $defaultFontString,
         output_fgcolour => '#839496',
         output_bgcolour => '#002b36',
         input_fgcolour  => '#839496',
         input_bgcolour  => '#002b36',
 
-        save_window_size => 1,
-        window_width     => 800,
-        window_height    => 600,
-        input_height     => 25,
+        save_window_size     => 1,
+        window_width         => 800,
+        window_height        => 600,
+        input_height         => 25,
 
         # theme          => 'solarized',
-        use_ansi       => 1,
-        use_mcp        => 1,
-        highlight_urls => 1,
+        use_ansi             => 1,
+        use_mcp              => 1,
+        highlight_urls       => 1,
 
         save_mcp_window_size => 1,
         mcp_window_width     => 600,
@@ -112,10 +112,12 @@ sub _colour_param {
         external_editor => 'gvim -f',
     );
 
-    sub get_defaults {
+    sub load_config_or_defaults {
         my ($self) = @_;
         while (my ($key,$val) = each %defaults) {
-            $self->$key($val) unless $self->$key;
+            $self->Write($key, $val) unless defined $self->config->Read($key);
+            no strict 'refs';
+            $self->$key($self->config->Read($key));
         }
     }
 }
