@@ -57,7 +57,7 @@ use Data::Dumper;
 print STDERR Data::Dumper::Dumper $data unless $data->{'name'};
             $prefs->config->SetPath($data->{'name'});
             while (my ($k, $v) = each %$data) {
-                $prefs->Write($k, $v);
+                $prefs->config->Write($k, $v);
             }
             $prefs->config->SetPath('/worlds');
         }

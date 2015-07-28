@@ -132,14 +132,12 @@ sub addEvents {
 
 sub closeConnection {
     my ($self) = @_;
-    $self->connection->Destroy;
-    $self->connection(undef);
+    $self->connection->Close;
 }
 
 sub reconnectConnection {
     my ($self) = shift;
-    $self->connection->Close;
-    $self->connection->connect;
+    $self->connection->reconnect;
 }
 
 sub onSize {

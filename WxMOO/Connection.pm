@@ -7,7 +7,7 @@ use Carp;
 
 use Wx qw( :socket );
 use Wx::Socket;
-use Wx::Event qw( EVT_SOCKET_INPUT EVT_SOCKET_LOST EVT_SOCKET_CONNECTION EVT_TIMER );
+use Wx::Event qw( EVT_SOCKET_INPUT EVT_SOCKET_LOST EVT_TIMER );
 use WxMOO::MCP21;  # this is icky
 
 use parent -norequire, 'Wx::SocketClient';
@@ -25,7 +25,6 @@ sub new {
     $self->output_pane($parent->{'output_pane'});
     $self->input_pane ($parent->{'input_pane'});
     EVT_SOCKET_INPUT($parent, $self, \&onInput);
-    EVT_SOCKET_LOST ($parent, $self, \&onClose);
 
     bless $self, $class;
 }
@@ -39,14 +38,19 @@ sub onInput {
     $self->output_pane->display($poop);
 }
 
-sub onClose {
+sub Close {
     my $self = shift;
     $self->keepalive->Stop;
-    $self->output_pane->display('WxMOO: Connection closed.');
+    $self->SUPER::Close;
+    $self->output_pane->display("WxMOO: Connection closed.\n");
 }
 
 sub output { shift->Write(@_); }
 
+# $connection->connect ([host], [port])
+#
+# existing connections will remember their host and port if not supplied here,
+# for ease of reconnect etc.
 sub connect {
     my ($self, $host, $port) = @_;
     $self->host($host) if $host;
@@ -56,6 +60,7 @@ sub connect {
     if ($self->IsConnected) {
         $self->input_pane->connection($self);
 
+        # Ugh.  I'm gonna have to build my own event dispatch system, aren't I
         WxMOO::MCP21::new_connection($self);
 
         # TODO - 'if world->connection->keepalive'
@@ -63,6 +68,12 @@ sub connect {
     } else {
         carp "Can't connect to host/port";
     }
+}
+
+sub reconnect {
+    my $self = shift;
+    $self->Close if $self->IsConnected;
+    $self->connect;
 }
 
 use constant KEEPALIVE_TIME => 60_000;  # 1 minute
