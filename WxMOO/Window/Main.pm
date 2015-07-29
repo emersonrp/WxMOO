@@ -83,7 +83,6 @@ sub buildMenu {
     my $Edit_cut   = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_CUT));
     my $Edit_copy  = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_COPY));
     my $Edit_paste = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_PASTE));
-    my $Edit_clear = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_CLEAR));
 
     my $PrefsMenu = Wx::Menu->new;
     my $Prefs_prefs = $PrefsMenu->Append(Wx::MenuItem->new($PrefsMenu, wxID_PREFERENCES));
@@ -111,10 +110,9 @@ sub buildMenu {
     EVT_MENU( $self, $Worlds_reconnect, \&reconnectConnection );
     EVT_MENU( $self, $Worlds_quit,      \&quitApplication     );
 
-    EVT_MENU( $self, $Edit_cut,     sub {1} );
-    EVT_MENU( $self, $Edit_copy,    sub {1} );
-    EVT_MENU( $self, $Edit_paste,   sub {1} );
-    EVT_MENU( $self, $Edit_clear,   sub {1} );
+    EVT_MENU( $self, $Edit_cut,     \&handleCut   );
+    EVT_MENU( $self, $Edit_copy,    \&handleCopy  );
+    EVT_MENU( $self, $Edit_paste,   \&handlePaste );
 
     EVT_MENU( $self, $Prefs_prefs, \&showPrefsEditor );
 
@@ -150,6 +148,14 @@ sub onSize {
     }
     $evt->Skip;
 }
+
+sub handleCopy  {
+    my ($self) = @_;
+    if    ($self->output_pane->HasSelection) { $self->output_pane->Copy }
+    elsif ($self->input_pane ->HasSelection) { $self->input_pane ->Copy }
+}
+sub handleCut   { shift->input_pane->Cut }
+sub handlePaste { shift->input_pane->Paste }
 
 ### DIALOGS AND SUBWINDOWS
 
@@ -192,6 +198,8 @@ sub showAboutBox {
 
     Wx::AboutBox($self->{'about_info'});
 }
+
+
 
 sub quitApplication {
     my ($self) = @_;

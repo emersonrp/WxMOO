@@ -4,10 +4,11 @@ use warnings;
 use v5.14;
 
 use Wx qw( :misc :textctrl :font WXK_UP WXK_DOWN );
+use Wx::RichText;
 use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_CHAR );
 use WxMOO::Prefs;
 
-use base qw( Wx::TextCtrl Class::Accessor );
+use parent -norequire, qw( Wx::RichTextCtrl Class::Accessor );
 WxMOO::Window::InputPane->mk_accessors(qw( parent connection cmd_history ));
 
 sub new {
@@ -39,10 +40,14 @@ sub new {
 
 sub restyle_thyself {
     my ($self) = @_;
-    $self->SetForegroundColour(WxMOO::Prefs->prefs->input_fgcolour);
+    my $basic_style = Wx::RichTextAttr->new;
+    $basic_style->SetTextColour      (WxMOO::Prefs->prefs->input_fgcolour);
+    $basic_style->SetBackgroundColour(WxMOO::Prefs->prefs->input_bgcolour);
     $self->SetBackgroundColour(WxMOO::Prefs->prefs->input_bgcolour);
+    $self->SetBasicStyle($basic_style);
     $self->SetFont(WxMOO::Prefs->prefs->input_font);
 }
+
 
 sub send_to_connection {
     my ($self, $evt) = @_;

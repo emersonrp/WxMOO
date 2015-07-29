@@ -7,7 +7,7 @@ use Carp;
 
 use Wx qw( :socket );
 use Wx::Socket;
-use Wx::Event qw( EVT_SOCKET_INPUT EVT_SOCKET_LOST EVT_TIMER );
+use Wx::Event qw( EVT_SOCKET_INPUT EVT_TIMER );
 use WxMOO::MCP21;  # this is icky
 
 use parent -norequire, 'Wx::SocketClient';

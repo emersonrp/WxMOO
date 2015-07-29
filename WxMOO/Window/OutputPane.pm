@@ -16,7 +16,7 @@ use WxMOO::Utility qw( URL_REGEX );
 # TODO we need a better output_filter scheme, probably?
 use WxMOO::MCP21;
 
-use base qw( Wx::RichTextCtrl Class::Accessor );
+use parent -norequire, qw( Wx::RichTextCtrl Class::Accessor );
 WxMOO::Window::OutputPane->mk_accessors(qw( parent ));
 
 sub new {
