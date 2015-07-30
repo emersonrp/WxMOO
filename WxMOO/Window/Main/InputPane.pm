@@ -1,15 +1,16 @@
-package WxMOO::Window::InputPane;
+package WxMOO::Window::Main::InputPane;
 use strict;
 use warnings;
 use v5.14;
 
 use Wx qw( :misc :textctrl :font WXK_UP WXK_DOWN );
 use Wx::RichText;
-use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_CHAR );
+use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_CHAR EVT_CONTEXT_MENU );
 use WxMOO::Prefs;
+use WxMOO::Window::Main::ContextMenu;
 
 use parent -norequire, qw( Wx::RichTextCtrl Class::Accessor );
-WxMOO::Window::InputPane->mk_accessors(qw( parent connection cmd_history ));
+WxMOO::Window::Main::InputPane->mk_accessors(qw( parent connection cmd_history context_menu ));
 
 sub new {
     my ($class, $parent) = @_;
@@ -20,15 +21,18 @@ sub new {
     );
 
     $self->parent($parent);
+    $self->context_menu(WxMOO::Window::Main::ContextMenu->new($parent));
 
     my $font = WxMOO::Prefs->prefs->input_font;
     $self->SetFont($font);
 
-    $self->cmd_history(WxMOO::Window::InputPane::CommandHistory->new);
+    $self->cmd_history(WxMOO::Window::Main::InputPane::CommandHistory->new);
 
     EVT_TEXT_ENTER( $self, -1, \&send_to_connection );
     EVT_TEXT      ( $self, -1, \&update_command_history );
     EVT_CHAR      ( $self,     \&check_for_interesting_keystrokes );
+
+    EVT_CONTEXT_MENU($self,    \&popupContextMenu);
 
     $self->SetFocus;
     $self->Clear;
@@ -36,6 +40,11 @@ sub new {
     $self->restyle_thyself;
 
     bless $self, $class;
+}
+
+sub popupContextMenu {
+    my ($self, $evt) = @_;
+    $self->context_menu->Popup($evt, $self);
 }
 
 sub restyle_thyself {
@@ -88,7 +97,7 @@ sub check_for_interesting_keystrokes {
 }
 
 ######################
-package WxMOO::Window::InputPane::CommandHistory;
+package WxMOO::Window::Main::InputPane::CommandHistory;
 use strict;
 use warnings;
 use v5.14;

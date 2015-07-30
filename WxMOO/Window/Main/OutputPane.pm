@@ -1,4 +1,4 @@
-package WxMOO::Window::OutputPane;
+package WxMOO::Window::Main::OutputPane;
 use strict;
 use warnings;
 use v5.14;
@@ -7,17 +7,18 @@ no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use Wx qw( :color :misc :textctrl );
 use Wx::RichText;
-use Wx::Event qw( EVT_SET_FOCUS EVT_TEXT_URL );
+use Wx::Event qw( EVT_SET_FOCUS EVT_TEXT_URL EVT_CONTEXT_MENU );
 
 use WxMOO::Prefs;
 use WxMOO::Theme;
 use WxMOO::Utility qw( URL_REGEX );
+use WxMOO::Window::Main::ContextMenu;
 
 # TODO we need a better output_filter scheme, probably?
 use WxMOO::MCP21;
 
 use parent -norequire, qw( Wx::RichTextCtrl Class::Accessor );
-WxMOO::Window::OutputPane->mk_accessors(qw( parent ));
+WxMOO::Window::Main::OutputPane->mk_accessors(qw( parent context_menu ));
 
 sub new {
     my ($class, $parent) = @_;
@@ -27,11 +28,13 @@ sub new {
     );
 
     $self->parent($parent);
+    $self->context_menu(WxMOO::Window::Main::ContextMenu->new($parent));
 
     $self->restyle_thyself;
 
     EVT_SET_FOCUS($self,       \&focus_input);
     EVT_TEXT_URL($self, $self, \&process_url_click);
+    EVT_CONTEXT_MENU($self,    \&popupContextMenu);
 
     return bless $self, $class;
 }
@@ -43,6 +46,11 @@ sub process_url_click {
     my $url = $event->GetString;
     # TODO - make this whole notion into a platform-agnostic launchy bit;
     system('xdg-open', $url);
+}
+
+sub popupContextMenu {
+    my ($self, $evt) = @_;
+    $self->context_menu->Popup($evt, $self);
 }
 
 sub WriteText {

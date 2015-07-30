@@ -12,9 +12,9 @@ use WxMOO::Editor;
 
 use WxMOO::Window::ConnectDialog;
 use WxMOO::Window::DebugMCP;
-use WxMOO::Window::InputPane;
 use WxMOO::Window::MainSplitter;
-use WxMOO::Window::OutputPane;
+use WxMOO::Window::Main::InputPane;
+use WxMOO::Window::Main::OutputPane;
 use WxMOO::Window::PrefsEditor;
 use WxMOO::Window::WorldsList;
 
@@ -38,15 +38,15 @@ sub new {
 
     my $h = 600;  my $w = 800;
     if ( $prefs->save_window_size) {
-        $w = $prefs->window_width if $prefs->window_width;
+        $w = $prefs->window_width  if $prefs->window_width;
         $h = $prefs->window_height if $prefs->window_height;
     }
     $self->SetSize([$w, $h]);
 
     my $splitter = WxMOO::Window::MainSplitter->new($self);
 
-    $self->input_pane (WxMOO::Window::InputPane ->new($splitter));
-    $self->output_pane(WxMOO::Window::OutputPane->new($splitter));
+    $self->input_pane (WxMOO::Window::Main::InputPane ->new($splitter));
+    $self->output_pane(WxMOO::Window::Main::OutputPane->new($splitter));
 
     $splitter->SplitHorizontally($self->output_pane, $self->input_pane);
     $splitter->SetMinimumPaneSize(20); # TODO - set to "one line of input field"
@@ -72,54 +72,54 @@ sub Initialize {
 sub buildMenu {
     my ($self) = @_;
     my $WorldsMenu = Wx::Menu->new;
-    my $Worlds_worlds  = $WorldsMenu->Append(-1, "&Worlds...",  "Browse list of worlds");
-    my $Worlds_connect = $WorldsMenu->Append(-1, "&Connect...", "Connect to a host and port");
-    my $Worlds_close   = $WorldsMenu->Append(Wx::MenuItem->new($WorldsMenu, wxID_CLOSE));
+    my $W_worlds  = $WorldsMenu->Append(-1, "&Worlds...",  "Browse list of worlds");
+    my $W_connect = $WorldsMenu->Append(-1, "&Connect...", "Connect to a host and port");
+    $WorldsMenu->Append(wxID_CLOSE, '');
     $WorldsMenu->AppendSeparator;
-    my $Worlds_reconnect = $WorldsMenu->Append(-1, "&Reconnect", "Close and re-open the current connection");
-    my $Worlds_quit      = $WorldsMenu->Append(Wx::MenuItem->new($WorldsMenu, wxID_EXIT));
+    my $W_reconnect = $WorldsMenu->Append(-1, "&Reconnect", "Close and re-open the current connection");
+    $WorldsMenu->Append(wxID_EXIT, '');
 
     my $EditMenu = Wx::Menu->new;
-    my $Edit_cut   = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_CUT));
-    my $Edit_copy  = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_COPY));
-    my $Edit_paste = $EditMenu->Append(Wx::MenuItem->new($EditMenu, wxID_PASTE));
+    $EditMenu->Append(wxID_CUT,   '');
+    $EditMenu->Append(wxID_COPY,  '');
+    $EditMenu->Append(wxID_PASTE, '');
 
     my $PrefsMenu = Wx::Menu->new;
-    my $Prefs_prefs = $PrefsMenu->Append(Wx::MenuItem->new($PrefsMenu, wxID_PREFERENCES));
+    $PrefsMenu->Append(wxID_PREFERENCES, "&Preferences\tCTRL-P");
 
     my $WindowMenu = Wx::Menu->new;
     my $Window_debugmcp = $WindowMenu->Append(-1, "&Debug MCP", "");
 
     my $HelpMenu = Wx::Menu->new;
-    my $Help_help  = $HelpMenu->Append(-1, "&Help Topics", "");
-    my $Help_about = $HelpMenu->Append(Wx::MenuItem->new($HelpMenu, wxID_ABOUT));
+    $HelpMenu->Append(wxID_HELP,  '' , "&Help Topics" );
+    $HelpMenu->Append(wxID_ABOUT, '');
 
     my $MenuBar = Wx::MenuBar->new;
     $MenuBar->Append($WorldsMenu, "&Worlds");
-    $MenuBar->Append($EditMenu, "&Edit");
-    $MenuBar->Append($PrefsMenu, "&Preferences");
-    $MenuBar->Append($WindowMenu, "Windows");
-    $MenuBar->Append($HelpMenu, "&Help");
+    $MenuBar->Append($EditMenu,   "&Edit");
+    $MenuBar->Append($PrefsMenu,  "&Preferences");
+    $MenuBar->Append($WindowMenu, "W&indows");
+    $MenuBar->Append($HelpMenu,   "&Help");
 
     $self->SetMenuBar($MenuBar);
 
     # MENUBAR EVENTS
-    EVT_MENU( $self, $Worlds_worlds,    \&showWorldsList      );
-    EVT_MENU( $self, $Worlds_connect,   \&showConnectDialog   );
-    EVT_MENU( $self, $Worlds_close,     \&closeConnection     );
-    EVT_MENU( $self, $Worlds_reconnect, \&reconnectConnection );
-    EVT_MENU( $self, $Worlds_quit,      \&quitApplication     );
+    EVT_MENU( $self, $W_worlds,    \&showWorldsList      );
+    EVT_MENU( $self, $W_connect,   \&showConnectDialog   );
+    EVT_MENU( $self, wxID_CLOSE,   \&closeConnection     );
+    EVT_MENU( $self, $W_reconnect, \&reconnectConnection );
+    EVT_MENU( $self, wxID_EXIT,    \&quitApplication     );
 
-    EVT_MENU( $self, $Edit_cut,     \&handleCut   );
-    EVT_MENU( $self, $Edit_copy,    \&handleCopy  );
-    EVT_MENU( $self, $Edit_paste,   \&handlePaste );
+    EVT_MENU( $self, wxID_CUT,     \&handleCut   );
+    EVT_MENU( $self, wxID_COPY,    \&handleCopy  );
+    EVT_MENU( $self, wxID_PASTE,   \&handlePaste );
 
-    EVT_MENU( $self, $Prefs_prefs, \&showPrefsEditor );
+    EVT_MENU( $self, wxID_PREFERENCES, \&showPrefsEditor );
 
     EVT_MENU( $self, $Window_debugmcp, \&showDebugMCP );
 
-    EVT_MENU( $self, $Help_help,  sub {1} );
-    EVT_MENU( $self, $Help_about, \&showAboutBox );
+    EVT_MENU( $self, wxID_HELP,  sub {1} );
+    EVT_MENU( $self, wxID_ABOUT, \&showAboutBox );
 }
 
 sub addEvents {

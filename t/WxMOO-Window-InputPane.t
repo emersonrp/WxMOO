@@ -2,12 +2,12 @@
 use strict;
 use Test::More;
 
-BEGIN { use_ok "WxMOO::Window::InputPane"; }
+BEGIN { use_ok "WxMOO::Window::Main::InputPane"; }
 
 
-my $window = new_ok('WxMOO::Window::InputPane');
+my $window = new_ok('WxMOO::Window::Main::InputPane');
 
-my $cmd_history = new_ok('WxMOO::Window::InputPane::CommandHistory');
+my $cmd_history = new_ok('WxMOO::Window::Main::InputPane::CommandHistory');
 
 ### ADD
 $cmd_history->add('first');
