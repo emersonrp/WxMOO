@@ -24,7 +24,7 @@ sub new {
     $self->menu->Append(wxID_PASTE,  '');
     $self->menu->Append(wxID_DELETE, '');
 
-    EVT_MENU( $self, wxID_CUT,    \&handleCut   );
+    EVT_MENU( $self->menu, wxID_CUT,    \&handleCut   );
     EVT_MENU( $self->menu, wxID_COPY,   \&handleCopy  );
     EVT_MENU( $self->menu, wxID_PASTE,  \&handlePaste );
     EVT_MENU( $self->menu, wxID_DELETE, \&handleDelete );
