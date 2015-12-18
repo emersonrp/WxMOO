@@ -5,9 +5,9 @@ use v5.14;
 
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
-use Wx qw( :color :misc :textctrl );
+use Wx qw( :color :misc :textctrl :sizer );
 use Wx::RichText;
-use Wx::Event qw( EVT_SET_FOCUS EVT_TEXT_URL );
+use Wx::Event qw( EVT_SET_FOCUS EVT_TEXT_URL EVT_SIZE );
 
 use WxMOO::Prefs;
 use WxMOO::Theme;
@@ -32,11 +32,19 @@ sub new {
 
     EVT_SET_FOCUS($self,       \&focus_input);
     EVT_TEXT_URL($self, $self, \&process_url_click);
+    # TODO - this probably should be a preference, but for now, this is the
+    # least-bad default behavior.
+    EVT_SIZE    ($self,        \&scroll_to_bottom);
 
     return bless $self, $class;
 }
 
 sub input_pane { shift->parent->input_pane; }
+
+sub scroll_to_bottom {
+    my ($self) = @_;
+    $self->ShowPosition($self->GetLastPosition);
+}
 
 sub process_url_click {
     my ($self, $event) = @_;
@@ -55,7 +63,7 @@ sub is_at_bottom { 1; } # are we already scrolled all the way down?
 sub ScrollIfAppropriate {
     my ($self) = @_;
     if (1 || $self->is_at_bottom || WxMOO::Prefs->prefs->scroll_on_output) {
-        $self->ShowPosition($self->GetCaretPosition);
+        $self->scroll_to_bottom;
     }
 }
 

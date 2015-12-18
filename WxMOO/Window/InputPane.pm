@@ -5,7 +5,7 @@ use v5.14;
 
 use Wx qw( :misc :textctrl :font WXK_UP WXK_DOWN );
 use Wx::RichText;
-use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_CHAR );
+use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_KEY_DOWN );
 use WxMOO::Prefs;
 
 use parent -norequire, qw( Wx::RichTextCtrl Class::Accessor );
@@ -28,7 +28,7 @@ sub new {
 
     EVT_TEXT_ENTER( $self, -1, \&send_to_connection );
     EVT_TEXT      ( $self, -1, \&update_command_history );
-    EVT_CHAR      ( $self,     \&check_for_interesting_keystrokes );
+    EVT_KEY_DOWN  ( $self,     \&check_for_interesting_keystrokes );
 
     $self->SetFocus;
     $self->Clear;
@@ -52,7 +52,7 @@ sub restyle_thyself {
 sub send_to_connection {
     my ($self, $evt) = @_;
     if ($self->connection) {
-        my $stuff = $self->GetValue;
+        (my $stuff = $self->GetValue) =~ s/\n//g;
         $self->cmd_history->add($stuff);
         $self->connection->output("$stuff\n");
         $self->Clear;
@@ -60,7 +60,9 @@ sub send_to_connection {
 }
 
 sub update_command_history {
-    my ($self, $evt) = @_; $self->cmd_history->update($self->GetValue) }
+    my ($self, $evt) = @_;
+    $self->cmd_history->update($self->GetValue)
+}
 
 sub check_for_interesting_keystrokes {
     my ($self, $evt) = @_;
