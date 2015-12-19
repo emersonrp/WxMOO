@@ -3,10 +3,12 @@ use strict;
 use warnings;
 use v5.14;
 
-use Wx qw( :misc :textctrl :font WXK_UP WXK_DOWN );
-use Wx::RichText;
-use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_KEY_DOWN );
+use Wx qw( wxTheClipboard :misc :textctrl :font :keycode );
+use Wx::DND;
+use Wx::RichText qw( EVT_RICHTEXT_SELECTION_CHANGED );
+use Wx::Event qw( EVT_TEXT EVT_TEXT_ENTER EVT_KEY_DOWN EVT_CHAR EVT_MIDDLE_UP );
 use WxMOO::Prefs;
+use WxMOO::Utility;
 
 use parent -norequire, qw( Wx::RichTextCtrl Class::Accessor );
 WxMOO::Window::InputPane->mk_accessors(qw( parent connection cmd_history ));
@@ -29,6 +31,12 @@ sub new {
     EVT_TEXT_ENTER( $self, -1, \&send_to_connection );
     EVT_TEXT      ( $self, -1, \&update_command_history );
     EVT_KEY_DOWN  ( $self,     \&check_for_interesting_keystrokes );
+#    EVT_CHAR      ( $self,     \&debug_key_code );
+
+    if (WxMOO::Prefs->prefs->use_x_copy_paste) {
+        EVT_MIDDLE_UP                  ( $self, \&paste_from_selection );
+#        EVT_RICHTEXT_SELECTION_CHANGED ( $self, \&copy_from_selection );
+    }
 
     $self->SetFocus;
     $self->Clear;
@@ -36,6 +44,22 @@ sub new {
     $self->restyle_thyself;
 
     bless $self, $class;
+}
+
+sub paste_from_selection {
+    # we only get here if we have ->prefs->use_x_copy paste set.
+    # We might have selected that option in a non-Unix context, though,
+    # so we want to check to decide which clipboard to paste from.
+    wxTheClipboard->UsePrimarySelection(1) if WxMOO::Utility::is_unix;
+    shift->Paste;
+    wxTheClipboard->UsePrimarySelection(0) if WxMOO::Utility::is_unix;
+}
+
+sub copy_from_selection {
+    wxTheClipboard->UsePrimarySelection(1) if WxMOO::Utility::is_unix;
+    shift->Copy;
+    say STDERR "Copied!!!";
+    wxTheClipboard->UsePrimarySelection(0) if WxMOO::Utility::is_unix;
 }
 
 sub restyle_thyself {
@@ -47,7 +71,6 @@ sub restyle_thyself {
     $self->SetBasicStyle($basic_style);
     $self->SetFont(WxMOO::Prefs->prefs->input_font);
 }
-
 
 sub send_to_connection {
     my ($self, $evt) = @_;
@@ -64,13 +87,24 @@ sub update_command_history {
     $self->cmd_history->update($self->GetValue)
 }
 
+sub debug_key_code {
+    my ($self, $evt) = @_;
+    my $k = $evt->GetKeyCode;
+    say STDERR "EVT_CHAR $k";
+}
+
 sub check_for_interesting_keystrokes {
     my ($self, $evt) = @_;
     my $k = $evt->GetKeyCode;
+
     if ($k == WXK_UP) {
         $self->SetValue($self->cmd_history->prev);
     } elsif ($k == WXK_DOWN) {
         $self->SetValue($self->cmd_history->next);
+    } elsif ($k == WXK_INSERT) {
+        # if it's Shift-Insert, paste, otherwise carry on
+        if ($evt->ShiftDown) { $self->Paste; }
+
     } elsif ($k == 23) { # Ctrl-W.  Is this right?
         my $end = $self->GetInsertionPoint;
 

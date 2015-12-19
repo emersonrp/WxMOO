@@ -8,6 +8,11 @@ our @EXPORT_OK = qw( URL_REGEX );
 
 use Wx;
 
+# These adapted from Padre::Constant
+sub is_windows { !!( ( $^O eq 'MSWin32' ) or ( $^O eq 'cygwin' )) }
+sub is_macos   { !!( $^O eq 'darwin' ) }
+sub is_unix    { !( is_windows() or is_macos() ) }
+
 # This regex adapted from one found at
 # http://daringfireball.net/2010/07/improved_regex_for_matching_urls
 use constant URL_REGEX => qr'

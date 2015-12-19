@@ -6,13 +6,14 @@ use v5.14;
 use Carp;
 use Scalar::Util 'blessed';
 use Wx qw( :font :colour );
+use WxMOO::Utility;
 
 use parent 'Class::Accessor';
 WxMOO::Prefs->mk_accessors(qw(
     use_mcp use_ansi highlight_urls theme
     save_window_size window_height window_width input_height
     save_mcp_window_size mcp_window_height mcp_window_width
-    external_editor
+    external_editor use_x_copy_paste
 ));
 
 sub prefs {
@@ -81,8 +82,6 @@ sub _colour_param {
     return $colour;
 }
 
-### DEFAULTS -- this will set everything to a default value if it's not already set.
-#               This gives us both brand-new-file and add-new-params'-default-values
 {
     my $defaultFont = Wx::Font->new( 12, wxTELETYPE, wxNORMAL, wxNORMAL );
     my $defaultFontString = $defaultFont->GetNativeFontInfo->ToString;
@@ -109,15 +108,16 @@ sub _colour_param {
         mcp_window_width     => 600,
         mcp_window_height    => 400,
 
-        external_editor => 'gvim -f',
+        external_editor  => 'gvim -f',
+        use_x_copy_paste => WxMOO::Utility::is_unix,
     );
 
     sub load_config_or_defaults {
         my ($self) = @_;
-        while (my ($key,$val) = each %defaults) {
-            $self->Write($key, $val) unless defined $self->config->Read($key);
-            no strict 'refs';
-            $self->$key($self->config->Read($key));
+        while (my ($key,$def_val) = each %defaults) {
+            # if nothing exists for that key, set it to the default.
+            $self->set($key, $def_val) unless defined $self->get($key);
+            $self->$key($self->get($key));
         }
     }
 }
