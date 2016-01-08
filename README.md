@@ -9,10 +9,10 @@ Done:
 * It connects to a MOO.  Initially, hard-coded to my MOO at hayseed.net:7777, specifically, but the Worlds->Connect dialog now works to connect wherever you like.
 * It takes input, and shows output.  Almost pleasantly, even.
 * The input field has a super-basic but functional command history.
-* ANSI color/style codes are, for the most part honored.
-* Incomplete MCP/2.1 implementation -- mcp-notify is implemented, but mcp-cord is not.
+* ANSI color/style codes are, for the most part, honored.
+* Incomplete [MCP/2.1](http://www.moo.mud.org/mcp/mcp2.html) implementation -- mcp-notify is implemented, but mcp-cord is not.
 * Starting in on MCP packages: dns-org-mud-moo-simpleedit done, external editor configurable
-* Saving prefs now works, for the small set of prefs it honors.
+* ~~Saving prefs now works, for the small set of prefs it honors.~~ (This is currently not working fantastically well.)
 
 0.1 Milestone:
 * fix output pane scroll-to-bottom behavior to dwym
@@ -51,7 +51,9 @@ Guiding thoughts:
 Dependencies
 ------------
 
-WxMOO requires perl 5.14 or newer, and WxWidgets 2.8 or newer.  I desperately want to move to Wx 3.0 but until it's a little more well-entrenched, I'm sticking with 2.8.
+WxMOO requires perl 5.14 or newer, and WxWidgets 3.  Getting a working wxWidgets 3 + wxPerl on Fedora is a little cranky-making but it fixes some quirks that I'd otherwise have to fix in hinky hackish perl customizations.  My sincere hope is that Fedora will start shipping wxPerl compiled against wx3 and our long national nightmare will be over.
+
+(You -can- run it with wx2.8, but there might be input weirdness of various types.)
 
 As far as further perl dependencies, Module::ScanDeps (not itself a dependency) reports the following:
 
